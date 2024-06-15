@@ -270,9 +270,9 @@ resource "aws_lambda_function" "terraform_lambda_func" {
 # =====================================================================================================================================
 # =====================================================================================================================================
 
-resource "aws_dynamodb_table" "dynamo-results-table-prod" {
+resource "aws_dynamodb_table" "dynamo-catchhistory-table-prod" {
   provider = aws.eu-central-1 
-  name           = "fishtracker-Results-Prod"
+  name           = "fishtracker-CatchHistory-Prod"
   billing_mode   = "PAY_PER_REQUEST"
   hash_key       = "QuestionId"
 
