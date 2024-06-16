@@ -1,0 +1,42 @@
+{
+  "resource": "/{proxy+}",
+  "path": "/api/questionmanager",
+  "httpMethod": "POST",
+  "Headers": {
+    "Content-Type": "application/json"
+  },
+  "queryStringParameters": null,
+  "pathParameters": {
+    "proxy": "api/questionmanager"
+  },
+  "stageVariables": null,
+  "requestContext": {
+    "accountId": "AAAAAAAAAAAA",
+    "resourceId": "5agfss",
+    "stage": "test-invoke-stage",
+    "requestId": "test-invoke-request",
+    "identity": {
+      "cognitoIdentityPoolId": null,
+      "accountId": "AAAAAAAAAAAA",
+      "cognitoIdentityId": null,
+      "caller": "BBBBBBBBBBBB",
+      "apiKey": "test-invoke-api-key",
+      "sourceIp": "test-invoke-source-ip",
+      "cognitoAuthenticationType": null,
+      "cognitoAuthenticationProvider": null,
+      "userArn": "arn:aws:iam::AAAAAAAAAAAA:root",
+      "userAgent": "Apache-HttpClient/4.5.x (Java/1.8.0_102)",
+      "user": "AAAAAAAAAAAA"
+    },
+    "resourcePath": "/{proxy+}",
+    "httpMethod": "POST",
+    "apiId": "t2yh6sjnmk"
+  },
+  "body1": "this is the body",
+  "body": "{\"Question\":\"Thisisatestquestion\",\"Notes\":\"Thisissomentesonthequestion\",\"Participants\":[]}",
+  "body3": {
+    "Question": "This is a test question",
+    "Notes": "This is some ntes on the question",
+    "Participants": []
+  }
+}
