@@ -1,11 +1,11 @@
 ﻿using System.IdentityModel.Tokens.Jwt;
 using System.Text;
 using Microsoft.IdentityModel.Tokens;
-using GradientOfAgreementLambda.Models.Lambda;
+using FishTracker.Models.Lambda;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 
-namespace GradientOfAgreementLambda.Services
+namespace FishTracker.Services
 {
     public static class TokenGenerator
     {

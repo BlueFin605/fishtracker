@@ -1,16 +1,16 @@
 using Amazon.DynamoDBv2;
-using GradientOfAgreementLambda.Models.Lambda;
-using GradientOfAgreementLambda.Services;
+using FishTracker.Models.Lambda;
+using FishTracker.Services;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.DataCollection;
 using Moq;
 
-namespace GradientOfAgreementLambda;
+namespace FishTracker;
 
 /// <summary>
 /// This class extends from APIGatewayProxyFunction which contains the method FunctionHandlerAsync which is the 
 /// actual Lambda function entry point. The Lambda handler field should be set to
 /// 
-/// GradientOfAgreementLambda::GradientOfAgreementLambda.LambdaEntryPoint::FunctionHandlerAsync
+/// FishTracker::FishTracker.LambdaEntryPoint::FunctionHandlerAsync
 /// </summary>
 public class TestEntryPoint :
 

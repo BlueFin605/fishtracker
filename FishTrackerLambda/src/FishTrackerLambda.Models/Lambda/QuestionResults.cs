@@ -1,4 +1,4 @@
-﻿namespace GradientOfAgreementLambda.Models.Lambda
+﻿namespace FishTracker.Models.Lambda
 {
     public record QuestionResults(
         QuestionDetails details,

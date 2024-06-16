@@ -1,10 +1,10 @@
 ﻿using System.Text.Json.Serialization;
 using Amazon.DynamoDBv2;
-using GradientOfAgreementLambda.AWSProxy;
-using GradientOfAgreementLambda.Services;
+using FishTracker.AWSProxy;
+using FishTracker.Services;
 using Microsoft.IdentityModel.Logging;
 
-namespace GradientOfAgreementLambda;
+namespace FishTracker;
 
 public class TestStartup
 {

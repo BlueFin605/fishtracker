@@ -1,6 +1,6 @@
-﻿using GradientOfAgreementLambda.Models.Lambda;
+﻿using FishTracker.Models.Lambda;
 
-namespace GradientOfAgreementLambda.Services
+namespace FishTracker.Services
 {
     public interface IQuestionService
     {

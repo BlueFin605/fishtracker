@@ -1,10 +1,10 @@
-namespace GradientOfAgreementLambda;
+namespace FishTracker;
 
 /// <summary>
 /// This class extends from APIGatewayProxyFunction which contains the method FunctionHandlerAsync which is the 
 /// actual Lambda function entry point. The Lambda handler field should be set to
 /// 
-/// GradientOfAgreementLambda::GradientOfAgreementLambda.LambdaEntryPoint::FunctionHandlerAsync
+/// FishTracker::FishTracker.LambdaEntryPoint::FunctionHandlerAsync
 /// </summary>
 public class LambdaEntryPoint :
 

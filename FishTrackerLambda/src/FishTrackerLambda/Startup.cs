@@ -1,12 +1,12 @@
 ﻿using System.Text.Json.Serialization;
 using Amazon.DynamoDBv2;
-using GradientOfAgreementLambda.AWSProxy;
-using GradientOfAgreementLambda.Services;
+using FishTracker.AWSProxy;
+using FishTracker.Services;
 using Microsoft.AspNetCore.Mvc.ViewEngines;
 using Microsoft.IdentityModel.Logging;
 using Newtonsoft.Json;
 
-namespace GradientOfAgreementLambda;
+namespace FishTracker;
 
 public class Startup
 {

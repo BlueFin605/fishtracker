@@ -1,6 +1,6 @@
 ﻿//using Newtonsoft.Json.Converters;
 
-namespace GradientOfAgreementLambda.Models.Lambda;
+namespace FishTracker.Models.Lambda;
 
 public record class VoteDetails (
     VoteType? vote,

@@ -2,7 +2,7 @@
 using System.Net.Mail;
 using Amazon.SecurityToken.Model;
 
-namespace GradientOfAgreementLambda.AWSProxy
+namespace FishTracker.AWSProxy
 {
     public interface IAmazonSecurityTokenServiceClientProxy
 	{

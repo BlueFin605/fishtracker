@@ -1,5 +1,5 @@
 ﻿using System;
-namespace GradientOfAgreementLambda.Models.Lambda
+namespace FishTracker.Models.Lambda
 {
 	public record VoteResponse(string SessionId);
 }

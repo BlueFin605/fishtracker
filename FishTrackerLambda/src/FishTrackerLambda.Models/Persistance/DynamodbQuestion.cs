@@ -1,7 +1,7 @@
 ﻿using System;
-using GradientOfAgreementLambda.Models.Lambda;
+using FishTracker.Models.Lambda;
 
-namespace GradientOfAgreementLambda.Models.Persistance
+namespace FishTracker.Models.Persistance
 {
     public class DynamodbQuestion
 	{

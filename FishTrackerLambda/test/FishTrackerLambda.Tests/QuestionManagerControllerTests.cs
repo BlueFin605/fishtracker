@@ -2,9 +2,9 @@ using Xunit;
 using Amazon.Lambda.Core;
 using Amazon.Lambda.APIGatewayEvents;
 using Newtonsoft;
-using GradientOfAgreementLambda.Models.Lambda;
+using FishTracker.Models.Lambda;
 
-namespace GradientOfAgreementLambda.Tests;
+namespace FishTracker.Tests;
 
 public class QuestionManagerControllerTests
 {

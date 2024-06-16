@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Xml.Linq;
 using Amazon.DynamoDBv2;
-using GradientOfAgreementLambda.Models.Lambda;
+using FishTracker.Models.Lambda;
 
-namespace GradientOfAgreementLambda.Services
+namespace FishTracker.Services
 {
 
     public class QuestionService : IQuestionService

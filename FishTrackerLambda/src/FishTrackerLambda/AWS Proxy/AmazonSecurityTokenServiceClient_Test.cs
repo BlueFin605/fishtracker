@@ -1,6 +1,6 @@
 ﻿using Amazon.SecurityToken.Model;
 
-namespace GradientOfAgreementLambda.AWSProxy
+namespace FishTracker.AWSProxy
 {
     class AmazonSecurityTokenServiceClient_Test : IAmazonSecurityTokenServiceClientProxy
     {

@@ -1,11 +1,11 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using GradientOfAgreementLambda.Models.Lambda;
-using GradientOfAgreementLambda.Services;
+using FishTracker.Models.Lambda;
+using FishTracker.Services;
 using Newtonsoft.Json.Linq;
-using GradientOfAgreementLambda.AWSProxy;
+using FishTracker.AWSProxy;
 using Amazon.SecurityToken.Model;
 
-namespace GradientOfAgreementLambda.Controllers;
+namespace FishTracker.Controllers;
 
 [Route("api/[controller]")]
 public class AuthenticateController : ControllerBase

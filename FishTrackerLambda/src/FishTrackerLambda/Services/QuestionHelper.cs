@@ -1,12 +1,12 @@
 ﻿using Amazon.DynamoDBv2;
 using Amazon.DynamoDBv2.DocumentModel;
 using Amazon.DynamoDBv2.Model;
-using GradientOfAgreementLambda.Models.Lambda;
-using GradientOfAgreementLambda.Models.Persistance;
+using FishTracker.Models.Lambda;
+using FishTracker.Models.Persistance;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 
-namespace GradientOfAgreementLambda.Services
+namespace FishTracker.Services
 {
     public static class QuestionHelper
     {

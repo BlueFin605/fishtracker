@@ -2,7 +2,7 @@
 using System.Text.Json.Serialization;
 //using Newtonsoft.Json.Converters;
 
-namespace GradientOfAgreementLambda.Models.Lambda;
+namespace FishTracker.Models.Lambda;
 
 public record class QuestionDetails (
     Guid Id,

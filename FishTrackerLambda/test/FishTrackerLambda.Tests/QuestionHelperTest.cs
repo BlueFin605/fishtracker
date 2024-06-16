@@ -4,14 +4,14 @@ using Amazon.Lambda.Core;
 using Amazon.Lambda.TestUtilities;
 using Amazon.Lambda.APIGatewayEvents;
 using Newtonsoft;
-using GradientOfAgreementLambda.Models.Lambda;
-using GradientOfAgreementLambda.Models.Persistance;
+using FishTracker.Models.Lambda;
+using FishTracker.Models.Persistance;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.DataCollection;
-using GradientOfAgreementLambda.Services;
+using FishTracker.Services;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 
-namespace GradientOfAgreementLambda.Tests;
+namespace FishTracker.Tests;
 
 public class QuestionHelperTest
 {

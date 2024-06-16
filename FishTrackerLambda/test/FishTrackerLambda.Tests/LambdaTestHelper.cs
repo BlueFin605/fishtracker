@@ -2,7 +2,7 @@
 using Amazon.Lambda.TestUtilities;
 using Amazon.Lambda.APIGatewayEvents;
 
-namespace GradientOfAgreementLambda.Tests;
+namespace FishTracker.Tests;
 
 public static class LambdaTestHelper
 {

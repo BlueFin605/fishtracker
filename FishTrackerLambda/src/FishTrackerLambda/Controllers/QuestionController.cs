@@ -1,8 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using GradientOfAgreementLambda.Models.Lambda;
-using GradientOfAgreementLambda.Services;
+using FishTracker.Models.Lambda;
+using FishTracker.Services;
 
-namespace GradientOfAgreementLambda.Controllers;
+namespace FishTracker.Controllers;
 
 [Route("api/[controller]")]
 public class QuestionController : ControllerBase
