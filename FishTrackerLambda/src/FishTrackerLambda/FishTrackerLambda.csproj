@@ -15,7 +15,6 @@
     <WarningLevel>4</WarningLevel>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(RunConfiguration)' == 'FishTrackerLambda' " />
   <ItemGroup>
     <PackageReference Include="Amazon.Lambda.AspNetCoreServer" Version="8.1.0" />
     <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="6.32.1" />
