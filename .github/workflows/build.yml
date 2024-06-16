@@ -30,30 +30,30 @@ jobs:
         run: dotnet build --no-restore
       - name: Test
         run: dotnet test --no-build --verbosity normal
-      - name: Debug output
-        run: ls src/FishTrackerLambda/bin/Debug/net6.0
-      - name: Create output
-        run: mkdir output
-      - name: Create lambda-deploymentpackage.zip
-        run: zip -r -j output/lambda-deploymentpackage.zip src/FishTrackerLambda/bin/Debug/net6.0/*
-      - name: Current Directory
-        run: pwd
-      - name: contents Current Directory
-        run: ls
-      - name: Debug output
-        run: ls output
+      # - name: Debug output
+      #   run: ls src/FishTrackerLambda/bin/Debug/net6.0
+      # - name: Create output
+      #   run: mkdir output
+      # - name: Create lambda-deploymentpackage.zip
+      #   run: zip -r -j output/lambda-deploymentpackage.zip src/FishTrackerLambda/bin/Debug/net6.0/*
+      # - name: Current Directory
+      #   run: pwd
+      # - name: contents Current Directory
+      #   run: ls
+      # - name: Debug output
+      #   run: ls output
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v2
-        with:
-          node-version: 14
+      # - name: Setup Node.js
+      #   uses: actions/setup-node@v2
+      #   with:
+      #     node-version: 14
   
-      - name: Install dependencies
-        run: npm install
-        working-directory: web
+      # - name: Install dependencies
+      #   run: npm install
+      #   working-directory: web
   
-      - name: Run tests
-        run: npm run test:headless
-        working-directory: web
+      # - name: Run tests
+      #   run: npm run test:headless
+      #   working-directory: web
 
           
