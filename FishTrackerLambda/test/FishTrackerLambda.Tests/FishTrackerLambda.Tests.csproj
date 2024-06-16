@@ -5,7 +5,7 @@
     <Nullable>enable</Nullable>
     <EnableDefaultContentItems>False</EnableDefaultContentItems>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(RunConfiguration)' == 'GradientOfAgreementLambda.Tests' " />
+  <PropertyGroup Condition=" '$(RunConfiguration)' == 'FishTrackerLambda.Tests' " />
   <ItemGroup>
     <Content Include=".\SampleRequests\*">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>

@@ -58,12 +58,12 @@ If already installed check if new version is available.
 
 Execute unit tests
 ```
-    cd "GradientOfAgreementLambda/test/GradientOfAgreementLambda.Tests"
+    cd "FishTrackerLambda/test/FishTrackerLambda.Tests"
     dotnet test
 ```
 
 Deploy application
 ```
-    cd "GradientOfAgreementLambda/src/GradientOfAgreementLambda"
+    cd "FishTrackerLambda/src/FishTrackerLambda"
     dotnet lambda deploy-serverless
 ```

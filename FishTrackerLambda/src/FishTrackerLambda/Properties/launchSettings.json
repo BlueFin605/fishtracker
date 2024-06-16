@@ -4,7 +4,7 @@
     "anonymousAuthentication": true
   },
   "profiles": {
-    "GradientOfAgreementLambda": {
+    "FishTrackerLambda": {
       "commandName": "Project",
       "launchBrowser": true,
       "applicationUrl": "http://localhost:26101",

@@ -10,7 +10,7 @@ namespace FishTracker.Services
 {
     public static class QuestionHelper
     {
-        private static string m_tableName = "GradientsOfAgreement-Results-Prod";
+        private static string m_tableName = "FishTracker-Results-Prod";
 
         public static async Task<DynamodbQuestion> AddVote(this Task<DynamodbQuestion> question, string sessionId, VoteType vote, string name, ILogger logger)
         {

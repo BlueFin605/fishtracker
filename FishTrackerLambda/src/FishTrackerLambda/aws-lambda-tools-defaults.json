@@ -8,7 +8,7 @@
   "profile": "default",
   "region": "eu-central-1",
   "configuration": "Release",
-  "s3-prefix": "GradientOfAgreementLambda/",
+  "s3-prefix": "FishTrackerLambda/",
   "template": "serverless.template",
   "template-parameters": ""
 }

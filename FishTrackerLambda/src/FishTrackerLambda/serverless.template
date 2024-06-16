@@ -8,7 +8,7 @@
     "AspNetCoreFunction": {
       "Type": "AWS::Serverless::Function",
       "Properties": {
-        "Handler": "GradientOfAgreementLambda::GradientOfAgreementLambda.LambdaEntryPoint::FunctionHandlerAsync",
+        "Handler": "FishTrackerLambda::FishTrackerLambda.LambdaEntryPoint::FunctionHandlerAsync",
         "Runtime": "dotnet6",
         "CodeUri": "",
         "MemorySize": 256,
