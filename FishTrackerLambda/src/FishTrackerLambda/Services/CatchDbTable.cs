@@ -6,7 +6,7 @@ namespace FishTrackerLambda.Services
 {
     public static class CatchDbTable
     {
-        private static string m_tableName = "FishTracker-Results-Prod";
+        private static string m_tableName = "FishTracker-CatchHistory-Prod";
 
         public static Task<DynamoDbCatch> SaveRecord(this Task<DynamoDbCatch> record, IAmazonDynamoDB client, ILogger logger)
         {
