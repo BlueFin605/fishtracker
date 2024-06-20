@@ -1,7 +1,7 @@
 ﻿using Amazon.DynamoDBv2.DataModel;
-using FishTracker.Models.Lambda;
+using FishTrackerLambda.Models.Lambda;
 
-namespace FishTracker.Models.Persistance
+namespace FishTrackerLambda.Models.Persistance
 {
     public class DynamoDbCatch
     {

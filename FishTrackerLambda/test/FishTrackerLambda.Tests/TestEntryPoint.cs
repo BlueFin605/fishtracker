@@ -1,10 +1,10 @@
 using Amazon.DynamoDBv2;
-using FishTracker.Models.Lambda;
-using FishTracker.Services;
+using FishTrackerLambda.Models.Lambda;
+using FishTrackerLambda.Services;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.DataCollection;
 using Moq;
 
-namespace FishTracker;
+namespace FishTrackerLambda;
 
 /// <summary>
 /// This class extends from APIGatewayProxyFunction which contains the method FunctionHandlerAsync which is the 

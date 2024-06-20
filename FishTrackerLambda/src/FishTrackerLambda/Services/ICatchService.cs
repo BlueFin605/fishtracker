@@ -1,6 +1,6 @@
-﻿using FishTracker.Models.Lambda;
+﻿using FishTrackerLambda.Models.Lambda;
 
-namespace FishTracker.Services
+namespace FishTrackerLambda.Services
 {
     public interface ICatchService
     {

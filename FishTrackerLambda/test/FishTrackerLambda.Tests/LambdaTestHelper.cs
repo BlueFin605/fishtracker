@@ -2,7 +2,7 @@
 using Amazon.Lambda.TestUtilities;
 using Amazon.Lambda.APIGatewayEvents;
 
-namespace FishTracker.Tests;
+namespace FishTrackerLambda.Tests;
 
 public static class LambdaTestHelper
 {

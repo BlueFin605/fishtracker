@@ -1,8 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using FishTracker.Models.Lambda;
-using FishTracker.Services;
+using FishTrackerLambda.Models.Lambda;
+using FishTrackerLambda.Services;
 
-namespace FishTracker.Controllers;
+namespace FishTrackerLambda.Controllers;
 
 [Route("api/[controller]")]
 public class CatchController : ControllerBase

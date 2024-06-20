@@ -2,9 +2,9 @@ using Xunit;
 using Amazon.Lambda.Core;
 using Amazon.Lambda.APIGatewayEvents;
 using Newtonsoft;
-using FishTracker.Models.Lambda;
+using FishTrackerLambda.Models.Lambda;
 
-namespace FishTracker.Tests;
+namespace FishTrackerLambda.Tests;
 
 public class CatchControllerTests
 {

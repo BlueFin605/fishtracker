@@ -1,8 +1,8 @@
 ﻿using Amazon.DynamoDBv2;
-using FishTracker.Models.Lambda;
-using FishTracker.Models.Persistance;
+using FishTrackerLambda.Models.Lambda;
+using FishTrackerLambda.Models.Persistance;
 
-namespace FishTracker.Services
+namespace FishTrackerLambda.Services
 {
     public static class CatchDbTable
     {

@@ -2,7 +2,7 @@
 using System.Net.Mail;
 using Amazon.SecurityToken.Model;
 
-namespace FishTracker.AWSProxy
+namespace FishTrackerLambda.AWSProxy
 {
     public interface IAmazonSecurityTokenServiceClientProxy
 	{

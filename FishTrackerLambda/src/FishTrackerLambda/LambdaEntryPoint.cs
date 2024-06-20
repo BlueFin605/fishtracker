@@ -1,4 +1,4 @@
-namespace FishTracker;
+namespace FishTrackerLambda;
 
 /// <summary>
 /// This class extends from APIGatewayProxyFunction which contains the method FunctionHandlerAsync which is the 

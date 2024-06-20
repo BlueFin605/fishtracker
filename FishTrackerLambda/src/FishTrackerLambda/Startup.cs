@@ -1,12 +1,12 @@
 ﻿using System.Text.Json.Serialization;
 using Amazon.DynamoDBv2;
-using FishTracker.AWSProxy;
-using FishTracker.Services;
+using FishTrackerLambda.AWSProxy;
+using FishTrackerLambda.Services;
 using Microsoft.AspNetCore.Mvc.ViewEngines;
 using Microsoft.IdentityModel.Logging;
 using Newtonsoft.Json;
 
-namespace FishTracker;
+namespace FishTrackerLambda;
 
 public class Startup
 {

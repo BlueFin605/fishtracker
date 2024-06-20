@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Text.Json.Serialization;
 
-namespace FishTracker.Models.Lambda;
+namespace FishTrackerLambda.Models.Lambda;
 
 public record class CatchDetails(
     Guid catchId,

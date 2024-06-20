@@ -1,11 +1,11 @@
 ﻿using Amazon.DynamoDBv2;
 using Amazon.DynamoDBv2.DocumentModel;
 using Amazon.DynamoDBv2.Model;
-using FishTracker.Models.Persistance;
+using FishTrackerLambda.Models.Persistance;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 
-namespace FishTracker.Services
+namespace FishTrackerLambda.Services
 {
     public static class DynamoDbHelper
     {

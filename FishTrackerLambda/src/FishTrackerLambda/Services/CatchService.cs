@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Xml.Linq;
 using Amazon.DynamoDBv2;
-using FishTracker.Models.Lambda;
+using FishTrackerLambda.Models.Lambda;
 
-namespace FishTracker.Services
+namespace FishTrackerLambda.Services
 {
 
     public class CatchService : ICatchService
