@@ -6,16 +6,17 @@ using FishTracker.Models.Lambda;
 
 namespace FishTracker.Tests;
 
-public class QuestionManagerControllerTests
+public class CatchControllerTests
 {
     [Fact]
     public async Task TestGet()
     {
-        var filename = "./SampleRequests/QuestionManagerController-Get.json";
+        var filename = "./SampleRequests/CatchController-Get.json";
         APIGatewayProxyResponse response = await LambdaTestHelper.SendRequest(filename);
 
         Assert.Equal(200, response.StatusCode);
-        var mystr = "{\"id\":\"71afaf34-e576-4234-b874-3aa7ca010a5f\",\"question\":\"This is a test question\",\"notes\":\"This is some ntes on the question\",\"participants\":[],\"vote\":{\"vote\":\"Fully\",\"name\":\"name\",\"sessionId\":\"sessionid\"}}";
+
+        var mystr = "{\"catchId\":\"5acb3a1b-9311-447b-95e5-7dfca626a3d2\",\"tripId\":\"6cc39752-b9b1-4bb4-befe-f1b082cc9e3d\",\"speciesId\":\"aa632249-1ab4-423b-bc4d-3eeb9f2dbaa0\",\"caughtLocation\":{\"longitude\":1,\"latitute\":2},\"caughtWhen\":\"1970-01-01T00:00:00Z\",\"caughtSize\":\"Medium\",\"caughtLength\":10}";
         Assert.Equal(mystr, response.Body);
 
         Assert.True(response.MultiValueHeaders.ContainsKey("Content-Type"));
@@ -26,13 +27,17 @@ public class QuestionManagerControllerTests
     [Fact]
     public async Task TestPost()
     {
-        var filename = "./SampleRequests/QuestionManagerController-Post.json";
+        var filename = "./SampleRequests/CatchController-Post.json";
         APIGatewayProxyResponse response = await LambdaTestHelper.SendRequest(filename);
 
         Assert.Equal(200, response.StatusCode);
-        var responseObj = Newtonsoft.Json.JsonConvert.DeserializeObject<NewQuestionResponse>(response.Body);
+        var responseObj = Newtonsoft.Json.JsonConvert.DeserializeObject<CatchDetails>(response.Body);
         Assert.NotNull(responseObj);
-        Assert.NotEmpty(responseObj.QuestionToken);
+
+        var mystr = "{\"catchId\":\"5acb3a1b-9311-447b-95e5-7dfca626a3d2\",\"tripId\":\"6cc39752-b9b1-4bb4-befe-f1b082cc9e3d\",\"speciesId\":\"aa632249-1ab4-423b-bc4d-3eeb9f2dbaa0\",\"caughtLocation\":{\"longitude\":1,\"latitute\":2},\"caughtWhen\":\"1970-01-01T00:00:00Z\",\"caughtSize\":\"Medium\",\"caughtLength\":10}";
+        Assert.Equal(mystr, response.Body);
+
+        //Assert.(responseObj.catchId);
         Assert.True(response.MultiValueHeaders.ContainsKey("Content-Type"));
         Assert.Equal("application/json; charset=utf-8", response.MultiValueHeaders["Content-Type"][0]);
     }

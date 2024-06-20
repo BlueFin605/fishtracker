@@ -36,9 +36,6 @@
     <Content Update="SampleRequests\QuestionManagerController-Get.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Update="SampleRequests\AuthenticateController-Question.json">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
     <Content Update="SampleRequests\QuestionManagerController-Post.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>

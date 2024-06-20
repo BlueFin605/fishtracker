@@ -1,13 +1,13 @@
 {
   "resource": "/{proxy+}",
-  "path": "api/questionmanager",
-  "httpMethod": "GET",
-  "headers": null,
-  "queryStringParameters": {
-    "qtoken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJJZCI6IjcxYWZhZjM0LWU1NzYtNDIzNC1iODc0LTNhYTdjYTAxMGE1ZiIsIlF1ZXN0aW9uIjoiVGhpcyBpcyBhIHRlc3QgcXVlc3Rpb24iLCJOb3RlcyI6IlRoaXMgaXMgc29tZSBudGVzIG9uIHRoZSBxdWVzdGlvbiIsIlBhcnRpY2lwYW50cyI6W10sIk93bmVyU2Vzc2lvbklkIjoiMGUyY2MzNTEtZGQ3Yy00NDJiLWI0MzktM2Q0NzU2NzlhMTMxIiwibmJmIjoxNjk0NjM1OTE2LCJleHAiOjE3MjYyNTgzMTYsImlhdCI6MTY5NDYzNTkxNn0.i9CYot1IN7fjgd5_9E7HQjyeLNy-_KCBmqQG6jgr9S4"
+  "path": "/api/catch",
+  "httpMethod": "POST",
+  "Headers": {
+    "Content-Type": "application/json"
   },
+  "queryStringParameters": null,
   "pathParameters": {
-    "proxy": "api/questionmanager"
+    "proxy": "api/catch"
   },
   "stageVariables": null,
   "requestContext": {
@@ -29,8 +29,8 @@
       "user": "AAAAAAAAAAAA"
     },
     "resourcePath": "/{proxy+}",
-    "httpMethod": "GET",
+    "httpMethod": "POST",
     "apiId": "t2yh6sjnmk"
   },
-  "body": null
+  "body": "{\"catchId\":\"5acb3a1b-9311-447b-95e5-7dfca626a3d2\",\"tripId\":\"6cc39752-b9b1-4bb4-befe-f1b082cc9e3d\",\"speciesId\":\"aa632249-1ab4-423b-bc4d-3eeb9f2dbaa0\",\"caughtLocation\":{\"longitude\":1,\"latitute\":2},\"caughtWhen\":\"1970-01-01T00:00:00Z\",\"caughtSize\":\"Medium\",\"caughtLength\":10}"
 }

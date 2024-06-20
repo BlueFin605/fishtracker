@@ -40,7 +40,7 @@ public class Startup
         }));
 
         services.AddSingleton<IAmazonSecurityTokenServiceClientProxy, AmazonSecurityTokenServiceClient_AWS>();
-        services.AddSingleton<IQuestionService, QuestionService>();
+        services.AddSingleton<ICatchService, CatchService>();
         services.AddTransient<IAmazonDynamoDB, AmazonDynamoDBClient>();
     }
 
