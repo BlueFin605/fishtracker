@@ -1,13 +1,13 @@
 {
   "resource": "/{proxy+}",
-  "path": "/api/catch",
+  "path": "api/trip/9943fc5f-8ada-4911-8684-b7939b138a2f/catch",
   "httpMethod": "POST",
   "Headers": {
     "Content-Type": "application/json"
   },
   "queryStringParameters": null,
   "pathParameters": {
-    "proxy": "api/catch"
+    "proxy": "api/trip/9943fc5f-8ada-4911-8684-b7939b138a2f/catch"
   },
   "stageVariables": null,
   "requestContext": {

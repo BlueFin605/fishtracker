@@ -5,20 +5,20 @@ using FishTrackerLambda.Services;
 namespace FishTrackerLambda.Controllers;
 
 [Route("api/[controller]")]
-public class CatchController : ControllerBase
+public class TripController : ControllerBase
 {
     private readonly ICatchService m_catchService;
 
-    private readonly ILogger<CatchController> m_logger;
+    private readonly ILogger<TripController> m_logger;
 
-    public CatchController(ICatchService catchService, ILogger<CatchController> logger)
+    public TripController(ICatchService catchService, ILogger<TripController> logger)
     {
         m_catchService = catchService;
         m_logger = logger;
     }
 
     // GET api/catch/8e480c5f-11da-4922-8684-679b9b198a2e
-    [HttpGet("{catchId}")]
+    [HttpGet("{tripId}/catch/{catchId}")]
     //[Route("api/catch/{catchId}")]
     public Task<CatchDetails> GetCatch([FromRoute] string catchId)
     {
@@ -26,7 +26,7 @@ public class CatchController : ControllerBase
     }
 
     // POST api/catch
-    [HttpPost]
+    [HttpPost("{tripId}/catch")]
     public Task<CatchDetails> NewCatch([FromBody] NewCatch newCatch)
     {
         return m_catchService.NewCatch(newCatch);
