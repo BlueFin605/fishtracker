@@ -1,5 +1,6 @@
 ﻿using Amazon.DynamoDBv2.DataModel;
 using FishTrackerLambda.Models.Lambda;
+using Newtonsoft.Json;
 
 namespace FishTrackerLambda.Models.Persistance
 {
@@ -14,6 +15,7 @@ namespace FishTrackerLambda.Models.Persistance
         public double CaughtLength { get; }
         public WeatherAttributes? Weather { get; }
 
+        [JsonConstructor]
         public DynamoDbCatch(Guid catchId, Guid tripId, Guid speciesId, Location caughtLocation, DateTime caughtWhen, FishSize caughtSize, double caughtLength, WeatherAttributes? weather)
         {
             CatchId = catchId;
