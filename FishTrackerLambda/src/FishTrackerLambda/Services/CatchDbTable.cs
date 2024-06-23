@@ -13,14 +13,14 @@ namespace FishTrackerLambda.Services
             return record.SaveDynamoDbRecord(client, m_tableName, logger);
         }
 
-        public static Task<DynamoDbCatch> GetRecord(Guid id, IAmazonDynamoDB client, ILogger logger)
+        public static Task<DynamoDbCatch> GetRecord(Guid tripId, Guid catchId, IAmazonDynamoDB client, ILogger logger)
         {
-            return DynamoDbHelper.GetDynamoDbRecord<DynamoDbCatch>(id, client, m_tableName, logger, () => new DynamoDbCatch(id));
+            return DynamoDbHelper.GetDynamoDbRecord(tripId, catchId, client, m_tableName, logger, () => new DynamoDbCatch(tripId, catchId));
         }
 
-        public static Task<DynamoDbCatch> CreateDyanmoRecord(this NewCatch newCatch)
+        public static Task<DynamoDbCatch> CreateDyanmoRecord(this NewCatch newCatch, Guid tripId)
         {
-            return Task.FromResult(new DynamoDbCatch(Guid.NewGuid(), newCatch.TripId, newCatch.SpeciesId, newCatch.caughtLocation, newCatch.caughtWhen, newCatch.caughtSize, newCatch.caughtLength, null));
+            return Task.FromResult(new DynamoDbCatch(Guid.NewGuid(), tripId, newCatch.SpeciesId, newCatch.caughtLocation, newCatch.caughtWhen, newCatch.caughtSize, newCatch.caughtLength, null));
         }
 
         public static async Task<CatchDetails> ToCatchDetails(this Task<DynamoDbCatch> catchDets)

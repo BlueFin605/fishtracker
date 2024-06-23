@@ -4,8 +4,8 @@ namespace FishTrackerLambda.Services
 {
     public interface ICatchService
     {
-        Task<CatchDetails> GetCatch(Guid catchId);
-        Task<CatchDetails> NewCatch(NewCatch newCatch);
+        Task<CatchDetails> GetCatch(Guid catchId, Guid tripId);
+        Task<CatchDetails> NewCatch(Guid tripId, NewCatch newCatch);
     }
 }
 

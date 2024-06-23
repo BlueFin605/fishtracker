@@ -26,33 +26,33 @@ namespace FishTrackerLambda.Services
             return q;
         }
 
-        public static async Task<T> GetDynamoDbRecord<T>(Guid id, IAmazonDynamoDB client, string tableName, ILogger logger, Func<T> initDefault)
+        public static async Task<T> GetDynamoDbRecord<T,P,S>(P part, S sortKey, IAmazonDynamoDB client, string tableName, ILogger logger, Func<T> initDefault)
         {
-            logger.LogInformation($"DynamoDbHelper::GetDynamoDbRecord id[{id}]");
+            logger.LogInformation($"DynamoDbHelper::GetDynamoDbRecord part[{part}] sort[{sortKey}]");
 
             var table = Table.LoadTable(client, tableName);
 
             try
             {
-                var item = await table.GetItemAsync(id.ToString());
+                var item = await table.GetItemAsync(part?.ToString(), sortKey?.ToString());
                 if (item == null)
                 {
-                    logger.LogInformation($"GetDynamoDbRecord:[{id}] null response - creating empty");
+                    logger.LogInformation($"GetDynamoDbRecord:[{part}][{sortKey}] null response - creating empty");
                     return initDefault();
                 }
 
-                string jsonText = item.ToJson() ?? throw new Exception($"Unable to convert to Json for table:[{tableName}] id:[{id.ToString()}]");
+                string jsonText = item.ToJson() ?? throw new Exception($"Unable to convert to Json for table:[{tableName}] part:[{part}] sort[{sortKey}]");
 
-                return JsonConvert.DeserializeObject<T>(jsonText, new StringEnumConverter()) ?? throw new Exception($"Unable to deserialise Json for table:[{tableName}] id:[{id.ToString()}]");
+                return JsonConvert.DeserializeObject<T>(jsonText, new StringEnumConverter()) ?? throw new Exception($"Unable to deserialise Json for table:[{tableName}] part:[{part}] sort[{sortKey}]");
             }
             catch (ResourceNotFoundException)
             {
-                logger.LogInformation($"GetDynamoDbRecord:[{id}] ResourceNotFoundException - creating empty");
+                logger.LogInformation($"GetDynamoDbRecord:[{part}][{sortKey}] ResourceNotFoundException - creating empty");
                 return initDefault();
             }
             catch (Exception ex)
             {
-                logger.LogError(ex, $"GetDynamoDbRecord:[{id}] Exception:[{ex.Message}] [Type[{ex.GetType()}]");
+                logger.LogError(ex, $"GetDynamoDbRecord:[{part}][{sortKey}] Exception:[{ex.Message}] [Type[{ex.GetType()}]");
                 throw;
             }
         }

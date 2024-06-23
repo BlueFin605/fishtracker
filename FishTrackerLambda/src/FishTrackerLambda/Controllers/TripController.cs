@@ -20,15 +20,15 @@ public class TripController : ControllerBase
     // GET api/catch/8e480c5f-11da-4922-8684-679b9b198a2e
     [HttpGet("{tripId}/catch/{catchId}")]
     //[Route("api/catch/{catchId}")]
-    public Task<CatchDetails> GetCatch([FromRoute] string catchId)
+    public Task<CatchDetails> GetCatch([FromRoute] string tripId, [FromRoute] string catchId)
     {
-        return m_catchService.GetCatch(Guid.Parse(catchId));
+        return m_catchService.GetCatch(Guid.Parse(tripId), Guid.Parse(catchId));
     }
 
     // POST api/catch
     [HttpPost("{tripId}/catch")]
-    public Task<CatchDetails> NewCatch([FromBody] NewCatch newCatch)
+    public Task<CatchDetails> NewCatch([FromRoute] string tripId, [FromBody] NewCatch newCatch)
     {
-        return m_catchService.NewCatch(newCatch);
+        return m_catchService.NewCatch(Guid.Parse(tripId), newCatch);
     }
 }

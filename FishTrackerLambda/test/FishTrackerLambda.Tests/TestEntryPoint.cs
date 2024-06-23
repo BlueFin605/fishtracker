@@ -48,8 +48,8 @@ public class TestEntryPoint :
     protected override void Init(IHostBuilder builder)
     {
         var qservice = new Moq.Mock<ICatchService>();
-        qservice.Setup(s => s.GetCatch(It.IsAny<Guid>())).Returns(Task.FromResult<CatchDetails>(new CatchDetails(Guid.Parse("5acb3a1b-9311-447b-95e5-7dfca626a3d2"), Guid.Parse("6cc39752-b9b1-4bb4-befe-f1b082cc9e3d"), Guid.Parse("aa632249-1ab4-423b-bc4d-3eeb9f2dbaa0"), new Location(1,2), DateTime.UnixEpoch, FishSize.Medium, 10, null)));
-        qservice.Setup(s => s.NewCatch(It.IsAny<NewCatch>())).Returns(Task.FromResult<CatchDetails>(new CatchDetails(Guid.Parse("5acb3a1b-9311-447b-95e5-7dfca626a3d2"), Guid.Parse("6cc39752-b9b1-4bb4-befe-f1b082cc9e3d"), Guid.Parse("aa632249-1ab4-423b-bc4d-3eeb9f2dbaa0"), new Location(1, 2), DateTime.UnixEpoch, FishSize.Medium, 10, null)));
+        qservice.Setup(s => s.GetCatch(It.IsAny<Guid>(), It.IsAny<Guid>())).Returns(Task.FromResult<CatchDetails>(new CatchDetails(Guid.Parse("5acb3a1b-9311-447b-95e5-7dfca626a3d2"), Guid.Parse("6cc39752-b9b1-4bb4-befe-f1b082cc9e3d"), Guid.Parse("aa632249-1ab4-423b-bc4d-3eeb9f2dbaa0"), new Location(1,2), DateTime.UnixEpoch, FishSize.Medium, 10, null)));
+        qservice.Setup(s => s.NewCatch(It.IsAny<Guid>(), It.IsAny<NewCatch>())).Returns(Task.FromResult<CatchDetails>(new CatchDetails(Guid.Parse("5acb3a1b-9311-447b-95e5-7dfca626a3d2"), Guid.Parse("6cc39752-b9b1-4bb4-befe-f1b082cc9e3d"), Guid.Parse("aa632249-1ab4-423b-bc4d-3eeb9f2dbaa0"), new Location(1, 2), DateTime.UnixEpoch, FishSize.Medium, 10, null)));
 
         builder.ConfigureServices(services => {
             services.AddSingleton< IAmazonDynamoDB>(sp => (new Moq.Mock<IAmazonDynamoDB>()).Object);

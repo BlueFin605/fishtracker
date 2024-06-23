@@ -5,8 +5,8 @@ namespace FishTrackerLambda.Models.Persistance
 {
     public class DynamoDbCatch
     {
-        public Guid CatchId { get; }
         public Guid TripId { get; }
+        public Guid CatchId { get; }
         public Guid SpeciesId { get; }
         public Location CaughtLocation { get; }
         public DateTime CaughtWhen { get; }
@@ -26,9 +26,10 @@ namespace FishTrackerLambda.Models.Persistance
             Weather = weather;
         }
 
-        public DynamoDbCatch(Guid catchId)
+        public DynamoDbCatch(Guid tripId, Guid catchId)
         {
             CatchId = catchId;
+            TripId = tripId;
             CaughtLocation = new Location(0,0);
         }
     }

@@ -18,14 +18,14 @@ namespace FishTrackerLambda.Services
             m_client = client;
         }
 
-        public Task<CatchDetails> GetCatch(Guid catchId)
+        public Task<CatchDetails> GetCatch(Guid tripId, Guid catchId)
         {
-            return CatchDbTable.GetRecord(catchId, m_client, m_logger).ToCatchDetails();
+            return CatchDbTable.GetRecord(tripId, catchId, m_client, m_logger).ToCatchDetails();
         }
 
-        public Task<CatchDetails> NewCatch(NewCatch newCatch)
+        public Task<CatchDetails> NewCatch(Guid tripId, NewCatch newCatch)
         {
-            return newCatch.CreateDyanmoRecord().SaveRecord(m_client, m_logger).ToCatchDetails();
+            return newCatch.CreateDyanmoRecord(tripId).SaveRecord(m_client, m_logger).ToCatchDetails();
         }
     }
 }
