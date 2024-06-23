@@ -22,13 +22,30 @@ public class TripController : ControllerBase
     //[Route("api/catch/{catchId}")]
     public Task<CatchDetails> GetCatch([FromRoute] string tripId, [FromRoute] string catchId)
     {
-        return m_catchService.GetCatch(Guid.Parse(tripId), Guid.Parse(catchId));
+        try
+        {
+            m_logger.LogInformation($"GetCatch tripId:[{tripId}] catchId:[${catchId}]");
+            return m_catchService.GetCatch(Guid.Parse(tripId), Guid.Parse(catchId));
+        }
+        catch (Exception e)
+        {
+            m_logger.LogError(e, $"GetCatch Exception {e.Message}");
+            throw;
+        }
     }
 
     // POST api/catch
     [HttpPost("{tripId}/catch")]
     public Task<CatchDetails> NewCatch([FromRoute] string tripId, [FromBody] NewCatch newCatch)
     {
-        return m_catchService.NewCatch(Guid.Parse(tripId), newCatch);
+        try {
+            m_logger.LogInformation($"NewCatch tripId:[{tripId}]");
+            return m_catchService.NewCatch(Guid.Parse(tripId), newCatch);
+        }
+        catch (Exception e)
+        {
+            m_logger.LogError(e, $"NewCatch Exception {e.Message}");
+            throw;
+        }
     }
 }
