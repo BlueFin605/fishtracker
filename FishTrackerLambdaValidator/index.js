@@ -5,6 +5,7 @@ let data;
 module.exports.handler = async (event, context, callback) => {
   try {
     data = await lib.authenticate(event);
+    console.log(data)
   }
   catch (err) {
       console.log(err);

@@ -4,8 +4,8 @@ using System.Text.Json.Serialization;
 namespace FishTrackerLambda.Models.Lambda;
 
 public record class CatchDetails(
+    Guid tripId,
     Guid catchId,
-    Guid TripId,
     Guid SpeciesId,
     Location caughtLocation,
     DateTime caughtWhen,

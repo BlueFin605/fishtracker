@@ -6,17 +6,17 @@ using FishTrackerLambda.Models.Lambda;
 
 namespace FishTrackerLambda.Tests;
 
-public class CatchControllerTests
+public class TripControllerTests
 {
     [Fact]
     public async Task TestGet()
     {
-        var filename = "./SampleRequests/CatchController-Get.json";
+        var filename = "./SampleRequests/TripController-Get.json";
         APIGatewayProxyResponse response = await LambdaTestHelper.SendRequest(filename);
 
         Assert.Equal(200, response.StatusCode);
 
-        var mystr = "{\"catchId\":\"5acb3a1b-9311-447b-95e5-7dfca626a3d2\",\"tripId\":\"6cc39752-b9b1-4bb4-befe-f1b082cc9e3d\",\"speciesId\":\"aa632249-1ab4-423b-bc4d-3eeb9f2dbaa0\",\"caughtLocation\":{\"longitude\":1,\"latitute\":2},\"caughtWhen\":\"1970-01-01T00:00:00Z\",\"caughtSize\":\"Medium\",\"caughtLength\":10}";
+        var mystr = "{\"tripId\":\"6cc39752-b9b1-4bb4-befe-f1b082cc9e3d\",\"catchId\":\"5acb3a1b-9311-447b-95e5-7dfca626a3d2\",\"speciesId\":\"aa632249-1ab4-423b-bc4d-3eeb9f2dbaa0\",\"caughtLocation\":{\"longitude\":1,\"latitute\":2},\"caughtWhen\":\"1970-01-01T00:00:00Z\",\"caughtSize\":\"Medium\",\"caughtLength\":10}";
         Assert.Equal(mystr, response.Body);
 
         Assert.True(response.MultiValueHeaders.ContainsKey("Content-Type"));
@@ -27,14 +27,14 @@ public class CatchControllerTests
     [Fact]
     public async Task TestPost()
     {
-        var filename = "./SampleRequests/CatchController-Post.json";
+        var filename = "./SampleRequests/TripController-Post.json";
         APIGatewayProxyResponse response = await LambdaTestHelper.SendRequest(filename);
 
         Assert.Equal(200, response.StatusCode);
         var responseObj = Newtonsoft.Json.JsonConvert.DeserializeObject<CatchDetails>(response.Body);
         Assert.NotNull(responseObj);
 
-        var mystr = "{\"catchId\":\"5acb3a1b-9311-447b-95e5-7dfca626a3d2\",\"tripId\":\"6cc39752-b9b1-4bb4-befe-f1b082cc9e3d\",\"speciesId\":\"aa632249-1ab4-423b-bc4d-3eeb9f2dbaa0\",\"caughtLocation\":{\"longitude\":1,\"latitute\":2},\"caughtWhen\":\"1970-01-01T00:00:00Z\",\"caughtSize\":\"Medium\",\"caughtLength\":10}";
+        var mystr = "{\"tripId\":\"6cc39752-b9b1-4bb4-befe-f1b082cc9e3d\",\"catchId\":\"5acb3a1b-9311-447b-95e5-7dfca626a3d2\",\"speciesId\":\"aa632249-1ab4-423b-bc4d-3eeb9f2dbaa0\",\"caughtLocation\":{\"longitude\":1,\"latitute\":2},\"caughtWhen\":\"1970-01-01T00:00:00Z\",\"caughtSize\":\"Medium\",\"caughtLength\":10}";
         Assert.Equal(mystr, response.Body);
 
         //Assert.(responseObj.catchId);
