@@ -27,7 +27,7 @@ namespace FishTrackerLambda.Services
         {
             var c = await catchDets;
 
-            return new CatchDetails(c.CatchId, c.TripId, c.SpeciesId, c.CaughtLocation, c.CaughtWhen, c.CaughtSize, c.CaughtLength, c.Weather);
+            return new CatchDetails(c.TripId, c.CatchId, c.SpeciesId, c.CaughtLocation, c.CaughtWhen, c.CaughtSize, c.CaughtLength, c.Weather);
         }
     }
 }
