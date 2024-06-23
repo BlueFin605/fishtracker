@@ -16,10 +16,10 @@ namespace FishTrackerLambda.Models.Persistance
         public WeatherAttributes? Weather { get; }
 
         [JsonConstructor]
-        public DynamoDbCatch(Guid catchId, Guid tripId, Guid speciesId, Location caughtLocation, DateTime caughtWhen, FishSize caughtSize, double caughtLength, WeatherAttributes? weather)
+        public DynamoDbCatch(Guid tripId, Guid catchId, Guid speciesId, Location caughtLocation, DateTime caughtWhen, FishSize caughtSize, double caughtLength, WeatherAttributes? weather)
         {
-            CatchId = catchId;
             TripId = tripId;
+            CatchId = catchId;
             SpeciesId = speciesId;
             CaughtLocation = caughtLocation;
             CaughtWhen = caughtWhen;
@@ -30,8 +30,8 @@ namespace FishTrackerLambda.Models.Persistance
 
         public DynamoDbCatch(Guid tripId, Guid catchId)
         {
-            CatchId = catchId;
             TripId = tripId;
+            CatchId = catchId;
             CaughtLocation = new Location(0,0);
         }
     }
