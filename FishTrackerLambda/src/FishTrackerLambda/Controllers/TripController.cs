@@ -34,6 +34,22 @@ public class TripController : ControllerBase
         }
     }
 
+    [HttpGet("{tripId}/catch")]
+    //[Route("api/catch/{catchId}")]
+    public Task<IEnumerable<CatchDetails>> GetTripCatch([FromRoute] string tripId)
+    {
+        try
+        {
+            m_logger.LogInformation($"GetTripCatch tripId:[{tripId}]");
+            return m_catchService.GetTripCatch(Guid.Parse(tripId));
+        }
+        catch (Exception e)
+        {
+            m_logger.LogError(e, $"GetTripCatch Exception {e.Message}");
+            throw;
+        }
+    }
+
     // POST api/catch
     [HttpPost("{tripId}/catch")]
     public Task<CatchDetails> NewCatch([FromRoute] string tripId, [FromBody] NewCatch newCatch)

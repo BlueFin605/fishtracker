@@ -23,6 +23,12 @@ namespace FishTrackerLambda.Services
             return CatchDbTable.GetRecord(tripId, catchId, m_client, m_logger).ToCatchDetails();
         }
 
+        public async Task<IEnumerable<CatchDetails>> GetTripCatch(Guid tripId)
+        {
+            var records = await CatchDbTable.GetAllRecords(tripId, m_client, m_logger);
+            return records.Select(c => c.ToCatchDetails());
+        }
+
         public Task<CatchDetails> NewCatch(Guid tripId, NewCatch newCatch)
         {
             return newCatch.CreateDyanmoRecord(tripId).SaveRecord(m_client, m_logger).ToCatchDetails();

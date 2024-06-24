@@ -1,4 +1,6 @@
-﻿using Amazon.DynamoDBv2;
+﻿using System.Collections.Concurrent;
+using System.Globalization;
+using Amazon.DynamoDBv2;
 using Amazon.DynamoDBv2.DocumentModel;
 using Amazon.DynamoDBv2.Model;
 using FishTrackerLambda.Models.Persistance;
@@ -53,6 +55,38 @@ namespace FishTrackerLambda.Services
             catch (Exception ex)
             {
                 logger.LogError(ex, $"GetDynamoDbRecord:[{part}][{sortKey}] Exception:[{ex.Message}] [Type[{ex.GetType()}]");
+                throw;
+            }
+        }
+
+        public static async Task<IEnumerable<T>> GetDynamoDbRecords<T, P>(P part, IAmazonDynamoDB client, string tableName, ILogger logger)
+        {
+            logger.LogInformation($"DynamoDbHelper::GetDynamoDbRecords part[{part}]");
+
+            var table = Table.LoadTable(client, tableName);
+
+            try
+            {
+                var queryFilter = new QueryFilter("TripId", QueryOperator.Equal, part?.ToString());
+                var queryOptions = new QueryOperationConfig
+                {
+                    Filter = queryFilter
+                };
+
+                var items = await table.Query(queryOptions).GetRemainingAsync();
+
+                return items.Select( i => {
+                    return JsonConvert.DeserializeObject<T>(i, new StringEnumConverter()) ?? throw new Exception($"Unable to deserialise Json for table:[{tableName}] part:[{part}]");
+                });
+            }
+            catch (ResourceNotFoundException)
+            {
+                logger.LogInformation($"GetDynamoDbRecords:[{part}] ResourceNotFoundException - creating empty");
+                return new List<T>();
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, $"GetDynamoDbRecords:[{part}] Exception:[{ex.Message}] [Type[{ex.GetType()}]");
                 throw;
             }
         }
