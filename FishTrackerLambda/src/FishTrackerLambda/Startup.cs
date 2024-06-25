@@ -1,8 +1,9 @@
 ﻿using System.Text.Json.Serialization;
 using Amazon.DynamoDBv2;
-using FishTrackerLambda.AWSProxy;
+using Amazon.Runtime;
 using FishTrackerLambda.Services;
 using Microsoft.AspNetCore.Mvc.ViewEngines;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Logging;
 using Newtonsoft.Json;
 
@@ -39,9 +40,24 @@ public class Startup
                    .AllowAnyHeader();
         }));
 
-        services.AddSingleton<IAmazonSecurityTokenServiceClientProxy, AmazonSecurityTokenServiceClient_AWS>();
         services.AddSingleton<ICatchService, CatchService>();
-        services.AddTransient<IAmazonDynamoDB, AmazonDynamoDBClient>();
+
+        // Only load the service when running locally
+        if (Configuration.GetSection("Environment")?.Value == "Development")
+        {
+            Func<IAmazonDynamoDB> create = () =>
+            {
+                AmazonDynamoDBConfig clientConfig = new AmazonDynamoDBConfig();
+                // Set the endpoint URL
+                clientConfig.ServiceURL = "http://localhost:8000";
+                var credentials = new BasicAWSCredentials("xxx", "xxx");
+                AmazonDynamoDBClient client = new AmazonDynamoDBClient(credentials, clientConfig);
+                return (IAmazonDynamoDB)client;
+            };
+            services.AddSingleton(create());
+        }
+        else
+            services.AddTransient<IAmazonDynamoDB, AmazonDynamoDBClient>();
     }
 
     // This method gets called by the runtime. Use this method to configure the HTTP request pipeline
