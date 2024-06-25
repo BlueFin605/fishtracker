@@ -76,7 +76,7 @@ namespace FishTrackerLambda.Services
                 var items = await table.Query(queryOptions).GetRemainingAsync();
 
                 return items.Select( i => {
-                    return JsonConvert.DeserializeObject<T>(i, new StringEnumConverter()) ?? throw new Exception($"Unable to deserialise Json for table:[{tableName}] part:[{part}]");
+                    return JsonConvert.DeserializeObject<T>(i.ToJson(), new StringEnumConverter()) ?? throw new Exception($"Unable to deserialise Json for table:[{tableName}] part:[{part}]");
                 });
             }
             catch (ResourceNotFoundException)

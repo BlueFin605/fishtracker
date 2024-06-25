@@ -1,6 +1,5 @@
 ﻿using System.Text.Json.Serialization;
 using Amazon.DynamoDBv2;
-using FishTrackerLambda.AWSProxy;
 using FishTrackerLambda.Services;
 using Microsoft.IdentityModel.Logging;
 
@@ -34,7 +33,7 @@ public class TestStartup
                    .AllowAnyHeader();
         }));
 
-        services.AddSingleton<IAmazonSecurityTokenServiceClientProxy, AmazonSecurityTokenServiceClient_Test>();
+        //services.AddSingleton<IAmazonSecurityTokenServiceClientProxy, AmazonSecurityTokenServiceClient_Test>();
         //services.AddSingleton<IQuestionService, QuestionService>();
         //services.AddTransient<IAmazonDynamoDB, AmazonDynamoDBClient>();
     }

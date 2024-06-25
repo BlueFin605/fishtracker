@@ -31,12 +31,10 @@
   </ItemGroup>
   <ItemGroup>
     <None Remove="Services\" />
-    <None Remove="AWS Proxy\" />
     <None Remove="Utilities\" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Services\" />
-    <Folder Include="AWS Proxy\" />
     <Folder Include="Utilities\" />
   </ItemGroup>
   <ItemGroup>
