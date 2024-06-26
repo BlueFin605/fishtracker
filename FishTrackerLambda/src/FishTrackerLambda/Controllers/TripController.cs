@@ -24,6 +24,13 @@ public class TripController : ControllerBase
     {
         try
         {
+            var claims = User.Claims; 
+            m_logger.LogInformation("Claims:");
+            foreach (var claim in claims)
+            {
+                m_logger.LogInformation($"{claim.Type}: {claim.Value}");
+            }
+
             m_logger.LogInformation($"GetCatch tripId:[{tripId}] catchId:[${catchId}]");
             return m_catchService.GetCatch(Guid.Parse(tripId), Guid.Parse(catchId));
         }
