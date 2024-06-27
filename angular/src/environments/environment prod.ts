@@ -1,5 +1,5 @@
 export const environment = {
-    production: false,
+    production: true,
     auth0Domain: '{{DOMAON}}',
     auth0ClientId: '{CLIENTID}'
   };
