@@ -394,5 +394,7 @@ FodyWeavers.xsd
 *.msm
 *.msp
 
+environment.development.ts
+
 # JetBrains Rider
 *.sln.iml
