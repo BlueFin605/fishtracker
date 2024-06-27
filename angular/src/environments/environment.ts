@@ -1,5 +1,5 @@
 export const environment = {
-    production: false,
-    auth0Domain: '<<placeholder for environment>>',
-    auth0ClientId: '<<placeholder for environment>>'
-  };
+  production: true,
+  auth0Domain: '{{AUTH0_DOMAIN}}',
+  auth0ClientId: '{AUTH0_CLIENTID}'
+};
