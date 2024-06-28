@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { ApiService, TripCatch } from '../services/api.service';
+import { ApiService, TripCatch } from '../../services/api.service';
 
 @Component({
   selector: 'app-trip-catch',

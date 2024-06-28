@@ -15,6 +15,7 @@ export class ApiService {
   getTripCatch(): Observable<TripCatch[]> {
     return this.auth.idTokenClaims$.pipe(
       switchMap((tokenClaims) => {
+        console.log(`Bearer ${tokenClaims?.__raw}`);
         const headers = new HttpHeaders({
           Authorization: `Bearer ${tokenClaims?.__raw}`,
         });
