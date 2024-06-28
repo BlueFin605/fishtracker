@@ -1,9 +1,12 @@
 import { Component, OnInit } from '@angular/core';
 import { ApiService, TripCatch } from '../../services/api.service';
+import { CommonModule } from '@angular/common';
 
 @Component({
+  standalone: true,
   selector: 'app-trip-catch',
   templateUrl: './trip-catch.component.html',
+  imports: [CommonModule]
 })
 export class TripCatchComponent implements OnInit {
   tripCatch: TripCatch[];

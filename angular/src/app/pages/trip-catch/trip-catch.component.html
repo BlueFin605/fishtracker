@@ -1,18 +1,24 @@
 <p>Trip Catch History</p>
-<table>
+<table class="custom-header">
     <thead>
         <tr>
-            <th>Property 1</th>
-            <th>Property 2</th>
-            <th>Property 3</th>
+            <th class="custom-header">Trip</th>
+            <th class="custom-header">Catch</th>
+            <th class="custom-header">Species</th>
+            <th class="custom-header">When</th>
+            <th class="custom-header">Size</th>
+            <th class="custom-header">Length</th>
             <!-- Add more table headers for additional properties -->
         </tr>
     </thead>
     <tbody>
         <tr *ngFor="let item of tripCatch">
-            <td>{{ item.tripId }}</td>
-            <td>{{ item.catchId }}</td>
-            <td>{{ item.speciesId }}</td>
+            <td class="custom-cell">{{ item.tripId }}</td>
+            <td class="custom-cell">{{ item.catchId }}</td>
+            <td class="custom-cell">{{ item.speciesId }}</td>
+            <td class="custom-cell">{{ item.caughtWhen }}</td>
+            <td class="custom-cell">{{ item.caughtSize }}</td>
+            <td class="custom-cell">{{ item.caughtLength }}</td>
             <!-- Add more table cells for additional properties -->
         </tr>
     </tbody>
