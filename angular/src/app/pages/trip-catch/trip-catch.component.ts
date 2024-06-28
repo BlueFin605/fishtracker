@@ -15,6 +15,7 @@ export class TripCatchComponent implements OnInit {
   ngOnInit() {
     this.apiService.getTripCatch().subscribe((data: TripCatch[]) => {
       this.tripCatch = data;
+      console.log(`catch data ${JSON.stringify(this.tripCatch)}`)
     });
   }
 }

@@ -1,3 +1,20 @@
 <p>Trip Catch History</p>
-<!-- <p>{{tripCatch}}</p> -->
+<table>
+    <thead>
+        <tr>
+            <th>Property 1</th>
+            <th>Property 2</th>
+            <th>Property 3</th>
+            <!-- Add more table headers for additional properties -->
+        </tr>
+    </thead>
+    <tbody>
+        <tr *ngFor="let item of tripCatch">
+            <td>{{ item.tripId }}</td>
+            <td>{{ item.catchId }}</td>
+            <td>{{ item.speciesId }}</td>
+            <!-- Add more table cells for additional properties -->
+        </tr>
+    </tbody>
+</table>
 

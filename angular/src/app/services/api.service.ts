@@ -15,7 +15,7 @@ export class ApiService {
 
   getTripCatch(): Observable<TripCatch[]> {
     return this.tokenService.token.pipe(switchMap(jwt => {
-        console.log(`Bearer ${jwt}`);
+        // console.log(`Bearer ${jwt}`);
         const headers = new HttpHeaders({
           Authorization: `Bearer ${jwt}`,
         });
@@ -25,8 +25,11 @@ export class ApiService {
 }
 
 export class TripCatch {
-  id: number = 0;
-  location: string = '';
-  date: Date = new Date();
+  tripId: string =  '';
+  catchId: string = '';
+  speciesId: string = '';
+  caughtWhen: Date = new Date();
+  caughtSize: string = '';
+  caughtLength: number = 0;
   // Add other properties based on the actual response structure
 }

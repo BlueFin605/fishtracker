@@ -14,7 +14,7 @@ export class TokenService {
     this.auth.getAccessTokenSilently().subscribe(
       (token: string) => {
         this.tokenSubject.next(token); // Emit the token to subscribers
-        console.log(token); // Use the token here
+        //console.log(token); // Use the token here
       },
       (error) => {
         console.error('Error fetching access token:', error)
