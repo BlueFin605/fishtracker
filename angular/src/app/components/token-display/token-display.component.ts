@@ -15,7 +15,10 @@ export class TokenDisplayComponent implements OnInit {
   id_token: string;
 
   constructor(public auth: AuthService, tokenService: TokenService) { 
-    this.access_token = tokenService.token;
+    this.access_token = '';
+    tokenService.token.subscribe(t => {
+      this.access_token = t
+    });
     this.id_token = "";
   }
 
