@@ -1,12 +1,14 @@
 import { Component } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
-import { HeaderComponent } from './header/header.component'; // Import the app-header component with correct path
+import { HeaderComponent } from './components/header/header.component'; // Import the app-header component with correct path
+// import { Routes } from './app.routes'; // Import the app.routes file with correct path
+// import { RouterModule } from '@angular/router'; // Import RouterModule separately
 
 @Component({
   selector: 'app-root',
   standalone: true,
   imports: [RouterOutlet, 
-            HeaderComponent
+            HeaderComponent,
            ],
   templateUrl: './app.component.html',
   styleUrl: './app.component.css'
@@ -14,3 +16,5 @@ import { HeaderComponent } from './header/header.component'; // Import the app-h
 export class AppComponent {
   title = 'fishtracker';
 }
+
+// Import RouterModule.forRoot(Routes) in the application bootstrap
