@@ -6,6 +6,7 @@ import { CommonModule } from '@angular/common';
   standalone: true,
   selector: 'app-trip-catch',
   templateUrl: './trip-catch.component.html',
+  styleUrls: ['./trip-catch.component.css'],
   imports: [CommonModule]
 })
 export class TripCatchComponent implements OnInit {

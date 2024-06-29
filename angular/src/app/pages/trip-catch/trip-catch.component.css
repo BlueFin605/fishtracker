@@ -1,8 +1,11 @@
 .custom-cell {
     border: 1px solid black;
+    padding: 0px;
+    /* border: 1px; */
+    margin: 0px;
 }
 
 .custom-header {
     color: white;
-    background-color: black;
+    background-color: black;    
 }
