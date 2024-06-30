@@ -1,17 +1,26 @@
 import { Component } from '@angular/core';
-import { AuthService } from '@auth0/auth0-angular';
+import { AuthService, User } from '@auth0/auth0-angular';
 import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-user-profile',
   template: `
-    <ul *ngIf="auth.user$ | async as user">
-      <li>{{ user.name }}</li>
-      <li>{{ user.email }}</li>
+    <ul>
+      <li>{{ udets?.name }}</li>
+      <li>{{ udets?.email }}</li>
     </ul>`,
   standalone: true,
   imports: [CommonModule]
 })
 export class UserProfileComponent {
-  constructor(public auth: AuthService) {}
+  udets: User | null | undefined;
+
+  constructor(public auth: AuthService) {
+    this.udets = null;
+    console.log('subscribe to users');
+    auth.user$.subscribe(u =>  {
+      console.log(`got user[${JSON.stringify(u)}]`);
+      this.udets = u;
+    });
+  }
 }

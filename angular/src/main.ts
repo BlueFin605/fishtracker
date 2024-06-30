@@ -16,8 +16,9 @@ bootstrapApplication(AppComponent, {
       clientId: environment.auth0ClientId,
       authorizationParams: {
         redirect_uri: window.location.origin,
-        scope: "save:catch read:catch create:trip",
-        audience: "https://fishtracker.bluefin605.com"
+        // scope: "save:catch read:catch create:trip",
+        // scope: "openid profile email", //default scopes
+        audience: "https://api.fishtracker.bluefin605.com"
       }
     }),
   ]
