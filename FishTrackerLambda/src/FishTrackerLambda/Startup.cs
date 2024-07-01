@@ -41,6 +41,7 @@ public class Startup
         }));
 
         services.AddSingleton<ICatchService, CatchService>();
+        services.AddSingleton<ITripService, TripService>();
 
         // Only load the service when running locally
         if (Configuration.GetSection("Environment")?.Value == "Development")
