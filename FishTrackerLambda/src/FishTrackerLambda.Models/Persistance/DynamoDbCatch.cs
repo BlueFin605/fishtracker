@@ -35,5 +35,6 @@ namespace FishTrackerLambda.Models.Persistance
             CaughtLocation = new Location(0,0);
         }
     }
+
 }
 

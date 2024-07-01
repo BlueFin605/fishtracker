@@ -40,5 +40,6 @@ namespace FishTrackerLambda.Services
             return new CatchDetails(c.TripId, c.CatchId, c.SpeciesId, c.CaughtLocation, c.CaughtWhen, c.CaughtSize, c.CaughtLength, c.Weather);
         }
     }
+
 }
 
