@@ -1,7 +1,7 @@
 ﻿namespace FishTrackerLambda.Models.Lambda;
 
 public record class TripDetails(
-    string sub,
+    String subject,
     Guid tripId,
     DateTime startTime,
     DateTime? endtime,
@@ -9,10 +9,4 @@ public record class TripDetails(
     uint catchSize,
     TripRating rating,
     List<TripTags> tags
-);
-
-public record class NewTrip(
-    string sub,
-    DateTime startTime,
-    String notes
 );
