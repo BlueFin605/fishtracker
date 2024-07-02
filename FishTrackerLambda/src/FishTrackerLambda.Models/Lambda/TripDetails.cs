@@ -4,7 +4,7 @@ public record class TripDetails(
     String subject,
     Guid tripId,
     DateTime startTime,
-    DateTime? endtime,
+    DateTime? endTime,
     String notes,
     uint catchSize,
     TripRating rating,

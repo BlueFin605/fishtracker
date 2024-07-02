@@ -1,0 +1,27 @@
+<table>
+    <thead>
+        <tr>
+            <th>Subject</th>
+            <th>Trip ID</th>
+            <th>Start</th>
+            <th>End</th>
+            <th>Notes</th>
+            <th>catchSize</th>
+            <th>rating</th>
+            <th>tags</th>
+          
+        </tr>
+    </thead>
+    <tbody>
+        <tr *ngFor="let trip of trips">
+            <td>{{ trip.subject }}</td>
+            <td>{{ trip.tripId }}</td>
+            <td>{{ trip.startTime }}</td>
+            <td>{{ trip.endTime }}</td>
+            <td>{{ trip.notes }}</td>
+            <td>{{ trip.catchSize }}</td>
+            <td>{{ trip.rating }}</td>
+            <td>{{ trip.tags }}</td>
+        </tr>
+    </tbody>
+</table>

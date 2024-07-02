@@ -22,14 +22,70 @@ export class ApiService {
         return this.http.get<TripCatch[]>(this.apiUrl, { headers });
     }));
   }
+
+
+  getTrip(): Observable<TripDetails[]> {
+    return this.tokenService.token.pipe(switchMap(jwt => {
+        // console.log(`Bearer ${jwt}`);
+        const headers = new HttpHeaders({
+          Authorization: `Bearer ${jwt}`,
+        });
+        return this.http.get<TripDetails[]>('https://xte0lryazi.execute-api.eu-central-1.amazonaws.com/Prod/api/trip', { headers });
+    }));
+  }
+
 }
 
-export class TripCatch {
-  tripId: string =  '';
-  catchId: string = '';
-  speciesId: string = '';
-  caughtWhen: Date = new Date();
-  caughtSize: string = '';
-  caughtLength: number = 0;
+export interface TripCatch {
+  tripId: string;
+  catchId: string;
+  speciesId: string;
+  caughtWhen: Date;
+  caughtSize: string;
+  caughtLength: number;
   // Add other properties based on the actual response structure
 }
+
+export interface TripDetails {
+  subject: string;
+  tripId: string;
+  startTime: Date;
+  endTime?: Date;
+  notes: string;
+  catchSize: number;
+  rating: TripRating;
+  tags: TripTags[];
+}
+
+enum TripRating
+{
+    NonRated,
+    Bust,
+    Okay,
+    Good,
+    Fantastic,
+    OutOfThisWorld
+}
+
+enum TripTags
+{
+    Consistent,
+    IncomingTide,
+    OutgoingTide,
+    Current,
+    SlackWater,
+    DeepWater,
+    ShallowWater,
+    Bait,
+    Softbait,
+    Jigs,
+    EndOfTide,
+    MidTide,
+    StartOfTide,
+    Dawn,
+    Dusk,
+    Overcast,
+    Sunny,
+    Rainy
+}
+
