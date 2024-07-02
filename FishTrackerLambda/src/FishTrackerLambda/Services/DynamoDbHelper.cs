@@ -59,7 +59,7 @@ namespace FishTrackerLambda.Services
             }
         }
 
-        public static async Task<IEnumerable<T>> GetDynamoDbRecords<T, P>(P part, IAmazonDynamoDB client, string tableName, ILogger logger)
+        public static async Task<IEnumerable<T>> GetDynamoDbRecords<T, P>(P part, string partKeyName, IAmazonDynamoDB client, string tableName, ILogger logger)
         {
             logger.LogInformation($"DynamoDbHelper::GetDynamoDbRecords part[{part}]");
 
@@ -67,7 +67,7 @@ namespace FishTrackerLambda.Services
 
             try
             {
-                var queryFilter = new QueryFilter("TripId", QueryOperator.Equal, part?.ToString());
+                var queryFilter = new QueryFilter(partKeyName, QueryOperator.Equal, part?.ToString());
                 var queryOptions = new QueryOperationConfig
                 {
                     Filter = queryFilter

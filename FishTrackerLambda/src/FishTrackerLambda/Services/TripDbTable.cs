@@ -20,7 +20,7 @@ namespace FishTrackerLambda.Services
 
         internal static Task<IEnumerable<DynamoDbTrip>> GetAllRecords(String subject, IAmazonDynamoDB client, ILogger logger)
         {
-            return DynamoDbHelper.GetDynamoDbRecords<DynamoDbTrip, String>(subject, client, m_tableName, logger);
+            return DynamoDbHelper.GetDynamoDbRecords<DynamoDbTrip, String>(subject, "Subject", client, m_tableName, logger);
         }
 
         public static Task<DynamoDbTrip> CreateDyanmoRecord(this NewTrip newTrip, string subject)
