@@ -5,7 +5,7 @@ namespace FishTrackerLambda.Models.Persistance
 {
     public class DynamoDbTrip
     {
-        public string Sub { get; }
+        public string Subject { get; }
         public Guid TripId { get; }
         public DateTime StartTime { get; }
         public DateTime? EndTime { get; }
@@ -15,9 +15,9 @@ namespace FishTrackerLambda.Models.Persistance
         public List<TripTags> Tags { get; }
 
         [JsonConstructor]
-        public DynamoDbTrip(string sub, Guid tripId, DateTime startTime, DateTime? endTime, string notes, uint catchSize, TripRating rating, List<TripTags> tags)
+        public DynamoDbTrip(string subject, Guid tripId, DateTime startTime, DateTime? endTime, string notes, uint catchSize, TripRating rating, List<TripTags> tags)
         {
-            Sub = sub;
+            Subject = subject;
             TripId = tripId;
             StartTime = startTime;
             EndTime = endTime;
@@ -27,9 +27,9 @@ namespace FishTrackerLambda.Models.Persistance
             Tags = tags;
         }
 
-        public DynamoDbTrip(string sub, Guid tripId)
+        public DynamoDbTrip(string subject, Guid tripId)
         {
-            Sub = sub;
+            Subject = subject;
             TripId = tripId;
             Notes = String.Empty;
             Tags = new List<TripTags>();

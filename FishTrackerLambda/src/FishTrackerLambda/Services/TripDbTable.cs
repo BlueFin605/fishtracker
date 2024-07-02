@@ -37,7 +37,7 @@ namespace FishTrackerLambda.Services
 
         public static TripDetails ToTripDetails(this DynamoDbTrip t)
         {
-            return new TripDetails(t.Sub, t.TripId, t.StartTime, t.EndTime, t.Notes, t.CatchSize, t.Rating, t.Tags);
+            return new TripDetails(t.Subject, t.TripId, t.StartTime, t.EndTime, t.Notes, t.CatchSize, t.Rating, t.Tags);
         }
     }
 
