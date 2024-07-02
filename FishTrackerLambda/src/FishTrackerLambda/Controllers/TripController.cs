@@ -78,7 +78,7 @@ public class TripController : ControllerBase
     private string LocateSubject()
     {
         var claims = User.Claims;
-        var subjectClaim = claims.FirstOrDefault(claim => claim.Type == "sub")?.Value ?? throw new Exception("No Subject in claim");
+        var subjectClaim = claims.FirstOrDefault(claim => claim.Type == "principalId")?.Value ?? throw new Exception("No Subject[principalId] in claim");
         return subjectClaim;
     }
 
