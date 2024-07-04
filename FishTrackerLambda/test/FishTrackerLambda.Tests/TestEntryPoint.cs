@@ -52,8 +52,8 @@ public class TestEntryPoint :
         qservice.Setup(s => s.NewCatch(It.IsAny<Guid>(), It.IsAny<NewCatch>())).Returns(Task.FromResult<CatchDetails>(new CatchDetails(Guid.Parse("6cc39752-b9b1-4bb4-befe-f1b082cc9e3d"), Guid.Parse("5acb3a1b-9311-447b-95e5-7dfca626a3d2"), Guid.Parse("aa632249-1ab4-423b-bc4d-3eeb9f2dbaa0"), new Location(1, 2), DateTime.UnixEpoch, FishSize.Medium, 10, null)));
 
         var tservice = new Moq.Mock<ITripService>();
-        tservice.Setup(s => s.GetTrip(It.IsAny<String>(), It.IsAny<Guid>())).Returns(Task.FromResult<TripDetails>(new TripDetails("mysubject", Guid.Parse("5acb3a1b-9311-447b-95e5-7dfca626a3d2"), DateTime.UnixEpoch, null, "", 3, TripRating.Fantastic, new List<TripTags>())));
-        tservice.Setup(s => s.NewTrip(It.IsAny<String>(), It.IsAny<NewTrip>())).Returns(Task.FromResult<TripDetails>(new TripDetails("mysubject", Guid.Parse("5acb3a1b-9311-447b-95e5-7dfca626a3d2"), DateTime.UnixEpoch, null, "", 3, TripRating.Fantastic, new List<TripTags>())));
+        tservice.Setup(s => s.GetTrip(It.IsAny<String>(), It.IsAny<Guid>())).Returns(Task.FromResult<TripDetails>(new TripDetails("mysubject", Guid.Parse("5acb3a1b-9311-447b-95e5-7dfca626a3d2"), DateTime.UnixEpoch, null, "", 3, TripRating.Fantastic, new HashSet<TripTags>())));
+        tservice.Setup(s => s.NewTrip(It.IsAny<String>(), It.IsAny<NewTrip>())).Returns(Task.FromResult<TripDetails>(new TripDetails("mysubject", Guid.Parse("5acb3a1b-9311-447b-95e5-7dfca626a3d2"), DateTime.UnixEpoch, null, "", 3, TripRating.Fantastic, new HashSet<TripTags>())));
 
         builder.ConfigureServices(services => {
             services.AddSingleton< IAmazonDynamoDB>(sp => (new Moq.Mock<IAmazonDynamoDB>()).Object);

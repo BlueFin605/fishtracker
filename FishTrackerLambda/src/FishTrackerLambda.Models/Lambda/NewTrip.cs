@@ -2,5 +2,7 @@
 
 public record class NewTrip(
     DateTime startTime,
-    String notes
+    String notes,
+    HashSet<TripTags> tags
+
 );

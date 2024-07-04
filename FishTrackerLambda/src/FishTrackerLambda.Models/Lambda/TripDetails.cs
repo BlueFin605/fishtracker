@@ -8,5 +8,5 @@ public record class TripDetails(
     String notes,
     uint catchSize,
     TripRating rating,
-    List<TripTags> tags
+    HashSet<TripTags> tags
 );

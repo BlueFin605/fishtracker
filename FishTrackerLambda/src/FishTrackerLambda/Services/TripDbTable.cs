@@ -25,7 +25,7 @@ namespace FishTrackerLambda.Services
 
         public static Task<DynamoDbTrip> CreateDyanmoRecord(this NewTrip newTrip, string subject)
         {
-            return Task.FromResult(new DynamoDbTrip(subject, Guid.NewGuid(), newTrip.startTime, null, newTrip.notes, 0, TripRating.NonRated, new List<TripTags>()));
+            return Task.FromResult(new DynamoDbTrip(subject, Guid.NewGuid(), newTrip.startTime, null, newTrip.notes, 0, TripRating.NonRated, newTrip?.tags ?? new HashSet<TripTags>()));
         }
 
         public static async Task<TripDetails> ToTripDetails(this Task<DynamoDbTrip> TripDets)
