@@ -19,26 +19,11 @@ public class TripController : ControllerBase
         m_logger = logger;
     }
 
-    [HttpGet("{tripId}/catch/{catchId}")]
-    public Task<CatchDetails> GetCatch([FromRoute] string tripId, [FromRoute] string catchId)
+    private string LocateSubject()
     {
-        try
-        {
-            var claims = User.Claims; 
-            m_logger.LogInformation("Claims:");
-            foreach (var claim in claims)
-            {
-                m_logger.LogInformation($"{claim.Type}: {claim.Value}");
-            }
-
-            m_logger.LogInformation($"GetCatch tripId:[{tripId}] catchId:[${catchId}]");
-            return m_catchService.GetCatch(Guid.Parse(tripId), Guid.Parse(catchId));
-        }
-        catch (Exception e)
-        {
-            m_logger.LogError(e, $"GetCatch Exception {e.Message}");
-            throw;
-        }
+        var claims = User.Claims;
+        var subjectClaim = claims.FirstOrDefault(claim => claim.Type == "principalId")?.Value ?? throw new Exception("No Subject[principalId] in claim");
+        return subjectClaim;
     }
 
     [HttpGet]
@@ -75,13 +60,6 @@ public class TripController : ControllerBase
         }
     }
 
-    private string LocateSubject()
-    {
-        var claims = User.Claims;
-        var subjectClaim = claims.FirstOrDefault(claim => claim.Type == "principalId")?.Value ?? throw new Exception("No Subject[principalId] in claim");
-        return subjectClaim;
-    }
-
     [HttpPost]
     public Task<TripDetails> NewTrip([FromBody] NewTrip newTrip)
     {
@@ -97,6 +75,45 @@ public class TripController : ControllerBase
             throw;
         }
     }
+
+    [HttpPut("{tripId}")]
+    public Task<TripDetails> UpdateTrip([FromRoute] string tripId, [FromBody] TripDetails trip)
+    {
+        try
+        {
+            string subjectClaim = LocateSubject();
+            m_logger.LogInformation($"Update tripId:[{subjectClaim}][{tripId}]");
+            return m_tripService.UpdateTrip(subjectClaim, Guid.Parse(tripId), trip);
+        }
+        catch (Exception e)
+        {
+            m_logger.LogError(e, $"UpdateTrip Exception {e.Message}");
+            throw;
+        }
+    }
+
+    [HttpGet("{tripId}/catch/{catchId}")]
+    public Task<CatchDetails> GetCatch([FromRoute] string tripId, [FromRoute] string catchId)
+    {
+        try
+        {
+            var claims = User.Claims; 
+            m_logger.LogInformation("Claims:");
+            foreach (var claim in claims)
+            {
+                m_logger.LogInformation($"{claim.Type}: {claim.Value}");
+            }
+
+            m_logger.LogInformation($"GetCatch tripId:[{tripId}] catchId:[${catchId}]");
+            return m_catchService.GetCatch(Guid.Parse(tripId), Guid.Parse(catchId));
+        }
+        catch (Exception e)
+        {
+            m_logger.LogError(e, $"GetCatch Exception {e.Message}");
+            throw;
+        }
+    }
+
 
     [HttpGet("{tripId}/catch")]
     public Task<IEnumerable<CatchDetails>> GetTripCatch([FromRoute] string tripId)

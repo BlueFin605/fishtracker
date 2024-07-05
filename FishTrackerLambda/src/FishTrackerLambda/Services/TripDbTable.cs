@@ -23,6 +23,13 @@ namespace FishTrackerLambda.Services
             return DynamoDbHelper.GetDynamoDbRecords<DynamoDbTrip, String>(subject, "Subject", client, m_tableName, logger);
         }
 
+        internal static async Task<DynamoDbTrip> UpdateTrip(this Task<DynamoDbTrip> record, TripDetails trip)
+        {
+            var c = await record;
+
+            return new DynamoDbTrip(c.Subject, trip.tripId, trip.startTime, trip.endTime, trip.notes, trip.catchSize, trip.rating, trip.tags);
+        }
+
         public static Task<DynamoDbTrip> CreateDyanmoRecord(this NewTrip newTrip, string subject)
         {
             return Task.FromResult(new DynamoDbTrip(subject, Guid.NewGuid(), newTrip.startTime, null, newTrip.notes, 0, TripRating.NonRated, newTrip?.tags ?? new HashSet<TripTags>()));

@@ -30,6 +30,11 @@ namespace FishTrackerLambda.Services
         {
             return newTrip.CreateDyanmoRecord(subject).SaveRecord(m_client, m_logger).ToTripDetails();
         }
+
+        public Task<TripDetails> UpdateTrip(string subject, Guid tripId, TripDetails trip)
+        {
+            return TripDbTable.GetRecord(subject, tripId, m_client, m_logger).UpdateTrip(trip).SaveRecord(m_client, m_logger).ToTripDetails();
+        }
     }
 }
 
