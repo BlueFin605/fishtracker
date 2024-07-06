@@ -5,15 +5,20 @@ namespace FishTrackerLambda.Models.Lambda;
 
 public class TripTags : IEqualityComparer
 {
-    public String Tag { get; }
+    public String Tag { get; set; }
 
-    public TagType Type { get; }
+    public TagType Type { get; set; }
 
     public enum TagType
     {
         Standard,
         Custom
     };
+
+    public TripTags()
+    {
+        Tag = string.Empty;
+    }
 
     public TripTags(StdTripTags tag)
     {

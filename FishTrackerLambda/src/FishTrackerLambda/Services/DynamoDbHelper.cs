@@ -1,6 +1,7 @@
 ﻿using System.Collections.Concurrent;
 using System.Globalization;
 using Amazon.DynamoDBv2;
+using Amazon.DynamoDBv2.DataModel;
 using Amazon.DynamoDBv2.DocumentModel;
 using Amazon.DynamoDBv2.Model;
 using FishTrackerLambda.Models.Persistance;
@@ -11,41 +12,46 @@ namespace FishTrackerLambda.Services
 {
     public static class DynamoDbHelper
     {
-        public static async Task<T> SaveDynamoDbRecord<T>(this Task<T> record, IAmazonDynamoDB client, string tableName, ILogger logger)
+        public static async Task<T> SaveDynamoDbRecord<T>(this Task<T> record, IAmazonDynamoDB client, ILogger logger)
         {
             logger.LogInformation($"DynamoDbHelper::SaveDynamoDbRecord");
 
             var q = await record;
 
-            var table = Table.LoadTable(client, tableName);
-
-            var jsonText = JsonConvert.SerializeObject(q, new StringEnumConverter());
-
-            var item = Document.FromJson(jsonText) ?? throw new Exception("Error creating Document[null]");
-
-            await table.UpdateItemAsync(item);
+            var context = new DynamoDBContext(client);
+            await context.SaveAsync<T>(q);
 
             return q;
         }
 
-        public static async Task<T> GetDynamoDbRecord<T,P,S>(P part, S sortKey, IAmazonDynamoDB client, string tableName, ILogger logger, Func<T> initDefault)
+        public static async Task<T> UpdateDynamoDbRecord<T>(this Task<T> record, IAmazonDynamoDB client, ILogger logger, int? expectedVersion)
+        {
+            logger.LogInformation($"DynamoDbHelper::SaveDynamoDbRecord");
+
+            var q = await record;
+
+            var context = new DynamoDBContext(client);
+            await context.SaveAsync<T>(q);
+
+            return q;
+        }
+
+        public static async Task<T> GetDynamoDbRecord<T, P, S>(P part, S sortKey, IAmazonDynamoDB client, ILogger logger, Func<T> initDefault)
         {
             logger.LogInformation($"DynamoDbHelper::GetDynamoDbRecord part[{part}] sort[{sortKey}]");
 
-            var table = Table.LoadTable(client, tableName);
-
             try
             {
-                var item = await table.GetItemAsync(part?.ToString(), sortKey?.ToString());
-                if (item == null)
+                var context = new DynamoDBContext(client);
+                var record = await context.LoadAsync<T>(part, sortKey);
+
+                if (record == null)
                 {
                     logger.LogInformation($"GetDynamoDbRecord:[{part}][{sortKey}] null response - creating empty");
                     return initDefault();
                 }
 
-                string jsonText = item.ToJson() ?? throw new Exception($"Unable to convert to Json for table:[{tableName}] part:[{part}] sort[{sortKey}]");
-
-                return JsonConvert.DeserializeObject<T>(jsonText, new StringEnumConverter()) ?? throw new Exception($"Unable to deserialise Json for table:[{tableName}] part:[{part}] sort[{sortKey}]");
+                return record;
             }
             catch (ResourceNotFoundException)
             {
@@ -59,25 +65,16 @@ namespace FishTrackerLambda.Services
             }
         }
 
-        public static async Task<IEnumerable<T>> GetDynamoDbRecords<T, P>(P part, string partKeyName, IAmazonDynamoDB client, string tableName, ILogger logger)
+        public static async Task<IEnumerable<T>> GetDynamoDbRecords<T, P>(P part, string partKeyName, IAmazonDynamoDB client, ILogger logger)
         {
             logger.LogInformation($"DynamoDbHelper::GetDynamoDbRecords part[{part}]");
 
-            var table = Table.LoadTable(client, tableName);
-
             try
             {
-                var queryFilter = new QueryFilter(partKeyName, QueryOperator.Equal, part?.ToString());
-                var queryOptions = new QueryOperationConfig
-                {
-                    Filter = queryFilter
-                };
-
-                var items = await table.Query(queryOptions).GetRemainingAsync();
-
-                return items.Select( i => {
-                    return JsonConvert.DeserializeObject<T>(i.ToJson(), new StringEnumConverter()) ?? throw new Exception($"Unable to deserialise Json for table:[{tableName}] part:[{part}]");
-                });
+                var context = new DynamoDBContext(client);
+                var query = context.QueryAsync<T>(part /*queryOptions*/);
+                var items = await query.GetRemainingAsync();
+                return items;
             }
             catch (ResourceNotFoundException)
             {

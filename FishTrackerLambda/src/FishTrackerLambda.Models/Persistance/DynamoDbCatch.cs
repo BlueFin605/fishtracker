@@ -1,25 +1,31 @@
-﻿using Amazon.DynamoDBv2.DataModel;
+﻿using System.Runtime.InteropServices;
+using Amazon.DynamoDBv2.DataModel;
 using FishTrackerLambda.Models.Lambda;
 using Newtonsoft.Json;
 
 namespace FishTrackerLambda.Models.Persistance
 {
+    [DynamoDBTable("FishTracker-CatchHistory-Prod")]
     public class DynamoDbCatch
     {
-        public Guid TripId { get; }
-        public Guid CatchId { get; }
-        public Guid SpeciesId { get; }
-        public Location CaughtLocation { get; }
-        public DateTime CaughtWhen { get; }
-        public FishSize CaughtSize { get; }
-        public double CaughtLength { get; }
-        public WeatherAttributes? Weather { get; }
+        [DynamoDBHashKey]
+        public string TripId { get; set; }
+
+        [DynamoDBRangeKey]
+        public string CatchId { get; set; }
+
+        public Guid SpeciesId { get; set; }
+        public Location CaughtLocation { get; set; }
+        public DateTime CaughtWhen { get; set; }
+        public FishSize CaughtSize { get; set; }
+        public double CaughtLength { get; set; }
+        public WeatherAttributes? Weather { get; set; }
 
         [JsonConstructor]
         public DynamoDbCatch(Guid tripId, Guid catchId, Guid speciesId, Location caughtLocation, DateTime caughtWhen, FishSize caughtSize, double caughtLength, WeatherAttributes? weather)
         {
-            TripId = tripId;
-            CatchId = catchId;
+            TripId = tripId.ToString();
+            CatchId = catchId.ToString();
             SpeciesId = speciesId;
             CaughtLocation = caughtLocation;
             CaughtWhen = caughtWhen;
@@ -28,10 +34,17 @@ namespace FishTrackerLambda.Models.Persistance
             Weather = weather;
         }
 
+        public DynamoDbCatch()
+        {
+            TripId = string.Empty;
+            CatchId = string.Empty;
+            CaughtLocation = new Location();
+        }
+
         public DynamoDbCatch(Guid tripId, Guid catchId)
         {
-            TripId = tripId;
-            CatchId = catchId;
+            TripId = tripId.ToString();
+            CatchId = catchId.ToString();
             CaughtLocation = new Location(0,0);
         }
     }

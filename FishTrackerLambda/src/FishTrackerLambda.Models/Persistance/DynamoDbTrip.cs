@@ -1,38 +1,62 @@
-﻿using FishTrackerLambda.Models.Lambda;
+﻿using Amazon.DynamoDBv2.DataModel;
+using FishTrackerLambda.Models.Lambda;
 using Newtonsoft.Json;
 
 namespace FishTrackerLambda.Models.Persistance
 {
+    [DynamoDBTable("FishTracker-Trips-Prod")]
     public class DynamoDbTrip
     {
-        public string Subject { get; }
-        public Guid TripId { get; }
-        public DateTime StartTime { get; }
-        public DateTime? EndTime { get; }
-        public string Notes { get; }
-        public uint CatchSize { get; }
-        public TripRating Rating { get; }
-        public HashSet<TripTags> Tags { get; }
+        [DynamoDBHashKey]   //Partition key
+        public string Subject { get; set; }
+        [DynamoDBRangeKey]
+        public string TripId { get; set;  }
+        //[DynamoDBProperty]
+        public DateTime StartTime { get; set;  }
+        //[DynamoDBProperty]
+        public DateTime? EndTime { get; set;  }
+        //[DynamoDBProperty]
+        public string Notes { get; set;  }
+        //[DynamoDBProperty]
+        public uint CatchSize { get; set;  }
+        //[DynamoDBProperty]
+        public TripRating Rating { get; set;  }
+        //[DynamoDBProperty]
+        public List<TripTags> Tags { get; set;  }
+
+        //[DynamoDBVersion]
+        //public int? DynamoDbVersion { get; set; }
 
         [JsonConstructor]
-        public DynamoDbTrip(string subject, Guid tripId, DateTime startTime, DateTime? endTime, string notes, uint catchSize, TripRating rating, HashSet<TripTags> tags)
+        public DynamoDbTrip(string subject, Guid tripId, DateTime startTime, DateTime? endTime, string notes, uint catchSize, TripRating rating, List<TripTags> tags, int? dynamoDbVersion)
         {
             Subject = subject;
-            TripId = tripId;
+            TripId = tripId.ToString();
             StartTime = startTime;
             EndTime = endTime;
             Notes = notes;
             CatchSize = catchSize;
             Rating = rating;
             Tags = tags;
+            //DynamoDbVersion = dynamoDbVersion;
         }
 
         public DynamoDbTrip(string subject, Guid tripId)
         {
             Subject = subject;
-            TripId = tripId;
+            TripId = tripId.ToString();
             Notes = String.Empty;
-            Tags = new HashSet<TripTags>();
+            Tags = new List<TripTags>();
         }
+
+        public DynamoDbTrip()
+        {
+            Subject = string.Empty;
+            TripId = string.Empty;
+            Notes = string.Empty;
+            Tags = new List<TripTags>();
+            Notes = string.Empty;
+        }
+
     }
 }

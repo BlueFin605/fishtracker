@@ -22,7 +22,7 @@ public class TripController : ControllerBase
     private string LocateSubject()
     {
         var claims = User.Claims;
-        var subjectClaim = claims.FirstOrDefault(claim => claim.Type == "principalId")?.Value ?? throw new Exception("No Subject[principalId] in claim");
+        var subjectClaim = claims.FirstOrDefault(claim => claim.Type == "principalId")?.Value ?? "myprincipal";//throw new Exception("No Subject[principalId] in claim");
         return subjectClaim;
     }
 
@@ -82,12 +82,28 @@ public class TripController : ControllerBase
         try
         {
             string subjectClaim = LocateSubject();
-            m_logger.LogInformation($"Update tripId:[{subjectClaim}][{tripId}]");
-            return m_tripService.UpdateTrip(subjectClaim, Guid.Parse(tripId), trip);
+            m_logger.LogInformation($"UpdateTrip tripId:[{subjectClaim}][{tripId}]");
+            return m_tripService.UpdateTrip(subjectClaim, trip);
         }
         catch (Exception e)
         {
             m_logger.LogError(e, $"UpdateTrip Exception {e.Message}");
+            throw;
+        }
+    }
+
+    [HttpPatch("{tripId}")]
+    public Task<TripDetails> PatchTrip([FromRoute] string tripId, [FromBody] UpdateTripDetails trip)
+    {
+        try
+        {
+            string subjectClaim = LocateSubject();
+            m_logger.LogInformation($"PatchTrip tripId:[{subjectClaim}][{tripId}]");
+            return m_tripService.PatchTrip(subjectClaim, Guid.Parse(tripId), trip);
+        }
+        catch (Exception e)
+        {
+            m_logger.LogError(e, $"PatchTrip Exception {e.Message}");
             throw;
         }
     }
