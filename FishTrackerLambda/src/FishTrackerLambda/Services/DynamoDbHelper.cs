@@ -24,7 +24,7 @@ namespace FishTrackerLambda.Services
             return q;
         }
 
-        public static async Task<T> UpdateDynamoDbRecord<T>(this Task<T> record, IAmazonDynamoDB client, ILogger logger, int? expectedVersion)
+        public static async Task<T> UpdateDynamoDbRecord<T>(this Task<T> record, IAmazonDynamoDB client, ILogger logger)
         {
             logger.LogInformation($"DynamoDbHelper::SaveDynamoDbRecord");
 
