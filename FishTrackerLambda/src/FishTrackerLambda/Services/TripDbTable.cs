@@ -13,7 +13,7 @@ namespace FishTrackerLambda.Services
 
         public static Task<DynamoDbTrip> UpdateRecord(this Task<DynamoDbTrip> record, IAmazonDynamoDB client, ILogger logger)
         {
-            return record.UpdateDynamoDbRecord(client, logger, null);
+            return record.UpdateDynamoDbRecord(client, logger);
         }
 
         public static Task<DynamoDbTrip> GetRecord(String subject, Guid TripId, IAmazonDynamoDB client, ILogger logger)
