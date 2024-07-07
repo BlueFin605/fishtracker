@@ -7,9 +7,14 @@ namespace FishTrackerLambda.Services
 {
     public static class CatchDbTable
     {
-        public static Task<DynamoDbCatch> SaveRecord(this Task<DynamoDbCatch> record, IAmazonDynamoDB client, ILogger logger)
+        public static Task<DynamoDbCatch> CreateRecord(this Task<DynamoDbCatch> record, IAmazonDynamoDB client, ILogger logger)
         {
             return record.SaveDynamoDbRecord(client, logger);
+        }
+
+        public static Task<DynamoDbCatch> UpdateRecord(this Task<DynamoDbCatch> record, IAmazonDynamoDB client, ILogger logger)
+        {
+            return record.UpdateDynamoDbRecord(client, logger);
         }
 
         public static Task<DynamoDbCatch> GetRecord(Guid tripId, Guid catchId, IAmazonDynamoDB client, ILogger logger)
@@ -20,6 +25,36 @@ namespace FishTrackerLambda.Services
         internal static Task<IEnumerable<DynamoDbCatch>> GetAllRecords(Guid tripId, IAmazonDynamoDB client, ILogger logger)
         {
             return DynamoDbHelper.GetDynamoDbRecords<DynamoDbCatch, string>(tripId.ToString(), "TripId", client, logger);
+        }
+
+        internal static async Task<DynamoDbCatch> PatchCatch(this Task<DynamoDbCatch> record, UpdateCatchDetails updateCatch)
+        {
+            var c = await record;
+
+            return new DynamoDbCatch(Guid.Parse(c.TripId),
+                        Guid.Parse(c.CatchId),
+                        updateCatch.SpeciesId ?? c.SpeciesId,
+                        updateCatch.caughtLocation ?? c.CaughtLocation,
+                        updateCatch.caughtWhen ?? c.CaughtWhen,
+                        updateCatch.caughtSize ?? c.CaughtSize,
+                        updateCatch.caughtLength ?? c.CaughtLength,
+                        updateCatch.weather ?? c.Weather,
+                        c.DynamoDbVersion);
+        }
+
+        internal static async Task<DynamoDbCatch> UpdateCatch(this Task<DynamoDbCatch> record, CatchDetails updateCatch)
+        {
+            var c = await record;
+
+            return new DynamoDbCatch(Guid.Parse(c.TripId),
+                                    Guid.Parse(c.CatchId),
+                                    updateCatch.SpeciesId,
+                                    updateCatch.caughtLocation,
+                                    updateCatch.caughtWhen,
+                                    updateCatch.caughtSize,
+                                    updateCatch.caughtLength,
+                                    updateCatch.weather,
+                                    c.DynamoDbVersion);
         }
 
         public static Task<DynamoDbCatch> CreateDyanmoRecord(this NewCatch newCatch, Guid tripId)

@@ -112,6 +112,21 @@ public class TripController : ControllerBase
         }
     }
 
+    [HttpGet("{tripId}/catch")]
+    public Task<IEnumerable<CatchDetails>> GetAllCatches([FromRoute] Guid tripId)
+    {
+        try
+        {
+            m_logger.LogInformation($"GetTripCatch tripId:[{tripId}]");
+            return m_catchService.GetTripCatch(tripId);
+        }
+        catch (Exception e)
+        {
+            m_logger.LogError(e, $"GetTripCatch Exception {e.Message}");
+            throw;
+        }
+    }
+
     [HttpGet("{tripId}/catch/{catchId}")]
     public Task<CatchDetails> GetCatch([FromRoute] Guid tripId, [FromRoute] Guid catchId)
     {
@@ -134,22 +149,6 @@ public class TripController : ControllerBase
         }
     }
 
-
-    [HttpGet("{tripId}/catch")]
-    public Task<IEnumerable<CatchDetails>> GetTripCatch([FromRoute] Guid tripId)
-    {
-        try
-        {
-            m_logger.LogInformation($"GetTripCatch tripId:[{tripId}]");
-            return m_catchService.GetTripCatch(tripId);
-        }
-        catch (Exception e)
-        {
-            m_logger.LogError(e, $"GetTripCatch Exception {e.Message}");
-            throw;
-        }
-    }
-
     // POST api/catch
     [HttpPost("{tripId}/catch")]
     public Task<CatchDetails> NewCatch([FromRoute] Guid tripId, [FromBody] NewCatch newCatch)
@@ -164,4 +163,43 @@ public class TripController : ControllerBase
             throw;
         }
     }
+
+    [HttpPut("{tripId}/catch/{catchId}")]
+    public Task<CatchDetails> UpdateCatch([FromRoute] Guid tripId, [FromRoute] Guid catchId, [FromBody] CatchDetails updateCatch)
+    {
+        try
+        {
+            m_logger.LogInformation($"UpdateCatch tripId:[{tripId}] catchId:[${catchId}]");
+
+            if (updateCatch.tripId != tripId)
+                throw new Exception($"Cannot change tripId from[{updateCatch.tripId}] to[{tripId}]");
+
+            if (updateCatch.catchId != catchId)
+                throw new Exception($"Cannot change catchId from[{updateCatch.tripId}] to[{tripId}]");
+
+            return m_catchService.UpdateCatch(updateCatch);
+        }
+        catch (Exception e)
+        {
+            m_logger.LogError(e, $"UpdateCatch Exception {e.Message}");
+            throw;
+        }
+    }
+
+    [HttpPatch("{tripId}/catch/{catchId}")]
+    public Task<CatchDetails> PatchCatch([FromRoute] Guid tripId, [FromRoute] Guid catchId, [FromBody] UpdateCatchDetails updateCatch)
+    {
+        try
+        {
+            m_logger.LogInformation($"PatchCatch tripId:[{tripId}] catchId:[${catchId}]");
+            return m_catchService.PatchCatch(tripId, catchId, updateCatch);
+        }
+        catch (Exception e)
+        {
+            m_logger.LogError(e, $"PatchCatch Exception {e.Message}");
+            throw;
+        }
+    }
+
+
 }

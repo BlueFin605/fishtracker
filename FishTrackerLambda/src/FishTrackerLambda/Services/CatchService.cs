@@ -2,6 +2,8 @@
 using System.Xml.Linq;
 using Amazon.DynamoDBv2;
 using FishTrackerLambda.Models.Lambda;
+using FishTrackerLambda.Models.Persistance;
+using Newtonsoft.Json.Linq;
 
 namespace FishTrackerLambda.Services
 {
@@ -29,9 +31,20 @@ namespace FishTrackerLambda.Services
             return records.Select(c => c.ToCatchDetails());
         }
 
+
         public Task<CatchDetails> NewCatch(Guid tripId, NewCatch newCatch)
         {
-            return newCatch.CreateDyanmoRecord(tripId).SaveRecord(m_client, m_logger).ToCatchDetails();
+            return newCatch.CreateDyanmoRecord(tripId).CreateRecord(m_client, m_logger).ToCatchDetails();
+        }
+
+        public Task<CatchDetails> PatchCatch(Guid tripId, Guid catchId, UpdateCatchDetails updateCatch)
+        {
+            return CatchDbTable.GetRecord(tripId, catchId, m_client, m_logger).PatchCatch(updateCatch).UpdateRecord(m_client, m_logger).ToCatchDetails();
+        }
+
+        public Task<CatchDetails> UpdateCatch(CatchDetails upddateCatch)
+        {
+            return CatchDbTable.GetRecord(upddateCatch.tripId, upddateCatch.catchId, m_client, m_logger).UpdateCatch(upddateCatch).UpdateRecord(m_client, m_logger).ToCatchDetails();
         }
     }
 }
