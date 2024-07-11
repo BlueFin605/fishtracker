@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+
+  <PropertyGroup Condition=" '$(RunConfiguration)' == 'https' " />
+  <PropertyGroup Condition=" '$(RunConfiguration)' == 'http' " />
+  <ItemGroup>
+    <PackageReference Include="AWSSDK.DynamoDBv2" Version="3.7.304.7" />
+    <PackageReference Include="Amazon.Lambda.AspNetCoreServer" Version="9.0.0" />
+    <PackageReference Include="AWSSDK.SecurityToken" Version="3.7.300.118" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\FishTrackerLambda.Models\FishTrackerLambda.Models.csproj">
+      <GlobalPropertiesToRemove></GlobalPropertiesToRemove>
+    </ProjectReference>
+  </ItemGroup>
+</Project>
