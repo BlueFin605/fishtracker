@@ -2,7 +2,6 @@ using System.Security.Claims;
 using Amazon.DynamoDBv2;
 using Amazon.Runtime;
 using FishTrackerLambda.Services;
-using Microsoft.Extensions.Configuration;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddSingleton<ICatchService, CatchService>();
@@ -28,19 +27,23 @@ else
     builder.Services.AddSingleton<IClaimHandler, LambdaClaimHandler>();
     builder.Services.AddTransient<IAmazonDynamoDB, AmazonDynamoDBClient>();
 }
+// Add services to the container.
+builder.Services.AddControllers();
+
+// Add AWS Lambda support. When application is run in Lambda Kestrel is swapped out as the web server with Amazon.Lambda.AspNetCoreServer. This
+// package will act as the webserver translating request and responses between the Lambda event source and ASP.NET Core.
+builder.Services.AddAWSLambdaHosting(LambdaEventSource.RestApi);
 
 var app = builder.Build();
 
-app.MapGet("/", () => "Hello World!");
+app.UseHttpsRedirection();
+app.UseAuthorization();
+app.MapControllers();
 
-app.MapGet("api/trip/", async (IClaimHandler claimHandler, ICatchService catchService, ITripService tripService, ClaimsPrincipal user) =>
-{
-    string subjectClaim = claimHandler.ExtractSubject(user.Claims);
-    return await ExecuteService(app.Logger, $"GetAllTrips tripId subject:[{subjectClaim}]", async () => await tripService.GetTrips(subjectClaim));
-});
-
+app.MapRoutes();
 
 app.Run();
+
 
 static void SetupLogger(bool isDevelopment, ILoggingBuilder logging, IConfiguration configuration)
 {
@@ -69,19 +72,3 @@ static void SetupLogger(bool isDevelopment, ILoggingBuilder logging, IConfigurat
         logging.AddConsole();
     }
 }
-
-
-static async Task<IResult> ExecuteService<T>(ILogger logger, string logDesc, Func<Task<T>> func)
-{
-    try
-    {
-        logger.LogInformation(logDesc);
-        var result = await func();
-        return Results.Ok(result);
-    }
-    catch (Exception e)
-    {
-        logger.LogError(e, $"{logDesc} Exception {e.Message}");
-        throw;
-    }
-};
