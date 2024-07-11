@@ -16,9 +16,9 @@ namespace FishTrackerLambda.Services
             return record.UpdateDynamoDbRecord(client, logger);
         }
 
-        public static Task<DynamoDbTrip> GetRecord(String subject, Guid TripId, IAmazonDynamoDB client, ILogger logger)
+        public static Task<DynamoDbTrip> GetRecord(String subject, string TripId, IAmazonDynamoDB client, ILogger logger)
         {
-            return DynamoDbHelper.GetDynamoDbRecord(subject, TripId.ToString(), client, logger, () => new DynamoDbTrip(subject, TripId));
+            return DynamoDbHelper.GetDynamoDbRecord(subject, TripId, client, logger, () => new DynamoDbTrip(subject, TripId));
         }
 
         internal static Task<IEnumerable<DynamoDbTrip>> GetAllRecords(String subject, IAmazonDynamoDB client, ILogger logger)
@@ -31,7 +31,7 @@ namespace FishTrackerLambda.Services
             var c = await record;
 
             return new DynamoDbTrip(c.Subject,
-                                    Guid.Parse(c.TripId),
+                                    c.TripId,
                                     trip.startTime ?? c.StartTime,
                                     trip.endTime ??  c.EndTime,
                                     trip.notes ?? c.Notes,
@@ -46,7 +46,7 @@ namespace FishTrackerLambda.Services
             var c = await record;
 
             return new DynamoDbTrip(c.Subject,
-                                    Guid.Parse(c.TripId),
+                                    c.TripId,
                                     trip.startTime,
                                     trip.endTime,
                                     trip.notes,
@@ -58,7 +58,8 @@ namespace FishTrackerLambda.Services
 
         public static Task<DynamoDbTrip> CreateNewDyanmoRecord(this NewTrip newTrip, string subject)
         {
-            return Task.FromResult(new DynamoDbTrip(subject, Guid.NewGuid(), newTrip.startTime, null, newTrip.notes, 0, TripRating.NonRated, newTrip?.tags?.ToList() ?? new List<TripTags>(), null));
+            string currentDateTime = DateTime.Now.ToString("MMdd:HHmmss-yy");
+            return Task.FromResult(new DynamoDbTrip(subject, currentDateTime, newTrip.startTime, null, newTrip.notes, 0, TripRating.NonRated, newTrip?.tags?.ToList() ?? new List<TripTags>(), null));
         }
 
         public static Task<DynamoDbTrip> CreateDyanmoRecord(this TripDetails trip, string subject)
@@ -75,7 +76,7 @@ namespace FishTrackerLambda.Services
 
         public static TripDetails ToTripDetails(this DynamoDbTrip t)
         {
-            return new TripDetails(t.Subject, Guid.Parse(t.TripId), t.StartTime, t.EndTime, t.Notes, t.CatchSize, t.Rating, t.Tags.ToHashSet());
+            return new TripDetails(t.Subject, t.TripId, t.StartTime, t.EndTime, t.Notes, t.CatchSize, t.Rating, t.Tags.ToHashSet());
         }
     }
 

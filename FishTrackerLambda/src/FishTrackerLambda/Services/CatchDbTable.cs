@@ -17,12 +17,12 @@ namespace FishTrackerLambda.Services
             return record.UpdateDynamoDbRecord(client, logger);
         }
 
-        public static Task<DynamoDbCatch> GetRecord(Guid tripId, Guid catchId, IAmazonDynamoDB client, ILogger logger)
+        public static Task<DynamoDbCatch> GetRecord(string tripId, Guid catchId, IAmazonDynamoDB client, ILogger logger)
         {
-            return DynamoDbHelper.GetDynamoDbRecord(tripId.ToString(), catchId.ToString(), client, logger, () => new DynamoDbCatch(tripId, catchId));
+            return DynamoDbHelper.GetDynamoDbRecord(tripId, catchId.ToString(), client, logger, () => new DynamoDbCatch(tripId, catchId));
         }
 
-        internal static Task<IEnumerable<DynamoDbCatch>> GetAllRecords(Guid tripId, IAmazonDynamoDB client, ILogger logger)
+        internal static Task<IEnumerable<DynamoDbCatch>> GetAllRecords(string tripId, IAmazonDynamoDB client, ILogger logger)
         {
             return DynamoDbHelper.GetDynamoDbRecords<DynamoDbCatch, string>(tripId.ToString(), "TripId", client, logger);
         }
@@ -31,7 +31,7 @@ namespace FishTrackerLambda.Services
         {
             var c = await record;
 
-            return new DynamoDbCatch(Guid.Parse(c.TripId),
+            return new DynamoDbCatch(c.TripId,
                         Guid.Parse(c.CatchId),
                         updateCatch.SpeciesId ?? c.SpeciesId,
                         updateCatch.caughtLocation ?? c.CaughtLocation,
@@ -46,7 +46,7 @@ namespace FishTrackerLambda.Services
         {
             var c = await record;
 
-            return new DynamoDbCatch(Guid.Parse(c.TripId),
+            return new DynamoDbCatch(c.TripId,
                                     Guid.Parse(c.CatchId),
                                     updateCatch.SpeciesId,
                                     updateCatch.caughtLocation,
@@ -57,7 +57,7 @@ namespace FishTrackerLambda.Services
                                     c.DynamoDbVersion);
         }
 
-        public static Task<DynamoDbCatch> CreateDyanmoRecord(this NewCatch newCatch, Guid tripId)
+        public static Task<DynamoDbCatch> CreateDyanmoRecord(this NewCatch newCatch, string tripId)
         {
             return Task.FromResult(new DynamoDbCatch(tripId, Guid.NewGuid(), newCatch.SpeciesId, newCatch.caughtLocation, newCatch.caughtWhen, newCatch.caughtSize, newCatch.caughtLength, null, null));
         }
@@ -71,7 +71,7 @@ namespace FishTrackerLambda.Services
 
         public static CatchDetails ToCatchDetails(this DynamoDbCatch c)
         {
-            return new CatchDetails(Guid.Parse(c.TripId), Guid.Parse(c.CatchId), c.SpeciesId, c.CaughtLocation, c.CaughtWhen, c.CaughtSize, c.CaughtLength, c.Weather);
+            return new CatchDetails(c.TripId, Guid.Parse(c.CatchId), c.SpeciesId, c.CaughtLocation, c.CaughtWhen, c.CaughtSize, c.CaughtLength, c.Weather);
         }
     }
 

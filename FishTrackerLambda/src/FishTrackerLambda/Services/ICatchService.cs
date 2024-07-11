@@ -4,11 +4,11 @@ namespace FishTrackerLambda.Services
 {
     public interface ICatchService
     {
-        Task<CatchDetails> GetCatch(Guid tripId, Guid catchId);
-        Task<IEnumerable<CatchDetails>> GetTripCatch(Guid tripId);
-        Task<CatchDetails> NewCatch(Guid tripId, NewCatch newCatch);
+        Task<CatchDetails> GetCatch(string tripId, Guid catchId);
+        Task<IEnumerable<CatchDetails>> GetTripCatch(string tripId);
+        Task<CatchDetails> NewCatch(string tripId, NewCatch newCatch);
         Task<CatchDetails> UpdateCatch(CatchDetails updateCatch);
-        Task<CatchDetails> PatchCatch(Guid tripId, Guid catchId, UpdateCatchDetails updateCatch);
+        Task<CatchDetails> PatchCatch(string tripId, Guid catchId, UpdateCatchDetails updateCatch);
     }
 }
 

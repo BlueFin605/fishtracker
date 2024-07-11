@@ -9,21 +9,16 @@ public class TripController : ControllerBase
 {
     private readonly ICatchService m_catchService;
     private readonly ITripService m_tripService;
+    private readonly IClaimHandler m_claimHandler;
 
     private readonly ILogger<TripController> m_logger;
 
-    public TripController(ICatchService catchService, ITripService tripService, ILogger<TripController> logger)
+    public TripController(IClaimHandler claimHandler, ICatchService catchService, ITripService tripService, ILogger<TripController> logger)
     {
         m_catchService = catchService;
         m_tripService = tripService;
         m_logger = logger;
-    }
-
-    private string LocateSubject()
-    {
-        var claims = User.Claims;
-        var subjectClaim = claims.FirstOrDefault(claim => claim.Type == "principalId")?.Value ?? "myprincipal";//throw new Exception("No Subject[principalId] in claim");
-        return subjectClaim;
+        m_claimHandler = claimHandler;
     }
 
     [HttpGet]
@@ -32,7 +27,7 @@ public class TripController : ControllerBase
         try
         {
             //get the subject from the JWT access bearer token
-            string subjectClaim = LocateSubject();
+            string subjectClaim = m_claimHandler.ExtractSubject(User.Claims);
             m_logger.LogInformation($"GetAllTrips tripId:[{subjectClaim}]");
             return m_tripService.GetTrips(subjectClaim);
         }
@@ -44,12 +39,12 @@ public class TripController : ControllerBase
     }
 
     [HttpGet("{tripId}")]
-    public Task<TripDetails> GetTrip([FromRoute] Guid tripId)
+    public Task<TripDetails> GetTrip([FromRoute] string tripId)
     {
         try
         {
             //get the subject from the JWT access bearer token
-            string subjectClaim = LocateSubject();
+            string subjectClaim = m_claimHandler.ExtractSubject(User.Claims);
             m_logger.LogInformation($"GetTrip tripId:[{subjectClaim}][{tripId}]");
             return m_tripService.GetTrip(subjectClaim, tripId);
         }
@@ -65,7 +60,7 @@ public class TripController : ControllerBase
     {
         try
         {
-            string subjectClaim = LocateSubject();
+            string subjectClaim = m_claimHandler.ExtractSubject(User.Claims);
             m_logger.LogInformation($"NewTrip tripId:[{subjectClaim}]");
             return m_tripService.NewTrip(subjectClaim, newTrip);
         }
@@ -77,11 +72,11 @@ public class TripController : ControllerBase
     }
 
     [HttpPut("{tripId}")]
-    public Task<TripDetails> UpdateTrip([FromRoute] Guid tripId, [FromBody] TripDetails trip)
+    public Task<TripDetails> UpdateTrip([FromRoute] string tripId, [FromBody] TripDetails trip)
     {
         try
         {
-            string subjectClaim = LocateSubject();
+            string subjectClaim = m_claimHandler.ExtractSubject(User.Claims);
             m_logger.LogInformation($"UpdateTrip tripId:[{subjectClaim}][{tripId}]");
 
             if (trip.tripId != tripId)
@@ -97,11 +92,11 @@ public class TripController : ControllerBase
     }
 
     [HttpPatch("{tripId}")]
-    public Task<TripDetails> PatchTrip([FromRoute] Guid tripId, [FromBody] UpdateTripDetails trip)
+    public Task<TripDetails> PatchTrip([FromRoute] string tripId, [FromBody] UpdateTripDetails trip)
     {
         try
         {
-            string subjectClaim = LocateSubject();
+            string subjectClaim = m_claimHandler.ExtractSubject(User.Claims);
             m_logger.LogInformation($"PatchTrip tripId:[{subjectClaim}][{tripId}]");
             return m_tripService.PatchTrip(subjectClaim, tripId, trip);
         }
@@ -113,7 +108,7 @@ public class TripController : ControllerBase
     }
 
     [HttpGet("{tripId}/catch")]
-    public Task<IEnumerable<CatchDetails>> GetAllCatches([FromRoute] Guid tripId)
+    public Task<IEnumerable<CatchDetails>> GetAllCatches([FromRoute] string tripId)
     {
         try
         {
@@ -128,7 +123,7 @@ public class TripController : ControllerBase
     }
 
     [HttpGet("{tripId}/catch/{catchId}")]
-    public Task<CatchDetails> GetCatch([FromRoute] Guid tripId, [FromRoute] Guid catchId)
+    public Task<CatchDetails> GetCatch([FromRoute] string tripId, [FromRoute] Guid catchId)
     {
         try
         {
@@ -151,7 +146,7 @@ public class TripController : ControllerBase
 
     // POST api/catch
     [HttpPost("{tripId}/catch")]
-    public Task<CatchDetails> NewCatch([FromRoute] Guid tripId, [FromBody] NewCatch newCatch)
+    public Task<CatchDetails> NewCatch([FromRoute] string tripId, [FromBody] NewCatch newCatch)
     {
         try {
             m_logger.LogInformation($"NewCatch tripId:[{tripId}]");
@@ -165,7 +160,7 @@ public class TripController : ControllerBase
     }
 
     [HttpPut("{tripId}/catch/{catchId}")]
-    public Task<CatchDetails> UpdateCatch([FromRoute] Guid tripId, [FromRoute] Guid catchId, [FromBody] CatchDetails updateCatch)
+    public Task<CatchDetails> UpdateCatch([FromRoute] string tripId, [FromRoute] Guid catchId, [FromBody] CatchDetails updateCatch)
     {
         try
         {
@@ -187,7 +182,7 @@ public class TripController : ControllerBase
     }
 
     [HttpPatch("{tripId}/catch/{catchId}")]
-    public Task<CatchDetails> PatchCatch([FromRoute] Guid tripId, [FromRoute] Guid catchId, [FromBody] UpdateCatchDetails updateCatch)
+    public Task<CatchDetails> PatchCatch([FromRoute] string tripId, [FromRoute] Guid catchId, [FromBody] UpdateCatchDetails updateCatch)
     {
         try
         {

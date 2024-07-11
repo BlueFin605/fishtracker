@@ -15,7 +15,7 @@ namespace FishTrackerLambda.Services
             m_client = client;
         }
 
-        public Task<TripDetails> GetTrip(string subject, Guid tripId)
+        public Task<TripDetails> GetTrip(string subject, string tripId)
         {
             return TripDbTable.GetRecord(subject, tripId, m_client, m_logger).ToTripDetails();
         }
@@ -36,7 +36,7 @@ namespace FishTrackerLambda.Services
             return TripDbTable.GetRecord(subject, trip.tripId, m_client, m_logger).UpdateTrip(trip).UpdateRecord(m_client, m_logger).ToTripDetails();
         }
 
-        public Task<TripDetails> PatchTrip(string subject, Guid tripId, UpdateTripDetails trip)
+        public Task<TripDetails> PatchTrip(string subject, string tripId, UpdateTripDetails trip)
         {
             return TripDbTable.GetRecord(subject, tripId, m_client, m_logger).PatchTrip(trip).UpdateRecord(m_client, m_logger).ToTripDetails();
         }

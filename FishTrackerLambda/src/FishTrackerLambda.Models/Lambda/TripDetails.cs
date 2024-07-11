@@ -2,7 +2,7 @@
 
 public record class TripDetails(
     String subject,
-    Guid tripId,
+    string tripId,
     DateTime startTime,
     DateTime? endTime,
     String notes,

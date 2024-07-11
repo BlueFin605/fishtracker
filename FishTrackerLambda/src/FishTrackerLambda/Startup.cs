@@ -46,6 +46,7 @@ public class Startup
         // Only load the service when running locally
         if (Configuration.GetSection("Environment")?.Value == "Development")
         {
+            services.AddSingleton<IClaimHandler, LocalDebugClaimHandler>();
             Func<IAmazonDynamoDB> create = () =>
             {
                 AmazonDynamoDBConfig clientConfig = new AmazonDynamoDBConfig();
@@ -58,7 +59,10 @@ public class Startup
             services.AddSingleton(create());
         }
         else
+        {
+            services.AddSingleton<IClaimHandler, LambdaClaimHandler>();
             services.AddTransient<IAmazonDynamoDB, AmazonDynamoDBClient>();
+        }
     }
 
     // This method gets called by the runtime. Use this method to configure the HTTP request pipeline

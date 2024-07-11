@@ -28,10 +28,10 @@ namespace FishTrackerLambda.Models.Persistance
         public int? DynamoDbVersion { get; set; }
 
         [JsonConstructor]
-        public DynamoDbTrip(string subject, Guid tripId, DateTime startTime, DateTime? endTime, string notes, uint catchSize, TripRating rating, List<TripTags> tags, int? dynamoDbVersion)
+        public DynamoDbTrip(string subject, string tripId, DateTime startTime, DateTime? endTime, string notes, uint catchSize, TripRating rating, List<TripTags> tags, int? dynamoDbVersion)
         {
             Subject = subject;
-            TripId = tripId.ToString();
+            TripId = tripId;
             StartTime = startTime;
             EndTime = endTime;
             Notes = notes;
@@ -41,10 +41,10 @@ namespace FishTrackerLambda.Models.Persistance
             DynamoDbVersion = dynamoDbVersion;
         }
 
-        public DynamoDbTrip(string subject, Guid tripId)
+        public DynamoDbTrip(string subject, string tripId)
         {
             Subject = subject;
-            TripId = tripId.ToString();
+            TripId = tripId;
             Notes = String.Empty;
             Tags = new List<TripTags>();
         }
