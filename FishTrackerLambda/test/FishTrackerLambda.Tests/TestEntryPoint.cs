@@ -59,6 +59,7 @@ public class TestEntryPoint :
             services.AddSingleton< IAmazonDynamoDB>(sp => (new Moq.Mock<IAmazonDynamoDB>()).Object);
             services.AddSingleton<ICatchService>(sp => qservice.Object);
             services.AddSingleton<ITripService>(sp => tservice.Object);
+            services.AddSingleton<IClaimHandler, LocalDebugClaimHandler>();
         });
     }
 }
