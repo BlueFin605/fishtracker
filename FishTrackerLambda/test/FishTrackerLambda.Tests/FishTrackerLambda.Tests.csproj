@@ -4,7 +4,10 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <EnableDefaultContentItems>False</EnableDefaultContentItems>
+    <Publish>false</Publish>
   </PropertyGroup>
+  <PropertyGroup>
+  </PropertyGroup>  
   <PropertyGroup Condition=" '$(RunConfiguration)' == 'FishTrackerLambda.Tests' " />
   <ItemGroup>
     <Content Include=".\SampleRequests\*">
