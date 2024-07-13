@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Xml.Linq;
 using Amazon.DynamoDBv2;
+using FishTrackerLambda.Functional;
 using FishTrackerLambda.Models.Lambda;
 using FishTrackerLambda.Models.Persistance;
 using Newtonsoft.Json.Linq;
@@ -20,7 +21,7 @@ namespace FishTrackerLambda.Services
             m_client = client;
         }
 
-        public Task<CatchDetails> GetCatch(string tripId, Guid catchId)
+        public Task<HttpWrapper<CatchDetails>> GetCatch(string tripId, Guid catchId)
         {
             return CatchDbTable.GetRecord(tripId, catchId, m_client, m_logger).ToCatchDetails();
         }
@@ -34,17 +35,17 @@ namespace FishTrackerLambda.Services
 
         public Task<CatchDetails> NewCatch(string tripId, NewCatch newCatch)
         {
-            return newCatch.CreateDyanmoRecord(tripId).CreateRecord(m_client, m_logger).ToCatchDetails();
+            return newCatch.CreateDyanmoRecord(tripId).CreateRecord(m_client, m_logger).ToCatchDetailsOld();
         }
 
         public Task<CatchDetails> PatchCatch(string tripId, Guid catchId, UpdateCatchDetails updateCatch)
         {
-            return CatchDbTable.GetRecord(tripId, catchId, m_client, m_logger).PatchCatch(updateCatch).UpdateRecord(m_client, m_logger).ToCatchDetails();
+            return CatchDbTable.GetRecordOld(tripId, catchId, m_client, m_logger).PatchCatch(updateCatch).UpdateRecord(m_client, m_logger).ToCatchDetailsOld();
         }
 
         public Task<CatchDetails> UpdateCatch(CatchDetails upddateCatch)
         {
-            return CatchDbTable.GetRecord(upddateCatch.tripId, upddateCatch.catchId, m_client, m_logger).UpdateCatch(upddateCatch).UpdateRecord(m_client, m_logger).ToCatchDetails();
+            return CatchDbTable.GetRecordOld(upddateCatch.tripId, upddateCatch.catchId, m_client, m_logger).UpdateCatch(upddateCatch).UpdateRecord(m_client, m_logger).ToCatchDetailsOld();
         }
     }
 }

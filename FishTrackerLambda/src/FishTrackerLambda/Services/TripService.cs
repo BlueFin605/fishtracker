@@ -1,4 +1,5 @@
 ﻿using Amazon.DynamoDBv2;
+using FishTrackerLambda.Functional;
 using FishTrackerLambda.Models.Lambda;
 
 namespace FishTrackerLambda.Services
@@ -15,7 +16,7 @@ namespace FishTrackerLambda.Services
             m_client = client;
         }
 
-        public Task<TripDetails> GetTrip(string subject, string tripId)
+        public Task<HttpWrapper<TripDetails>> GetTrip(string subject, string tripId)
         {
             return TripDbTable.GetRecord(subject, tripId, m_client, m_logger).ToTripDetails();
         }
@@ -28,17 +29,17 @@ namespace FishTrackerLambda.Services
 
         public Task<TripDetails> NewTrip(string subject, NewTrip newTrip)
         {
-            return newTrip.CreateNewDyanmoRecord(subject).CreateRecord(m_client, m_logger).ToTripDetails();
+            return newTrip.CreateNewDyanmoRecord(subject).CreateRecord(m_client, m_logger).ToTripDetailsOld();
         }
 
         public Task<TripDetails> UpdateTrip(string subject, TripDetails trip)
         {
-            return TripDbTable.GetRecord(subject, trip.tripId, m_client, m_logger).UpdateTrip(trip).UpdateRecord(m_client, m_logger).ToTripDetails();
+            return TripDbTable.GetRecordOld(subject, trip.tripId, m_client, m_logger).UpdateTrip(trip).UpdateRecord(m_client, m_logger).ToTripDetailsOld();
         }
 
         public Task<TripDetails> PatchTrip(string subject, string tripId, UpdateTripDetails trip)
         {
-            return TripDbTable.GetRecord(subject, tripId, m_client, m_logger).PatchTrip(trip).UpdateRecord(m_client, m_logger).ToTripDetails();
+            return TripDbTable.GetRecordOld(subject, tripId, m_client, m_logger).PatchTrip(trip).UpdateRecord(m_client, m_logger).ToTripDetailsOld();
         }
     }
 }

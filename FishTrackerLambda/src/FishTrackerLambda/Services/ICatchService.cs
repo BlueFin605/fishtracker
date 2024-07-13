@@ -1,10 +1,11 @@
-﻿using FishTrackerLambda.Models.Lambda;
+﻿using FishTrackerLambda.Functional;
+using FishTrackerLambda.Models.Lambda;
 
 namespace FishTrackerLambda.Services
 {
     public interface ICatchService
     {
-        Task<CatchDetails> GetCatch(string tripId, Guid catchId);
+        Task<HttpWrapper<CatchDetails>> GetCatch(string tripId, Guid catchId);
         Task<IEnumerable<CatchDetails>> GetTripCatch(string tripId);
         Task<CatchDetails> NewCatch(string tripId, NewCatch newCatch);
         Task<CatchDetails> UpdateCatch(CatchDetails updateCatch);

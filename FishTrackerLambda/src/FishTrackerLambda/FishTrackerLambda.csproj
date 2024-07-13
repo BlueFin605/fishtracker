@@ -9,8 +9,8 @@
     <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
     <!-- Generate ready to run images during publishing to improvement cold starts. -->
     <PublishReadyToRun>true</PublishReadyToRun>
-    <PublishReadyToRunShowWarnings>true</PublishReadyToRunShowWarnings>    
-    <RuntimeIdentifier>linux-arm64</RuntimeIdentifier>    
+    <!-- <PublishReadyToRunShowWarnings>true</PublishReadyToRunShowWarnings>    
+    <RuntimeIdentifier>linux-arm64</RuntimeIdentifier>     -->
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Amazon.Lambda.AspNetCoreServer.Hosting" Version="1.6.0" />
@@ -19,5 +19,11 @@
     <ProjectReference Include="..\FishTrackerLambda.Models\FishTrackerLambda.Models.csproj">
       <GlobalPropertiesToRemove></GlobalPropertiesToRemove>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Remove="Functional\" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Functional\" />
   </ItemGroup>
 </Project>

@@ -4,6 +4,7 @@ using Amazon.DynamoDBv2;
 using Amazon.DynamoDBv2.DataModel;
 using Amazon.DynamoDBv2.DocumentModel;
 using Amazon.DynamoDBv2.Model;
+using FishTrackerLambda.Functional;
 using FishTrackerLambda.Models.Persistance;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
@@ -36,7 +37,7 @@ namespace FishTrackerLambda.Services
             return q;
         }
 
-        public static async Task<T> GetDynamoDbRecord<T, P, S>(P part, S sortKey, IAmazonDynamoDB client, ILogger logger, Func<T> initDefault)
+        public static async Task<HttpWrapper<T>> GetDynamoDbRecord<T, P, S>(P part, S sortKey, IAmazonDynamoDB client, ILogger logger)
         {
             logger.LogInformation($"DynamoDbHelper::GetDynamoDbRecord part[{part}] sort[{sortKey}]");
 
@@ -48,15 +49,15 @@ namespace FishTrackerLambda.Services
                 if (record == null)
                 {
                     logger.LogInformation($"GetDynamoDbRecord:[{part}][{sortKey}] null response - creating empty");
-                    return initDefault();
+                    return HttpWrapper<T>.NotFound;
                 }
 
-                return record;
+                return HttpWrapper<T>.Ok(record);
             }
             catch (ResourceNotFoundException)
             {
                 logger.LogInformation($"GetDynamoDbRecord:[{part}][{sortKey}] ResourceNotFoundException - creating empty");
-                return initDefault();
+                return HttpWrapper<T>.NotFound;
             }
             catch (Exception ex)
             {

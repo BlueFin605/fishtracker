@@ -1,4 +1,5 @@
 ﻿using Amazon.DynamoDBv2;
+using FishTrackerLambda.Functional;
 using FishTrackerLambda.Models.Lambda;
 using FishTrackerLambda.Models.Persistance;
 
@@ -16,9 +17,15 @@ namespace FishTrackerLambda.Services
             return record.UpdateDynamoDbRecord(client, logger);
         }
 
-        public static Task<DynamoDbTrip> GetRecord(String subject, string TripId, IAmazonDynamoDB client, ILogger logger)
+        public static Task<HttpWrapper<DynamoDbTrip>> GetRecord(String subject, string TripId, IAmazonDynamoDB client, ILogger logger)
         {
-            return DynamoDbHelper.GetDynamoDbRecord(subject, TripId, client, logger, () => new DynamoDbTrip(subject, TripId));
+            return DynamoDbHelper.GetDynamoDbRecord<DynamoDbTrip,string,string>(subject, TripId, client, logger);
+        }
+
+        public static async Task<DynamoDbTrip> GetRecordOld(String subject, string TripId, IAmazonDynamoDB client, ILogger logger)
+        {
+            var x = await  DynamoDbHelper.GetDynamoDbRecord<DynamoDbTrip, string, string>(subject, TripId, client, logger);
+            return x?.Value ?? new DynamoDbTrip();
         }
 
         internal static Task<IEnumerable<DynamoDbTrip>> GetAllRecords(String subject, IAmazonDynamoDB client, ILogger logger)
@@ -67,7 +74,16 @@ namespace FishTrackerLambda.Services
             return Task.FromResult(new DynamoDbTrip(subject, trip.tripId, trip.startTime, trip.endTime, trip.notes, trip.catchSize, trip.rating, trip.tags.ToList(), null));
         }
 
-        public static async Task<TripDetails> ToTripDetails(this Task<DynamoDbTrip> TripDets)
+        public static async Task<HttpWrapper<TripDetails>> ToTripDetails(this Task<HttpWrapper<DynamoDbTrip>> TripDets)
+        {
+            var c = await TripDets;
+
+            var value = c?.Value ?? new DynamoDbTrip();
+
+            return new HttpWrapper<TripDetails>(value.ToTripDetails());
+        }
+
+        public static async Task<TripDetails> ToTripDetailsOld(this Task<DynamoDbTrip> TripDets)
         {
             var c = await TripDets;
 

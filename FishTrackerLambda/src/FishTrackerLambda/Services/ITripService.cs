@@ -1,10 +1,11 @@
-﻿using FishTrackerLambda.Models.Lambda;
+﻿using FishTrackerLambda.Functional;
+using FishTrackerLambda.Models.Lambda;
 
 namespace FishTrackerLambda.Services
 {
     public interface ITripService
     {
-        Task<TripDetails> GetTrip(string subject, string tripId);
+        Task<HttpWrapper<TripDetails>> GetTrip(string subject, string tripId);
         Task<IEnumerable<TripDetails>> GetTrips(string subject);
         Task<TripDetails> NewTrip(string subject, NewTrip newTrip);
         Task<TripDetails> UpdateTrip(string subject, TripDetails trip);
