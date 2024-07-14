@@ -57,10 +57,16 @@ namespace FishTrackerLambda.Services
                                     c.DynamoDbVersion);
         }
 
+        public static NewTrip FillInMissingData(this NewTrip newTrip)
+        {
+            var startTime = newTrip.startTime ?? DateTime.Now;
+            return new NewTrip(startTime, newTrip.notes, newTrip.tags);
+        }
+
         public static DynamoDbTrip CreateNewDyanmoRecord(this NewTrip newTrip, string subject)
         {
-            string currentDateTime = DateTime.Now.ToString("MMdd:HHmmss-yy");
-            return new DynamoDbTrip(subject, currentDateTime, newTrip.startTime, null, newTrip.notes, 0, TripRating.NonRated, newTrip?.tags?.ToList() ?? new List<TripTags>(), null);
+            string tripId = newTrip?.startTime?.ToString("MMdd:HHmmss-yy") ?? throw new Exception("startTime should not be emptry here");
+            return new DynamoDbTrip(subject, tripId, (DateTime)newTrip.startTime, null, newTrip.notes, 0, TripRating.NonRated, newTrip?.tags?.ToList() ?? new List<TripTags>(), null);
         }
 
         public static TripDetails ToTripDetails(this DynamoDbTrip t)
