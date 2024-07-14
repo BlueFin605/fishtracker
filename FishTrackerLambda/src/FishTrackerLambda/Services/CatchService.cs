@@ -23,32 +23,41 @@ namespace FishTrackerLambda.Services
 
         public Task<HttpWrapper<CatchDetails>> GetCatch(string tripId, Guid catchId)
         {
-            //return CatchDbTable.GetRecord(tripId, catchId, m_client, m_logger).Map<DynamoDbCatch,CatchDetails>(c => c.ToCatchDetailsWrapper());
-            Task<HttpWrapper<DynamoDbCatch>> x = CatchDbTable.GetRecord(tripId, catchId, m_client, m_logger);
-            Task<HttpWrapper<CatchDetails>> y = x.Map<DynamoDbCatch, CatchDetails>(c => c.ToCatchDetailsWrapper());
-            return y;
+            return CatchDbTable.GetRecord(tripId, catchId, m_client, m_logger)
+                .Map(c => c.ToCatchDetailsWrapper());
+            //Task<HttpWrapper<DynamoDbCatch>> x = CatchDbTable.GetRecord(tripId, catchId, m_client, m_logger);
+            //Task<HttpWrapper<CatchDetails>> y = x.Map<DynamoDbCatch, CatchDetails>(c => c.ToCatchDetailsWrapper());
+            //return y;
         }
 
-        public async Task<IEnumerable<CatchDetails>> GetTripCatch(string tripId)
+        public Task<HttpWrapper<IEnumerable<CatchDetails>>> GetTripCatch(string tripId)
         {
-            var records = await CatchDbTable.GetAllRecords(tripId, m_client, m_logger);
-            return records.Select(c => c.ToCatchDetailsRaw());
+            return CatchDbTable.GetAllRecords(tripId, m_client, m_logger)
+                .MapSuccess( c => c.Select(r => r.ToCatchDetailsRaw()));
         }
 
 
-        public Task<CatchDetails> NewCatch(string tripId, NewCatch newCatch)
+        public Task<HttpWrapper<CatchDetails>> NewCatch(string tripId, NewCatch newCatch)
         {
-            return newCatch.CreateDyanmoRecord(tripId).CreateRecord(m_client, m_logger).ToCatchDetailsOld();
+            return newCatch.CreateDyanmoRecord(tripId)
+                .Map(c => c.WriteDynamDbCatchRecord(m_client, m_logger))
+                .MapSuccess(d => d.ToCatchDetailsRaw());
         }
 
-        public Task<CatchDetails> PatchCatch(string tripId, Guid catchId, UpdateCatchDetails updateCatch)
+        public Task<HttpWrapper<CatchDetails>> PatchCatch(string tripId, Guid catchId, UpdateCatchDetails updateCatch)
         {
-            return CatchDbTable.GetRecordOld(tripId, catchId, m_client, m_logger).PatchCatch(updateCatch).UpdateRecord(m_client, m_logger).ToCatchDetailsOld();
+            return CatchDbTable.GetRecord(tripId, catchId, m_client, m_logger)
+                .MapSuccess(c => c.PatchCatch(updateCatch))
+                .Map(c => c.UpdateRecord(m_client, m_logger))
+                .MapSuccess(c => c.ToCatchDetailsRaw());
         }
 
-        public Task<CatchDetails> UpdateCatch(CatchDetails upddateCatch)
+        public Task<HttpWrapper<CatchDetails>> UpdateCatch(CatchDetails updateCatch)
         {
-            return CatchDbTable.GetRecordOld(upddateCatch.tripId, upddateCatch.catchId, m_client, m_logger).UpdateCatch(upddateCatch).UpdateRecord(m_client, m_logger).ToCatchDetailsOld();
+            return CatchDbTable.GetRecord(updateCatch.tripId, updateCatch.catchId, m_client, m_logger)
+                .MapSuccess(c => c.UpdateCatch(updateCatch))
+                .Map(c => c.UpdateRecord(m_client, m_logger))
+                .MapSuccess(c => c.ToCatchDetailsRaw());
         }
     }
 }

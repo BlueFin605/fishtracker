@@ -7,12 +7,12 @@ namespace FishTrackerLambda.Services
 {
     public static class TripDbTable
     {
-        public static Task<DynamoDbTrip> CreateRecord(this Task<DynamoDbTrip> record, IAmazonDynamoDB client, ILogger logger)
+        public static Task<HttpWrapper<DynamoDbTrip>> CreateRecord(this DynamoDbTrip record, IAmazonDynamoDB client, ILogger logger)
         {
             return record.SaveDynamoDbRecord(client, logger);
         }
 
-        public static Task<DynamoDbTrip> UpdateRecord(this Task<DynamoDbTrip> record, IAmazonDynamoDB client, ILogger logger)
+        public static Task<HttpWrapper<DynamoDbTrip>> UpdateRecord(this DynamoDbTrip record, IAmazonDynamoDB client, ILogger logger)
         {
             return record.UpdateDynamoDbRecord(client, logger);
         }
@@ -28,14 +28,14 @@ namespace FishTrackerLambda.Services
             return x?.Value ?? new DynamoDbTrip();
         }
 
-        internal static Task<IEnumerable<DynamoDbTrip>> GetAllRecords(String subject, IAmazonDynamoDB client, ILogger logger)
+        internal static Task<HttpWrapper<IEnumerable<DynamoDbTrip>>> GetAllRecords(String subject, IAmazonDynamoDB client, ILogger logger)
         {
             return DynamoDbHelper.GetDynamoDbRecords<DynamoDbTrip, String>(subject, "Subject", client, logger);
         }
 
-        internal static async Task<DynamoDbTrip> PatchTrip(this Task<DynamoDbTrip> record, UpdateTripDetails trip)
+        internal static DynamoDbTrip PatchTrip(this DynamoDbTrip record, UpdateTripDetails trip)
         {
-            var c = await record;
+            var c = record;
 
             return new DynamoDbTrip(c.Subject,
                                     c.TripId,
@@ -48,9 +48,9 @@ namespace FishTrackerLambda.Services
                                     c.DynamoDbVersion);
         }
 
-        internal static async Task<DynamoDbTrip> UpdateTrip(this Task<DynamoDbTrip> record, TripDetails trip)
+        internal static DynamoDbTrip UpdateTrip(this DynamoDbTrip record, TripDetails trip)
         {
-            var c = await record;
+            var c = record;
 
             return new DynamoDbTrip(c.Subject,
                                     c.TripId,
@@ -63,10 +63,10 @@ namespace FishTrackerLambda.Services
                                     c.DynamoDbVersion);
         }
 
-        public static Task<DynamoDbTrip> CreateNewDyanmoRecord(this NewTrip newTrip, string subject)
+        public static Task<HttpWrapper<DynamoDbTrip>> CreateNewDyanmoRecord(this NewTrip newTrip, string subject)
         {
             string currentDateTime = DateTime.Now.ToString("MMdd:HHmmss-yy");
-            return Task.FromResult(new DynamoDbTrip(subject, currentDateTime, newTrip.startTime, null, newTrip.notes, 0, TripRating.NonRated, newTrip?.tags?.ToList() ?? new List<TripTags>(), null));
+            return Task.FromResult(new HttpWrapper<DynamoDbTrip>(new DynamoDbTrip(subject, currentDateTime, newTrip.startTime, null, newTrip.notes, 0, TripRating.NonRated, newTrip?.tags?.ToList() ?? new List<TripTags>(), null)));
         }
 
         public static Task<DynamoDbTrip> CreateDyanmoRecord(this TripDetails trip, string subject)
@@ -80,20 +80,26 @@ namespace FishTrackerLambda.Services
 
             var value = c?.Value ?? new DynamoDbTrip();
 
-            return new HttpWrapper<TripDetails>(value.ToTripDetails());
+            return new HttpWrapper<TripDetails>(value.ToTripDetailsRaw());
         }
 
         public static async Task<TripDetails> ToTripDetailsOld(this Task<DynamoDbTrip> TripDets)
         {
             var c = await TripDets;
 
-            return c.ToTripDetails();
+            return c.ToTripDetailsRaw();
         }
 
-        public static TripDetails ToTripDetails(this DynamoDbTrip t)
+        public static TripDetails ToTripDetailsRaw(this DynamoDbTrip t)
         {
             return new TripDetails(t.Subject, t.TripId, t.StartTime, t.EndTime, t.Notes, t.CatchSize, t.Rating, t.Tags.ToHashSet());
         }
+
+        public static Task<HttpWrapper<TripDetails>> ToTripDetailsWrapper(this DynamoDbTrip t)
+        {
+            return Task.FromResult(new HttpWrapper<TripDetails>(new TripDetails(t.Subject, t.TripId, t.StartTime, t.EndTime, t.Notes, t.CatchSize, t.Rating, t.Tags.ToHashSet())));
+        }
+
     }
 
 }

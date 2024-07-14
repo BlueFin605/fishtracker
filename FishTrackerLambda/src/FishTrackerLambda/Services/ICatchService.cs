@@ -6,10 +6,10 @@ namespace FishTrackerLambda.Services
     public interface ICatchService
     {
         Task<HttpWrapper<CatchDetails>> GetCatch(string tripId, Guid catchId);
-        Task<IEnumerable<CatchDetails>> GetTripCatch(string tripId);
-        Task<CatchDetails> NewCatch(string tripId, NewCatch newCatch);
-        Task<CatchDetails> UpdateCatch(CatchDetails updateCatch);
-        Task<CatchDetails> PatchCatch(string tripId, Guid catchId, UpdateCatchDetails updateCatch);
+        Task<HttpWrapper<IEnumerable<CatchDetails>>> GetTripCatch(string tripId);
+        Task<HttpWrapper<CatchDetails>> NewCatch(string tripId, NewCatch newCatch);
+        Task<HttpWrapper<CatchDetails>> UpdateCatch(CatchDetails updateCatch);
+        Task<HttpWrapper<CatchDetails>> PatchCatch(string tripId, Guid catchId, UpdateCatchDetails updateCatch);
     }
 }
 

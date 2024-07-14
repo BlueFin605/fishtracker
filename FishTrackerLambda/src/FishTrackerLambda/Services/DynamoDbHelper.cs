@@ -13,28 +13,27 @@ namespace FishTrackerLambda.Services
 {
     public static class DynamoDbHelper
     {
-        public static async Task<T> SaveDynamoDbRecord<T>(this Task<T> record, IAmazonDynamoDB client, ILogger logger)
+        public static async Task<HttpWrapper<T>> SaveDynamoDbRecord<T>(this T record, IAmazonDynamoDB client, ILogger logger)
         {
             logger.LogInformation($"DynamoDbHelper::SaveDynamoDbRecord");
 
-            var q = await record;
+            var q = record;
 
             var context = new DynamoDBContext(client);
             await context.SaveAsync<T>(q);
-
-            return q;
+            return HttpWrapper<T>.Ok(q);
         }
 
-        public static async Task<T> UpdateDynamoDbRecord<T>(this Task<T> record, IAmazonDynamoDB client, ILogger logger)
+        public static async Task<HttpWrapper<T>> UpdateDynamoDbRecord<T>(this T record, IAmazonDynamoDB client, ILogger logger)
         {
             logger.LogInformation($"DynamoDbHelper::SaveDynamoDbRecord");
 
-            var q = await record;
+            var q = record;
 
             var context = new DynamoDBContext(client);
             await context.SaveAsync<T>(q);
 
-            return q;
+            return HttpWrapper<T>.Ok(q);
         }
 
         public static async Task<HttpWrapper<T>> GetDynamoDbRecord<T, P, S>(P part, S sortKey, IAmazonDynamoDB client, ILogger logger)
@@ -66,7 +65,7 @@ namespace FishTrackerLambda.Services
             }
         }
 
-        public static async Task<IEnumerable<T>> GetDynamoDbRecords<T, P>(P part, string partKeyName, IAmazonDynamoDB client, ILogger logger)
+        public static async Task<HttpWrapper<IEnumerable<T>>> GetDynamoDbRecords<T, P>(P part, string partKeyName, IAmazonDynamoDB client, ILogger logger)
         {
             logger.LogInformation($"DynamoDbHelper::GetDynamoDbRecords part[{part}]");
 
@@ -75,12 +74,12 @@ namespace FishTrackerLambda.Services
                 var context = new DynamoDBContext(client);
                 var query = context.QueryAsync<T>(part /*queryOptions*/);
                 var items = await query.GetRemainingAsync();
-                return items;
+                return HttpWrapper<IEnumerable<T>>.Ok(items);
             }
             catch (ResourceNotFoundException)
             {
                 logger.LogInformation($"GetDynamoDbRecords:[{part}] ResourceNotFoundException - creating empty");
-                return new List<T>();
+                return HttpWrapper<IEnumerable<T>>.NotFound;
             }
             catch (Exception ex)
             {
