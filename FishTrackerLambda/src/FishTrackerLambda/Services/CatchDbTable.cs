@@ -1,4 +1,5 @@
-﻿using Amazon.DynamoDBv2;
+﻿using System;
+using Amazon.DynamoDBv2;
 using FishTrackerLambda.Functional;
 using FishTrackerLambda.Models.Lambda;
 using FishTrackerLambda.Models.Persistance;
@@ -78,19 +79,24 @@ namespace FishTrackerLambda.Services
 
             var value = c?.Value ?? new DynamoDbCatch();
 
-            return new HttpWrapper<CatchDetails>(value.ToCatchDetails());
+            return new HttpWrapper<CatchDetails>(value.ToCatchDetailsRaw());
         }
 
         public static async Task<CatchDetails> ToCatchDetailsOld(this Task<DynamoDbCatch> catchDets)
         {
             var c = await catchDets;
 
-            return c.ToCatchDetails();
+            return c.ToCatchDetailsRaw();
         }
 
-        public static CatchDetails ToCatchDetails(this DynamoDbCatch c)
+        public static CatchDetails ToCatchDetailsRaw(this DynamoDbCatch c)
         {
             return new CatchDetails(c.TripId, Guid.Parse(c.CatchId), c.SpeciesId, c.CaughtLocation, c.CaughtWhen, c.CaughtSize, c.CaughtLength, c.Weather);
+        }
+
+        public static HttpWrapper<CatchDetails> ToCatchDetailsWrapper(this DynamoDbCatch c)
+        {
+            return new HttpWrapper<CatchDetails>(new CatchDetails(c.TripId, Guid.Parse(c.CatchId), c.SpeciesId, c.CaughtLocation, c.CaughtWhen, c.CaughtSize, c.CaughtLength, c.Weather));
         }
     }
 

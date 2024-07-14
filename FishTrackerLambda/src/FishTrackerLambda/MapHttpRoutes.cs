@@ -55,7 +55,7 @@ public static class MapHttpRoutes
 
         app.MapGet("api/trip/{tripId}/catch/{catchId}", async (IClaimHandler claimHandler, ICatchService catchService, ITripService tripService, ClaimsPrincipal user, string tripId, Guid catchId) =>
         {
-            return await ExecuteServiceOld(app.Logger, $"GetCatch tripId:[{tripId}] catchId:[${catchId}]", async () => await catchService.GetCatch(tripId, catchId));
+            return await ExecuteService(app.Logger, $"GetCatch tripId:[{tripId}] catchId:[${catchId}]", async () => await catchService.GetCatch(tripId, catchId));
         });
 
         app.MapPost("api/trip/{tripId}/catch", async (IClaimHandler claimHandler, ICatchService catchService, ITripService tripService, ClaimsPrincipal user, string tripId, NewCatch newCatch) =>
@@ -105,6 +105,8 @@ public static class MapHttpRoutes
             logger.LogInformation(logDesc);
             var result = await func();
             return result.Result;
+            //var hr = result.Result;
+            //return hr;
         }
         catch (Exception e)
         {

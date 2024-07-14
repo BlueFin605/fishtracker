@@ -47,6 +47,11 @@
             return new HttpWrapper<T>(value);
         }
 
+        public HttpWrapper<R> CloneFailed<R>()
+        {
+            return new HttpWrapper<R>(Result);
+        }
+
         public static HttpWrapper<T> NotFound => new HttpWrapper<T>();
 
         public static HttpWrapper<T> Ok(T value) => new HttpWrapper<T>(value);

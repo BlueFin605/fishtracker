@@ -23,13 +23,16 @@ namespace FishTrackerLambda.Services
 
         public Task<HttpWrapper<CatchDetails>> GetCatch(string tripId, Guid catchId)
         {
-            return CatchDbTable.GetRecord(tripId, catchId, m_client, m_logger).ToCatchDetails();
+            //return CatchDbTable.GetRecord(tripId, catchId, m_client, m_logger).Map<DynamoDbCatch,CatchDetails>(c => c.ToCatchDetailsWrapper());
+            Task<HttpWrapper<DynamoDbCatch>> x = CatchDbTable.GetRecord(tripId, catchId, m_client, m_logger);
+            Task<HttpWrapper<CatchDetails>> y = x.Map<DynamoDbCatch, CatchDetails>(c => c.ToCatchDetailsWrapper());
+            return y;
         }
 
         public async Task<IEnumerable<CatchDetails>> GetTripCatch(string tripId)
         {
             var records = await CatchDbTable.GetAllRecords(tripId, m_client, m_logger);
-            return records.Select(c => c.ToCatchDetails());
+            return records.Select(c => c.ToCatchDetailsRaw());
         }
 
 
