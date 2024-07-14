@@ -3,7 +3,12 @@ namespace FishTrackerLambda.Functional
 {
 	public static class Function
 	{
-		public static async Task<HttpWrapper<R>> Map<T,R>(this Task<HttpWrapper<T>> record, Func<T, Task<HttpWrapper<R>>> mapper)
+        public static Task<HttpWrapper<T>> Init<T>(T value)
+        {
+            return Task.FromResult(new HttpWrapper<T>(value));
+        }
+
+		public static async Task<HttpWrapper<R>> MapAsync<T,R>(this Task<HttpWrapper<T>> record, Func<T, Task<HttpWrapper<R>>> mapper)
 		{
 			var waitedRec = await record;
 
@@ -21,7 +26,7 @@ namespace FishTrackerLambda.Functional
             return await mapper(value);
 		}
 
-        public static async Task<HttpWrapper<R>> MapSuccess<T, R>(this Task<HttpWrapper<T>> record, Func<T, R> mapper)
+        public static async Task<HttpWrapper<R>> Map<T, R>(this Task<HttpWrapper<T>> record, Func<T, R> mapper)
         {
             var waitedRec = await record;
 

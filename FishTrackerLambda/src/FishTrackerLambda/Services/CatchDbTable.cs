@@ -8,28 +8,22 @@ namespace FishTrackerLambda.Services
 {
     public static class CatchDbTable
     {
-        public static Task<HttpWrapper<DynamoDbCatch>> WriteDynamDbCatchRecord(this DynamoDbCatch record, IAmazonDynamoDB client, ILogger logger)
+        public static Task<HttpWrapper<DynamoDbCatch>> WriteCatchToDynamoDb(this DynamoDbCatch record, IAmazonDynamoDB client, ILogger logger)
         {
             return record.SaveDynamoDbRecord(client, logger);
         }
 
-        public static Task<HttpWrapper<DynamoDbCatch>> UpdateRecord(this DynamoDbCatch record, IAmazonDynamoDB client, ILogger logger)
+        public static Task<HttpWrapper<DynamoDbCatch>> UpdateCatchInDynamodb(this DynamoDbCatch record, IAmazonDynamoDB client, ILogger logger)
         {
             return record.UpdateDynamoDbRecord(client, logger);
         }
 
-        public static Task<HttpWrapper<DynamoDbCatch>> GetRecord(string tripId, Guid catchId, IAmazonDynamoDB client, ILogger logger)
+        public static Task<HttpWrapper<DynamoDbCatch>> ReadCatchFromDynamodb(string tripId, Guid catchId, IAmazonDynamoDB client, ILogger logger)
         {
             return DynamoDbHelper.GetDynamoDbRecord<DynamoDbCatch, string, string>(tripId, catchId.ToString(), client, logger);
         }
 
-        public static async Task<DynamoDbCatch> GetRecordOld(string tripId, Guid catchId, IAmazonDynamoDB client, ILogger logger)
-        {
-            var x = await DynamoDbHelper.GetDynamoDbRecord<DynamoDbCatch, string, string>(tripId, catchId.ToString(), client, logger);
-            return x?.Value ?? new DynamoDbCatch();
-        }
-
-        internal static Task<HttpWrapper<IEnumerable<DynamoDbCatch>>> GetAllRecords(string tripId, IAmazonDynamoDB client, ILogger logger)
+        internal static Task<HttpWrapper<IEnumerable<DynamoDbCatch>>> ReadAllCatchFromDynamoDb(string tripId, IAmazonDynamoDB client, ILogger logger)
         {
             return DynamoDbHelper.GetDynamoDbRecords<DynamoDbCatch, string>(tripId.ToString(), "TripId", client, logger);
         }
@@ -68,35 +62,14 @@ namespace FishTrackerLambda.Services
                                     c.DynamoDbVersion);
         }
 
-        public static Task<HttpWrapper<DynamoDbCatch>> CreateDyanmoRecord(this NewCatch newCatch, string tripId)
+        public static DynamoDbCatch CreateNewDyanmoRecord(this NewCatch newCatch, string tripId)
         {
-            return Task.FromResult(new HttpWrapper<DynamoDbCatch>(new DynamoDbCatch(tripId, Guid.NewGuid(), newCatch.SpeciesId, newCatch.caughtLocation, newCatch.caughtWhen, newCatch.caughtSize, newCatch.caughtLength, null, null)));
+            return new DynamoDbCatch(tripId, Guid.NewGuid(), newCatch.SpeciesId, newCatch.caughtLocation, newCatch.caughtWhen, newCatch.caughtSize, newCatch.caughtLength, null, null);
         }
 
-        public static async Task<HttpWrapper<CatchDetails>> ToCatchDetails(this Task<HttpWrapper<DynamoDbCatch>> catchDets)
-        {
-            var c = await catchDets;
-
-            var value = c?.Value ?? new DynamoDbCatch();
-
-            return new HttpWrapper<CatchDetails>(value.ToCatchDetailsRaw());
-        }
-
-        public static async Task<CatchDetails> ToCatchDetailsOld(this Task<DynamoDbCatch> catchDets)
-        {
-            var c = await catchDets;
-
-            return c.ToCatchDetailsRaw();
-        }
-
-        public static CatchDetails ToCatchDetailsRaw(this DynamoDbCatch c)
+        public static CatchDetails ToCatchDetails(this DynamoDbCatch c)
         {
             return new CatchDetails(c.TripId, Guid.Parse(c.CatchId), c.SpeciesId, c.CaughtLocation, c.CaughtWhen, c.CaughtSize, c.CaughtLength, c.Weather);
-        }
-
-        public static Task<HttpWrapper<CatchDetails>> ToCatchDetailsWrapper(this DynamoDbCatch c)
-        {
-            return Task.FromResult(new HttpWrapper<CatchDetails>(new CatchDetails(c.TripId, Guid.Parse(c.CatchId), c.SpeciesId, c.CaughtLocation, c.CaughtWhen, c.CaughtSize, c.CaughtLength, c.Weather)));
         }
     }
 

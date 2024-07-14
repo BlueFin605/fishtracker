@@ -18,41 +18,37 @@ namespace FishTrackerLambda.Services
 
         public Task<HttpWrapper<TripDetails>> GetTrip(string subject, string tripId)
         {
-            return TripDbTable.GetRecord(subject, tripId, m_client, m_logger)
-                .Map(c => c.ToTripDetailsWrapper());
+            return TripDbTable.ReadTripFromDynamodb(subject, tripId, m_client, m_logger)
+                .Map(c => c.ToTripDetails());
         }
 
         public Task<HttpWrapper<IEnumerable<TripDetails>>> GetTrips(string subject)
         {
-            return TripDbTable.GetAllRecords(subject, m_client, m_logger)
-                .MapSuccess(c => c.Select(r => r.ToTripDetailsRaw()));
+            return TripDbTable.ReadAllTripsFromDynamoDb(subject, m_client, m_logger)
+                .Map(c => c.Select(r => r.ToTripDetails()));
         }
 
         public Task<HttpWrapper<TripDetails>> NewTrip(string subject, NewTrip newTrip)
         {
-            return newTrip.CreateNewDyanmoRecord(subject)
-                .Map(t => t.CreateRecord(m_client, m_logger))
-                .MapSuccess(t => t.ToTripDetailsRaw());
+            return Function.Init(newTrip.CreateNewDyanmoRecord(subject))
+                .MapAsync(t => t.WriteTripToDynamoDb(m_client, m_logger))
+                .Map(t => t.ToTripDetails());
         }
 
         public Task<HttpWrapper<TripDetails>> UpdateTrip(string subject, TripDetails trip)
         {
-            return TripDbTable.GetRecord(subject, trip.tripId, m_client, m_logger)
-                .MapSuccess(t => t.UpdateTrip(trip))
-                .Map(t => t.UpdateRecord(m_client, m_logger))
-                .MapSuccess(t => t.ToTripDetailsRaw());
-
-            //return TripDbTable.GetRecordOld(subject, trip.tripId, m_client, m_logger).UpdateTrip(trip).UpdateRecord(m_client, m_logger).ToTripDetailsOld();
+            return TripDbTable.ReadTripFromDynamodb(subject, trip.tripId, m_client, m_logger)
+                .Map(t => t.UpdateTrip(trip))
+                .MapAsync(t => t.UpdateTripInDynamodb(m_client, m_logger))
+                .Map(t => t.ToTripDetails());
         }
 
         public Task<HttpWrapper<TripDetails>> PatchTrip(string subject, string tripId, UpdateTripDetails trip)
         {
-            return TripDbTable.GetRecord(subject, tripId, m_client, m_logger)
-                .MapSuccess(c => c.PatchTrip(trip))
-                .Map(c => c.UpdateRecord(m_client, m_logger))
-                .MapSuccess(c => c.ToTripDetailsRaw());
-
-            //return TripDbTable.GetRecordOld(subject, tripId, m_client, m_logger).PatchTrip(trip).UpdateRecord(m_client, m_logger).ToTripDetailsOld();
+            return TripDbTable.ReadTripFromDynamodb(subject, tripId, m_client, m_logger)
+                .Map(c => c.PatchTrip(trip))
+                .MapAsync(c => c.UpdateTripInDynamodb(m_client, m_logger))
+                .Map(c => c.ToTripDetails());
         }
     }
 }

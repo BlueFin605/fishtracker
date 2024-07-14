@@ -23,41 +23,38 @@ namespace FishTrackerLambda.Services
 
         public Task<HttpWrapper<CatchDetails>> GetCatch(string tripId, Guid catchId)
         {
-            return CatchDbTable.GetRecord(tripId, catchId, m_client, m_logger)
-                .Map(c => c.ToCatchDetailsWrapper());
-            //Task<HttpWrapper<DynamoDbCatch>> x = CatchDbTable.GetRecord(tripId, catchId, m_client, m_logger);
-            //Task<HttpWrapper<CatchDetails>> y = x.Map<DynamoDbCatch, CatchDetails>(c => c.ToCatchDetailsWrapper());
-            //return y;
+            return CatchDbTable.ReadCatchFromDynamodb(tripId, catchId, m_client, m_logger)
+                .Map(c => c.ToCatchDetails());
         }
 
         public Task<HttpWrapper<IEnumerable<CatchDetails>>> GetTripCatch(string tripId)
         {
-            return CatchDbTable.GetAllRecords(tripId, m_client, m_logger)
-                .MapSuccess( c => c.Select(r => r.ToCatchDetailsRaw()));
+            return CatchDbTable.ReadAllCatchFromDynamoDb(tripId, m_client, m_logger)
+                .Map( c => c.Select(r => r.ToCatchDetails()));
         }
 
 
         public Task<HttpWrapper<CatchDetails>> NewCatch(string tripId, NewCatch newCatch)
         {
-            return newCatch.CreateDyanmoRecord(tripId)
-                .Map(c => c.WriteDynamDbCatchRecord(m_client, m_logger))
-                .MapSuccess(d => d.ToCatchDetailsRaw());
+            return Function.Init(newCatch.CreateNewDyanmoRecord(tripId))
+                .MapAsync(c => c.WriteCatchToDynamoDb(m_client, m_logger))
+                .Map(d => d.ToCatchDetails());
         }
 
         public Task<HttpWrapper<CatchDetails>> PatchCatch(string tripId, Guid catchId, UpdateCatchDetails updateCatch)
         {
-            return CatchDbTable.GetRecord(tripId, catchId, m_client, m_logger)
-                .MapSuccess(c => c.PatchCatch(updateCatch))
-                .Map(c => c.UpdateRecord(m_client, m_logger))
-                .MapSuccess(c => c.ToCatchDetailsRaw());
+            return CatchDbTable.ReadCatchFromDynamodb(tripId, catchId, m_client, m_logger)
+                .Map(c => c.PatchCatch(updateCatch))
+                .MapAsync(c => c.UpdateCatchInDynamodb(m_client, m_logger))
+                .Map(c => c.ToCatchDetails());
         }
 
         public Task<HttpWrapper<CatchDetails>> UpdateCatch(CatchDetails updateCatch)
         {
-            return CatchDbTable.GetRecord(updateCatch.tripId, updateCatch.catchId, m_client, m_logger)
-                .MapSuccess(c => c.UpdateCatch(updateCatch))
-                .Map(c => c.UpdateRecord(m_client, m_logger))
-                .MapSuccess(c => c.ToCatchDetailsRaw());
+            return CatchDbTable.ReadCatchFromDynamodb(updateCatch.tripId, updateCatch.catchId, m_client, m_logger)
+                .Map(c => c.UpdateCatch(updateCatch))
+                .MapAsync(c => c.UpdateCatchInDynamodb(m_client, m_logger))
+                .Map(c => c.ToCatchDetails());
         }
     }
 }
