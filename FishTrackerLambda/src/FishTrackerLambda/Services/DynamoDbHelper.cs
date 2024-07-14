@@ -44,14 +44,7 @@ namespace FishTrackerLambda.Services
             {
                 var context = new DynamoDBContext(client);
                 var record = await context.LoadAsync<T>(part, sortKey);
-
-                if (record == null)
-                {
-                    logger.LogInformation($"GetDynamoDbRecord:[{part}][{sortKey}] null response - creating empty");
-                    return HttpWrapper<T>.NotFound;
-                }
-
-                return HttpWrapper<T>.Ok(record);
+                return record == null ? HttpWrapper<T>.NotFound : HttpWrapper<T>.Ok(record);
             }
             catch (ResourceNotFoundException)
             {

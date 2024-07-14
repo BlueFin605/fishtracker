@@ -33,10 +33,13 @@ public static class MapHttpRoutes
             string subjectClaim = claimHandler.ExtractSubject(user.Claims);
             return await ExecuteService(app.Logger, $"UpdateTrip tripId:[{subjectClaim}][{tripId}]", async () =>
             {
-                if (trip.tripId != tripId)
-                    throw new Exception($"Cannot change tripId from[{trip.tripId}] to[{tripId}]");
-
-                return await tripService.UpdateTrip(subjectClaim, trip);
+                switch ((trip.tripId, tripId))
+                {
+                    case var (tId, tIdParam) when tId != tIdParam:
+                        throw new Exception($"Cannot change tripId from[{tId}] to[{tIdParam}]");
+                    default:
+                        return await tripService.UpdateTrip(subjectClaim, trip);
+                }
             });
         });
 
@@ -65,13 +68,15 @@ public static class MapHttpRoutes
         {
             return await ExecuteService(app.Logger, $"UpdateCatch tripId:[{tripId}] catchId:[${catchId}]", async () =>
             {
-                if (updateCatch.tripId != tripId)
-                    throw new Exception($"Cannot change tripId from[{updateCatch.tripId}] to[{tripId}]");
-
-                if (updateCatch.catchId != catchId)
-                    throw new Exception($"Cannot change catchId from[{updateCatch.tripId}] to[{tripId}]");
-
-                return await catchService.UpdateCatch(updateCatch);
+                switch ((updateCatch.tripId, updateCatch.catchId))
+                {
+                    case (var tId, var cId) when tId != tripId:
+                        throw new Exception($"Cannot change tripId from[{tId}] to[{tripId}]");
+                    case (var tId, var cId) when cId != catchId:
+                        throw new Exception($"Cannot change catchId from[{cId}] to[{catchId}]");
+                    default:
+                        return await catchService.UpdateCatch(updateCatch);
+                }
             });
         });
 
