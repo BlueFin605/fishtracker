@@ -3,8 +3,6 @@ using System.Security.Claims;
 using FishTrackerLambda.Functional;
 using FishTrackerLambda.Models.Lambda;
 using FishTrackerLambda.Services;
-using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Mvc;
 
 public static class MapHttpRoutes
 {
@@ -84,21 +82,6 @@ public static class MapHttpRoutes
         });
     }
 
-    //private static async Task<IResult> ExecuteServiceOld<T>(ILogger logger, string logDesc, Func<Task<T>> func)
-    //{
-    //    try
-    //    {
-    //        logger.LogInformation(logDesc);
-    //        var result = await func();
-    //        return Results.Ok(result);
-    //    }
-    //    catch (Exception e)
-    //    {
-    //        logger.LogError(e, $"{logDesc} Exception {e.Message}");
-    //        throw;
-    //    }
-    //}
-
     private static async Task<IResult> ExecuteService<T>(ILogger logger, string logDesc, Func<Task<HttpWrapper<T>>> func)
     {
         try
@@ -106,8 +89,6 @@ public static class MapHttpRoutes
             logger.LogInformation(logDesc);
             var result = await func();
             return result.Result;
-            //var hr = result.Result;
-            //return hr;
         }
         catch (Exception e)
         {
