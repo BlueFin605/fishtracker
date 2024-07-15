@@ -3,6 +3,17 @@ namespace FishTrackerLambda.Functional
 {
 	public static class Function
 	{
+        public static Task<HttpWrapper<object>> ValidateInput(Func<IResult?> result)
+        {
+            var res = result();
+            return Task.FromResult(res == null ? HttpWrapper<object>.Ok(default) : HttpWrapper<object>.FromResult(res));
+        }
+
+        public static Task<HttpWrapper<object>> ValidateInput(this Task<HttpWrapper<object>> record, Func<IResult?> result)
+        {
+            return ValidateInput(result);
+        }
+
         public static Task<HttpWrapper<T>> Init<T>(T value)
         {
             return Task.FromResult(new HttpWrapper<T>(value));
@@ -20,9 +31,6 @@ namespace FishTrackerLambda.Functional
 
             T? value = waitedRec.Value;
 
-			if (value == null)
-				return new HttpWrapper<R>();
-
             return await mapper(value);
 		}
 
@@ -37,9 +45,6 @@ namespace FishTrackerLambda.Functional
             }
 
             T? value = waitedRec.Value;
-
-            if (value == null)
-                return new HttpWrapper<R>();
 
             return new HttpWrapper<R>(mapper(value));
         }

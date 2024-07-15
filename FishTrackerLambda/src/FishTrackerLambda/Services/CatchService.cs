@@ -49,9 +49,16 @@ namespace FishTrackerLambda.Services
                 .Map(c => c.ToCatchDetails());
         }
 
-        public Task<HttpWrapper<CatchDetails>> UpdateCatch(CatchDetails updateCatch)
+        public Task<HttpWrapper<CatchDetails>> UpdateCatch(string tripId, Guid catchId, CatchDetails updateCatch)
         {
-            return CatchDbTable.ReadCatchFromDynamodb(updateCatch.tripId, updateCatch.catchId, m_client, m_logger)
+            return Function
+                .ValidateInput(() => {
+                    return tripId == updateCatch.tripId ? null : Results.BadRequest($"Cannot change tripId from[{tripId}] to[{updateCatch.tripId}]");
+                 })
+                .ValidateInput(() => {
+                    return catchId == updateCatch.catchId ? null : Results.BadRequest($"Cannot change tripId from[{catchId}] to[{updateCatch.catchId}]");
+                 })
+                .MapAsync( c => CatchDbTable.ReadCatchFromDynamodb(updateCatch.tripId, updateCatch.catchId, m_client, m_logger))
                 .Map(c => c.UpdateCatch(updateCatch))
                 .MapAsync(c => c.UpdateCatchInDynamodb(m_client, m_logger))
                 .Map(c => c.ToCatchDetails());

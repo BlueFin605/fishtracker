@@ -1,8 +1,8 @@
 ﻿namespace FishTrackerLambda.Models.Lambda;
 
 public record class NewTrip(
-    DateTime? startTime,
+    DateTimeOffset? startTime,
+    //String timeZone,
     String notes,
     HashSet<TripTags> tags
-
 );

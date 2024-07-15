@@ -17,13 +17,13 @@
             m_value = default(T);
         }
 
-        public HttpWrapper(T initial)
+        public HttpWrapper(T? initial)
         {
             m_value = initial;
 
-            m_canContinue = m_value != null;
+            m_canContinue = true;
 
-            m_httpCode = m_value != null ? null : Results.NotFound();
+            m_httpCode = null;
         }
 
         private HttpWrapper(T initial, bool valid)
@@ -54,7 +54,9 @@
 
         public static HttpWrapper<T> NotFound => new HttpWrapper<T>();
 
-        public static HttpWrapper<T> Ok(T value) => new HttpWrapper<T>(value);
+        public static HttpWrapper<T> Ok(T? value) => new HttpWrapper<T>(value);
+
+        public static HttpWrapper<T> FromResult(IResult result) => new HttpWrapper<T>(result);
 
         public bool Continue => m_canContinue;
 

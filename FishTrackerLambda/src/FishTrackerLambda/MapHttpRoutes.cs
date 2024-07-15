@@ -31,16 +31,7 @@ public static class MapHttpRoutes
         app.MapPut("api/trip/{tripId}", async (IClaimHandler claimHandler, ICatchService catchService, ITripService tripService, ClaimsPrincipal user, string tripId, TripDetails trip) =>
         {
             string subjectClaim = claimHandler.ExtractSubject(user.Claims);
-            return await ExecuteService(app.Logger, $"UpdateTrip tripId:[{subjectClaim}][{tripId}]", async () =>
-            {
-                switch ((trip.tripId, tripId))
-                {
-                    case var (tId, tIdParam) when tId != tIdParam:
-                        throw new Exception($"Cannot change tripId from[{tId}] to[{tIdParam}]");
-                    default:
-                        return await tripService.UpdateTrip(subjectClaim, trip);
-                }
-            });
+            return await ExecuteService(app.Logger, $"UpdateTrip tripId:[{subjectClaim}][{tripId}]", async () => await tripService.UpdateTrip(subjectClaim, tripId, trip));
         });
 
         app.MapPatch("api/trip/{tripId}", async (IClaimHandler claimHandler, ICatchService catchService, ITripService tripService, ClaimsPrincipal user, string tripId, UpdateTripDetails trip) =>
@@ -66,20 +57,8 @@ public static class MapHttpRoutes
 
         app.MapPut("api/trip/{tripId}/catch/{catchId}", async (IClaimHandler claimHandler, ICatchService catchService, ITripService tripService, ClaimsPrincipal user, string tripId, Guid catchId, CatchDetails updateCatch) =>
         {
-            return await ExecuteService(app.Logger, $"UpdateCatch tripId:[{tripId}] catchId:[${catchId}]", async () =>
-            {
-                switch ((updateCatch.tripId, updateCatch.catchId))
-                {
-                    case (var tId, var cId) when tId != tripId:
-                        throw new Exception($"Cannot change tripId from[{tId}] to[{tripId}]");
-                    case (var tId, var cId) when cId != catchId:
-                        throw new Exception($"Cannot change catchId from[{cId}] to[{catchId}]");
-                    default:
-                        return await catchService.UpdateCatch(updateCatch);
-                }
-            });
+            return await ExecuteService(app.Logger, $"UpdateCatch tripId:[{tripId}] catchId:[${catchId}]", async () => await catchService.UpdateCatch(tripId, catchId, updateCatch));
         });
-
 
         app.MapPatch("api/trip/{tripId}/catch/{catchId}", async (IClaimHandler claimHandler, ICatchService catchService, ITripService tripService, ClaimsPrincipal user, string tripId, Guid catchId, UpdateCatchDetails updateCatch) =>
         {

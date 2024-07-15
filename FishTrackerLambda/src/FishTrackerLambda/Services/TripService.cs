@@ -1,6 +1,7 @@
 ﻿using Amazon.DynamoDBv2;
 using FishTrackerLambda.Functional;
 using FishTrackerLambda.Models.Lambda;
+using FishTrackerLambda.Models.Persistance;
 
 namespace FishTrackerLambda.Services
 {
@@ -39,10 +40,13 @@ namespace FishTrackerLambda.Services
                 .Map(t => t.ToTripDetails());
         }
 
-        public Task<HttpWrapper<TripDetails>> UpdateTrip(string subject, TripDetails trip)
+        public Task<HttpWrapper<TripDetails>> UpdateTrip(string subject, string tripId, TripDetails trip)
         {
-            return TripDbTable
-                .ReadTripFromDynamodb(subject, trip.tripId, m_client, m_logger)
+            return Function
+                .ValidateInput(() => {
+                    return tripId == trip.tripId ? null : Results.BadRequest($"Cannot change tripId from[{tripId}] to[{trip.tripId}]");
+                 })
+                .MapAsync(t => TripDbTable.ReadTripFromDynamodb(subject, trip.tripId, m_client, m_logger))
                 .Map(t => t.UpdateTrip(trip))
                 .MapAsync(t => t.UpdateTripInDynamodb(m_client, m_logger))
                 .Map(t => t.ToTripDetails());
