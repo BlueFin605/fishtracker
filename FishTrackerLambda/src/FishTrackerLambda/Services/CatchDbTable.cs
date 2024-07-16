@@ -38,7 +38,7 @@ namespace FishTrackerLambda.Services
                         Guid.Parse(c.CatchId),
                         updateCatch.SpeciesId ?? c.SpeciesId,
                         updateCatch.caughtLocation ?? c.CaughtLocation,
-                        updateCatch.caughtWhen ?? c.CaughtWhen,
+                        updateCatch.caughtWhen ?? DateTimeOffset.Parse(c.CaughtWhen),
                         updateCatch.caughtSize ?? c.CaughtSize,
                         updateCatch.caughtLength ?? c.CaughtLength,
                         updateCatch.weather ?? c.Weather,
@@ -64,12 +64,27 @@ namespace FishTrackerLambda.Services
 
         public static DynamoDbCatch CreateNewDyanmoRecord(this NewCatch newCatch, string tripId)
         {
-            return new DynamoDbCatch(tripId, Guid.NewGuid(), newCatch.SpeciesId, newCatch.caughtLocation, newCatch.caughtWhen, newCatch.caughtSize, newCatch.caughtLength, null, null);
+            return new DynamoDbCatch(tripId,
+                                     Guid.NewGuid(),
+                                     newCatch.SpeciesId,
+                                     newCatch.caughtLocation,
+                                     newCatch.caughtWhen,
+                                     newCatch.caughtSize,
+                                     newCatch.caughtLength,
+                                     null,
+                                     null);
         }
 
         public static CatchDetails ToCatchDetails(this DynamoDbCatch c)
         {
-            return new CatchDetails(c.TripId, Guid.Parse(c.CatchId), c.SpeciesId, c.CaughtLocation, c.CaughtWhen, c.CaughtSize, c.CaughtLength, c.Weather);
+            return new CatchDetails(c.TripId,
+                                    Guid.Parse(c.CatchId),
+                                    c.SpeciesId,
+                                    c.CaughtLocation,
+                                    DateTimeOffset.Parse(c.CaughtWhen),
+                                    c.CaughtSize,
+                                    c.CaughtLength,
+                                    c.Weather);
         }
     }
 

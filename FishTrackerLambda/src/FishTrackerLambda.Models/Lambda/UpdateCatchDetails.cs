@@ -3,7 +3,7 @@
 public record class UpdateCatchDetails(
     Guid? SpeciesId,
     Location? caughtLocation,
-    DateTime? caughtWhen,
+    DateTimeOffset? caughtWhen,
     FishSize? caughtSize,
     double? caughtLength,
     WeatherAttributes? weather);

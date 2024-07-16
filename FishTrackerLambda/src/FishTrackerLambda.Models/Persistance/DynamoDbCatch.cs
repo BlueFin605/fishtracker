@@ -1,4 +1,5 @@
-﻿using System.Runtime.InteropServices;
+﻿using System.ComponentModel;
+using System.Runtime.InteropServices;
 using Amazon.DynamoDBv2.DataModel;
 using FishTrackerLambda.Models.Lambda;
 using Newtonsoft.Json;
@@ -16,7 +17,7 @@ namespace FishTrackerLambda.Models.Persistance
 
         public Guid SpeciesId { get; set; }
         public Location CaughtLocation { get; set; }
-        public DateTime CaughtWhen { get; set; }
+        public string CaughtWhen { get; set; }
         public FishSize CaughtSize { get; set; }
         public double CaughtLength { get; set; }
         public WeatherAttributes? Weather { get; set; }
@@ -25,13 +26,13 @@ namespace FishTrackerLambda.Models.Persistance
         public int? DynamoDbVersion { get; set; }
 
         [JsonConstructor]
-        public DynamoDbCatch(string tripId, Guid catchId, Guid speciesId, Location caughtLocation, DateTime caughtWhen, FishSize caughtSize, double caughtLength, WeatherAttributes? weather, int? dynamoDbVersion)
+        public DynamoDbCatch(string tripId, Guid catchId, Guid speciesId, Location caughtLocation, DateTimeOffset caughtWhen, FishSize caughtSize, double caughtLength, WeatherAttributes? weather, int? dynamoDbVersion)
         {
             TripId = tripId;
             CatchId = catchId.ToString();
             SpeciesId = speciesId;
             CaughtLocation = caughtLocation;
-            CaughtWhen = caughtWhen;
+            CaughtWhen = caughtWhen.ToString("o");
             CaughtSize = caughtSize;
             CaughtLength = caughtLength;
             Weather = weather;
@@ -42,16 +43,9 @@ namespace FishTrackerLambda.Models.Persistance
         {
             TripId = string.Empty;
             CatchId = string.Empty;
+            CaughtWhen = string.Empty;
             CaughtLocation = new Location();
         }
-
-        public DynamoDbCatch(string tripId, Guid catchId)
-        {
-            TripId = tripId;
-            CatchId = catchId.ToString();
-            CaughtLocation = new Location(0,0);
-        }
     }
-
 }
 
