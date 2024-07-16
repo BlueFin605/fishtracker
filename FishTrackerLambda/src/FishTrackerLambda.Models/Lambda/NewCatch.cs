@@ -3,6 +3,7 @@
 public record class NewCatch(
     Guid SpeciesId,
     Location caughtLocation,
-    DateTimeOffset caughtWhen,
+    DateTimeOffset? caughtWhen,
+    String? timeZone,
     FishSize caughtSize,
     double caughtLength);

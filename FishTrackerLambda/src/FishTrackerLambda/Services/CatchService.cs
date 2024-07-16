@@ -36,7 +36,12 @@ namespace FishTrackerLambda.Services
 
         public Task<HttpWrapper<CatchDetails>> NewCatch(string tripId, NewCatch newCatch)
         {
-            return Function.Init(newCatch.CreateNewDyanmoRecord(tripId))
+            return Function
+                .ValidateInput(() => {
+                    return newCatch.caughtWhen != null || newCatch.timeZone != null ? null : Results.BadRequest("Must supply either a datetime or timezone");
+                 })
+                .Init(newCatch.FillInMissingData())
+                .Map( c => c.CreateNewDyanmoRecord(tripId))
                 .MapAsync(c => c.WriteCatchToDynamoDb(m_client, m_logger))
                 .Map(d => d.ToCatchDetails());
         }

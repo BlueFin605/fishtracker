@@ -1,6 +1,7 @@
 ﻿using System;
 using Amazon.DynamoDBv2;
 using FishTrackerLambda.Functional;
+using FishTrackerLambda.Helpers;
 using FishTrackerLambda.Models.Lambda;
 using FishTrackerLambda.Models.Persistance;
 
@@ -62,13 +63,20 @@ namespace FishTrackerLambda.Services
                                     c.DynamoDbVersion);
         }
 
+        public static NewCatch FillInMissingData(this NewCatch newCatch)
+        {
+            DateTimeOffset startTime = newCatch.caughtWhen ?? DateConverter.GetLocalNow(newCatch.timeZone);
+            var x = new NewCatch(newCatch.SpeciesId, newCatch.caughtLocation, startTime, newCatch.timeZone, newCatch.caughtSize, newCatch.caughtLength);
+            return x;
+        }
+
         public static DynamoDbCatch CreateNewDyanmoRecord(this NewCatch newCatch, string tripId)
         {
             return new DynamoDbCatch(tripId,
                                      Guid.NewGuid(),
                                      newCatch.SpeciesId,
                                      newCatch.caughtLocation,
-                                     newCatch.caughtWhen,
+                                     newCatch.caughtWhen ?? throw new Exception("Date should not be null"),
                                      newCatch.caughtSize,
                                      newCatch.caughtLength,
                                      null,
