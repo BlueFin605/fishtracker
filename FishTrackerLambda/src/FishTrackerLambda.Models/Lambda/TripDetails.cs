@@ -3,8 +3,8 @@
 public record class TripDetails(
     String subject,
     string tripId,
-    DateTime startTime,
-    DateTime? endTime,
+    DateTimeOffset startTime,
+    DateTimeOffset? endTime,
     String notes,
     uint catchSize,
     TripRating rating,

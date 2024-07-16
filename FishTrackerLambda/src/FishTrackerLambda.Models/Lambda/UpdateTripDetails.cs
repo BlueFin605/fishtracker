@@ -1,8 +1,8 @@
 ﻿namespace FishTrackerLambda.Models.Lambda;
 
 public record class UpdateTripDetails(
-    DateTime? startTime,
-    DateTime? endTime,
+    DateTimeOffset? startTime,
+    DateTimeOffset? endTime,
     String? notes,
     uint? catchSize,
     TripRating? rating,

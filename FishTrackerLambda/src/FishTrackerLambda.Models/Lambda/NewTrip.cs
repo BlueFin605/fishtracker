@@ -2,7 +2,7 @@
 
 public record class NewTrip(
     DateTimeOffset? startTime,
-    //String timeZone,
+    String? timeZone,
     String notes,
     HashSet<TripTags> tags
 );

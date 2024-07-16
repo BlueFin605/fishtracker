@@ -22,8 +22,10 @@
   </ItemGroup>
   <ItemGroup>
     <None Remove="Functional\" />
+    <None Remove="Helpers\" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Functional\" />
+    <Folder Include="Helpers\" />
   </ItemGroup>
 </Project>

@@ -26,14 +26,17 @@ namespace FishTrackerLambda.Services
 
         public Task<HttpWrapper<IEnumerable<TripDetails>>> GetTrips(string subject)
         {
-            return TripDbTable
-                .ReadAllTripsFromDynamoDb(subject, m_client, m_logger)
+            return Function
+                .InitAsync(TripDbTable.ReadAllTripsFromDynamoDb(subject, m_client, m_logger))
                 .Map(c => c.Select(r => r.ToTripDetails()));
         }
 
         public Task<HttpWrapper<TripDetails>> NewTrip(string subject, NewTrip newTrip)
         {
             return Function
+                .ValidateInput(() => {
+                    return newTrip.startTime != null || newTrip.timeZone != null ? null : Results.BadRequest("Must supply either a datetime or timezone");
+                 }) 
                 .Init(newTrip.FillInMissingData())
                 .Map(t => t.CreateNewDyanmoRecord(subject))
                 .MapAsync(t => t.WriteTripToDynamoDb(m_client, m_logger))

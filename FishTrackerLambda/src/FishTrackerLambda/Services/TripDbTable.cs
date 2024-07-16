@@ -1,5 +1,6 @@
 ﻿using Amazon.DynamoDBv2;
 using FishTrackerLambda.Functional;
+using FishTrackerLambda.Helpers;
 using FishTrackerLambda.Models.Lambda;
 using FishTrackerLambda.Models.Persistance;
 
@@ -33,13 +34,13 @@ namespace FishTrackerLambda.Services
 
             return new DynamoDbTrip(c.Subject,
                                     c.TripId,
-                                    trip.startTime ?? c.StartTime,
-                                    trip.endTime ??  c.EndTime,
+                                    trip.startTime ?? DateConverter.IsoFromString(c.StartTime),
+                                    trip.endTime ?? (c.EndTime != null ? DateConverter.IsoFromString(c.EndTime) : null),
                                     trip.notes ?? c.Notes,
                                     trip.catchSize ?? c.CatchSize,
                                     trip.rating ?? c.Rating,
                                     trip.tags?.ToList() ?? c.Tags,
-                                    c.DynamoDbVersion);
+                                    c.DynamoDbVersion); ;
         }
 
         internal static DynamoDbTrip UpdateTrip(this DynamoDbTrip record, TripDetails trip)
@@ -59,25 +60,35 @@ namespace FishTrackerLambda.Services
 
         public static NewTrip FillInMissingData(this NewTrip newTrip)
         {
-            DateTimeOffset startTime = newTrip.startTime ?? DateTime.Now;
-            var original = startTime.DateTime;
-            var local = startTime.ToLocalTime().DateTime;
-            var utc = startTime.UtcDateTime;
-            var strTime = startTime.ToString();
-
-            return new NewTrip(startTime, newTrip.notes, newTrip.tags);
+            DateTimeOffset startTime = newTrip.startTime ?? DateConverter.GetLocalNow(newTrip.timeZone);
+            return new NewTrip(startTime, newTrip.timeZone, newTrip.notes, newTrip.tags);
         }
 
         public static DynamoDbTrip CreateNewDyanmoRecord(this NewTrip newTrip, string subject)
         {
-            string tripId = newTrip?.startTime?.DateTime.ToString("MMdd:HHmmss-yy") ?? throw new Exception("startTime should not be null");
-            var startTime = newTrip?.startTime?.DateTime ?? throw new Exception("Start time should not be null");
-            return new DynamoDbTrip(subject, tripId, startTime, null, newTrip.notes, 0, TripRating.NonRated, newTrip?.tags?.ToList() ?? new List<TripTags>(), null);
+            var start = newTrip?.startTime ?? throw new Exception("Start time should not be null"); ;
+            string tripId = start.DateTime.ToString("MMdd:HHmmss-yy");
+            return new DynamoDbTrip(subject,
+                                    tripId,
+                                    start,
+                                    null,
+                                    newTrip.notes,
+                                    0,
+                                    TripRating.NonRated,
+                                    newTrip?.tags?.ToList() ?? new List<TripTags>(),
+                                    null);
         }
 
         public static TripDetails ToTripDetails(this DynamoDbTrip t)
         {
-            return new TripDetails(t.Subject, t.TripId, t.StartTime, t.EndTime, t.Notes, t.CatchSize, t.Rating, t.Tags.ToHashSet());
+            return new TripDetails(t.Subject,
+                                   t.TripId,
+                                   DateConverter.IsoFromString(t.StartTime),
+                                   string.IsNullOrEmpty(t.EndTime) ? null : DateConverter.IsoFromString(t.EndTime),
+                                   t.Notes,
+                                   t.CatchSize,
+                                   t.Rating,
+                                   t.Tags.ToHashSet());
         }
     }
 
