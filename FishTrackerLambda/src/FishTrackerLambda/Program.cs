@@ -2,7 +2,7 @@ using System.Security.Claims;
 using System.Text.Json.Serialization;
 using Amazon.DynamoDBv2;
 using Amazon.Runtime;
-using FishTrackerLambda.Services;
+using FishTrackerLambda.ClaimHandler;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddSingleton<ICatchService, CatchService>();

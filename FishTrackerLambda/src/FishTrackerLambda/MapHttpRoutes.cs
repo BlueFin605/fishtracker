@@ -2,7 +2,7 @@
 using System.Security.Claims;
 using FishTrackerLambda.Functional;
 using FishTrackerLambda.Models.Lambda;
-using FishTrackerLambda.Services;
+using FishTrackerLambda.ClaimHandler;
 
 public static class MapHttpRoutes
 {

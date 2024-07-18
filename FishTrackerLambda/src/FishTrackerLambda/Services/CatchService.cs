@@ -1,12 +1,13 @@
 ﻿using System;
 using System.Xml.Linq;
 using Amazon.DynamoDBv2;
+using FishTrackerLambda.DataAccess;
 using FishTrackerLambda.Functional;
 using FishTrackerLambda.Models.Lambda;
 using FishTrackerLambda.Models.Persistance;
 using Newtonsoft.Json.Linq;
 
-namespace FishTrackerLambda.Services
+namespace FishTrackerLambda.ClaimHandler
 {
 
     public class CatchService : ICatchService

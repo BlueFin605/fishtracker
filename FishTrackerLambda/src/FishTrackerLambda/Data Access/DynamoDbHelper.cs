@@ -9,7 +9,7 @@ using FishTrackerLambda.Models.Persistance;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 
-namespace FishTrackerLambda.Services
+namespace FishTrackerLambda.DataAccess
 {
     public static class DynamoDbHelper
     {

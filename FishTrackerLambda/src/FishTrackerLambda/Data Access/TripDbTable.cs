@@ -4,7 +4,7 @@ using FishTrackerLambda.Helpers;
 using FishTrackerLambda.Models.Lambda;
 using FishTrackerLambda.Models.Persistance;
 
-namespace FishTrackerLambda.Services
+namespace FishTrackerLambda.DataAccess
 {
     public static class TripDbTable
     {

@@ -1,9 +1,10 @@
 ﻿using Amazon.DynamoDBv2;
+using FishTrackerLambda.DataAccess;
 using FishTrackerLambda.Functional;
 using FishTrackerLambda.Models.Lambda;
 using FishTrackerLambda.Models.Persistance;
 
-namespace FishTrackerLambda.Services
+namespace FishTrackerLambda.ClaimHandler
 {
     public class TripService : ITripService
     {
