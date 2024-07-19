@@ -9,7 +9,7 @@ import { TokenService } from './token.service';
   providedIn: 'root'
 })
 export class ApiService {
-  private apiUrl = 'https://xte0lryazi.execute-api.eu-central-1.amazonaws.com/Prod/api/trip/5acb3a1b-9311-447b-95e5-7dfca626a3d2/catch';
+  private apiUrl = 'https://api.fishtracker.bluefin605.com/api/trip/5acb3a1b-9311-447b-95e5-7dfca626a3d2/catch';
 
   constructor(private http: HttpClient, private tokenService: TokenService ) {}
 
@@ -30,7 +30,7 @@ export class ApiService {
         const headers = new HttpHeaders({
           Authorization: `Bearer ${jwt}`,
         });
-        return this.http.get<TripDetails[]>('https://xte0lryazi.execute-api.eu-central-1.amazonaws.com/Prod/api/trip?view=relevant', { headers });
+        return this.http.get<TripDetails[]>('https://api.fishtracker.bluefin605.com/api/trip?view=relevant', { headers });
     }));
   }
 
