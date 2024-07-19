@@ -10,10 +10,10 @@ public static class MapHttpRoutes
     {
         app.MapGet("/", () => "Welcome to running ASP.NET Core Minimal API on AWS Lambda");
 
-        app.MapGet("api/trip/", async (IClaimHandler claimHandler, ICatchService catchService, ITripService tripService, ClaimsPrincipal user) =>
+        app.MapGet("api/trip/", async (IClaimHandler claimHandler, ICatchService catchService, ITripService tripService, ClaimsPrincipal user, string? view) =>
         {
             string subjectClaim = claimHandler.ExtractSubject(user.Claims);
-            return await ExecuteService(app.Logger, $"GetAllTrips tripId subject:[{subjectClaim}]", async () => await tripService.GetTrips(subjectClaim));
+            return await ExecuteService(app.Logger, $"GetAllTrips tripId subject:[{subjectClaim}] view:[{view}]", async () => await tripService.GetTrips(subjectClaim, view));
         });
 
         app.MapGet("api/trip/{tripId}", async (IClaimHandler claimHandler, ICatchService catchService, ITripService tripService, ClaimsPrincipal user, string tripId) =>

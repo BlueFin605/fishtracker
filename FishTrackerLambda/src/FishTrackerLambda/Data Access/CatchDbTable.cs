@@ -26,7 +26,7 @@ public static class CatchDbTable
 
     internal static Task<HttpWrapper<IEnumerable<DynamoDbCatch>>> ReadAllCatchFromDynamoDb(string tripId, IAmazonDynamoDB client, ILogger logger)
     {
-        return DynamoDbHelper.GetDynamoDbRecords<DynamoDbCatch, string>(tripId.ToString(), "TripId", client, logger);
+        return DynamoDbHelper.GetDynamoDbRecords<DynamoDbCatch, string>(tripId.ToString(), client, logger);
     }
 
     internal static DynamoDbCatch PatchCatch(this DynamoDbCatch record, UpdateCatchDetails updateCatch)

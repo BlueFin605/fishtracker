@@ -25,12 +25,24 @@ namespace FishTrackerLambda.ClaimHandler
                 .Map(c => c.ToTripDetails());
         }
 
-        public Task<HttpWrapper<IEnumerable<TripDetails>>> GetTrips(string subject)
+        public Task<HttpWrapper<IEnumerable<TripDetails>>> GetTrips(string subject, string? view)
         {
-            return Function
-                .InitAsync(TripDbTable.ReadAllTripsFromDynamoDb(subject, m_client, m_logger))
-                .Map(c => c.Select(r => r.ToTripDetails()));
+            switch (view)
+            {
+            case null:
+            case "all":
+                return Function
+                    .InitAsync(TripDbTable.ReadAllTripsFromDynamoDb(subject, m_client, m_logger))
+                    .Map(c => c.Select(r => r.ToTripDetails()));
+            case "relevant":
+                return Function
+                    .InitAsync(TripDbTable.ReadRelevantTripsFromDynamoDb(subject, m_client, m_logger))
+                    .Map(c => c.Select(r => r.ToTripDetails()));
+            default:
+                throw new Exception($"invalid view[{view}]");
+            }
         }
+
 
         public Task<HttpWrapper<TripDetails>> NewTrip(string subject, NewTrip newTrip)
         {

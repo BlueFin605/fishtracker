@@ -25,7 +25,13 @@ namespace FishTrackerLambda.DataAccess
 
         internal static Task<HttpWrapper<IEnumerable<DynamoDbTrip>>> ReadAllTripsFromDynamoDb(String subject, IAmazonDynamoDB client, ILogger logger)
         {
-            return DynamoDbHelper.GetDynamoDbRecords<DynamoDbTrip, String>(subject, "Subject", client, logger);
+            return DynamoDbHelper.GetDynamoDbRecords<DynamoDbTrip, String>(subject, client, logger);
+        }
+
+        internal static Task<HttpWrapper<IEnumerable<DynamoDbTrip>>> ReadRelevantTripsFromDynamoDb(String subject, IAmazonDynamoDB client, ILogger logger)
+        {
+            var month = DateTime.Now.Month;
+            return DynamoDbHelper.GetDynamoDbRecordsBySortKeyRange<DynamoDbTrip, String>(subject, "Subject", "TripId", (month - 1).ToString("D2"), (month + 2).ToString("D2"), client, logger);
         }
 
         internal static DynamoDbTrip PatchTrip(this DynamoDbTrip record, UpdateTripDetails trip)

@@ -58,7 +58,7 @@ namespace FishTrackerLambda.DataAccess
             }
         }
 
-        public static async Task<HttpWrapper<IEnumerable<T>>> GetDynamoDbRecords<T, P>(P part, string partKeyName, IAmazonDynamoDB client, ILogger logger)
+        public static async Task<HttpWrapper<IEnumerable<T>>> GetDynamoDbRecords<T, P>(P part, IAmazonDynamoDB client, ILogger logger)
         {
             logger.LogInformation($"DynamoDbHelper::GetDynamoDbRecords part[{part}]");
 
@@ -80,6 +80,49 @@ namespace FishTrackerLambda.DataAccess
                 throw;
             }
         }
+
+        public static async Task<HttpWrapper<IEnumerable<T>>> GetDynamoDbRecordsBySortKeyRange<T, P>(P partitionKey, string partKeyName, string sortKeyName, string lowerBound, string upperBound, IAmazonDynamoDB client, ILogger logger)
+        {
+            logger.LogInformation("GetDynamoDbRecordsBySortKeyRange partitionKey[{partitionKey}], lowerBound[{lowerBound}], upperBound[{upperBound}]", partitionKey, lowerBound, upperBound);
+
+            var typeT = typeof(T);
+            var typeP = typeof(P);
+
+            try
+            {
+                var context = new DynamoDBContext(client);
+                QueryOperationConfig config = new QueryOperationConfig
+                    {
+                    KeyExpression = new Expression
+                    {
+                        ExpressionStatement = "#partitionKey = :partitionKey AND #sortKey BETWEEN :lowerBound AND :upperBound",
+                        ExpressionAttributeNames = new Dictionary<string, string>
+                            {
+                                { "#partitionKey", partKeyName },
+                                { "#sortKey", sortKeyName }
+                            },
+                        ExpressionAttributeValues = new Dictionary<string, DynamoDBEntry>
+                            {
+                                { ":partitionKey", partitionKey?.ToString() ?? "" },
+                                { ":lowerBound", lowerBound },
+                                { ":upperBound", upperBound }
+                            }
+                    }
+                };
+                var query = context.FromQueryAsync<T>(config);
+                var items = await query.GetRemainingAsync();
+                return HttpWrapper<IEnumerable<T>>.Ok(items);
+            }
+            catch (ResourceNotFoundException)
+            {
+                logger.LogInformation("GetDynamoDbRecordsBySortKeyRange:[{partitionKey}] ResourceNotFoundException - creating empty", partitionKey);
+                return HttpWrapper<IEnumerable<T>>.NotFound;
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "GetDynamoDbRecordsBySortKeyRange partitionKey[{partitionKey}], lowerBound[{lowerBound}], upperBound[{upperBound}]  Exception:[{message}] Type[{type}]", partitionKey, lowerBound, upperBound, ex.Message, ex.GetType());
+                throw;
+            }
+        }
     }
 }
-

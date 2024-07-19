@@ -19,7 +19,7 @@ namespace FishTrackerLambda.Functional
             return Task.FromResult(new HttpWrapper<T>(value));
         }
 
-        public static Task<HttpWrapper<T>> InitAsync<T>(this Task<HttpWrapper<T>> record)
+        public static Task<HttpWrapper<T>> InitAsync<T>(Task<HttpWrapper<T>> record)
         {
             return record;
         }
