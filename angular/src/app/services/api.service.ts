@@ -30,7 +30,7 @@ export class ApiService {
         const headers = new HttpHeaders({
           Authorization: `Bearer ${jwt}`,
         });
-        return this.http.get<TripDetails[]>('https://xte0lryazi.execute-api.eu-central-1.amazonaws.com/Prod/api/trip', { headers });
+        return this.http.get<TripDetails[]>('https://xte0lryazi.execute-api.eu-central-1.amazonaws.com/Prod/api/trip?view=relevant', { headers });
     }));
   }
 
