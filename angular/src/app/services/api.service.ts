@@ -1,41 +1,38 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { AuthService } from '@auth0/auth0-angular';
-import { Observable, from, map, pipe } from 'rxjs';
+import { Observable } from 'rxjs';
 import { switchMap } from 'rxjs/operators';
 import { TokenService } from './token.service';
+import { environment } from '../../environments/environment';
 
 @Injectable({
   providedIn: 'root'
 })
 export class ApiService {
-  private apiUrl = 'https://api.fishtracker.bluefin605.com/api/trip/5acb3a1b-9311-447b-95e5-7dfca626a3d2/catch';
+  private baseApiUrl = environment.apiUrl; // Use environment variable for base API URL
 
-  constructor(private http: HttpClient, private tokenService: TokenService ) {}
+  constructor(private http: HttpClient, private tokenService: TokenService) {}
 
   getTripCatch(): Observable<TripCatch[]> {
+    const apiUrl = `${this.baseApiUrl}/trip/5acb3a1b-9311-447b-95e5-7dfca626a3d2/catch`; // Construct full API URL
     return this.tokenService.token.pipe(switchMap(jwt => {
-        // console.log(`Bearer ${jwt}`);
-        const headers = new HttpHeaders({
-          Authorization: `Bearer ${jwt}`,
-        });
-        return this.http.get<TripCatch[]>(this.apiUrl, { headers });
+      const headers = new HttpHeaders({
+        Authorization: `Bearer ${jwt}`,
+      });
+      return this.http.get<TripCatch[]>(apiUrl, { headers });
     }));
   }
-
 
   getTrip(): Observable<TripDetails[]> {
+    const apiUrl = `${this.baseApiUrl}/trip?view=relevant`; // Construct full API URL
     return this.tokenService.token.pipe(switchMap(jwt => {
-        // console.log(`Bearer ${jwt}`);
-        const headers = new HttpHeaders({
-          Authorization: `Bearer ${jwt}`,
-        });
-        return this.http.get<TripDetails[]>('https://api.fishtracker.bluefin605.com/api/trip?view=relevant', { headers });
+      const headers = new HttpHeaders({
+        Authorization: `Bearer ${jwt}`,
+      });
+      return this.http.get<TripDetails[]>(apiUrl, { headers });
     }));
   }
-
 }
-
 export interface TripCatch {
   tripId: string;
   catchId: string;
