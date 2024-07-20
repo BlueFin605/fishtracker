@@ -18,6 +18,13 @@ builder.Services.ConfigureHttpJsonOptions(options =>
 //    options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
 //});
 
+builder.Services.AddCors(o => o.AddPolicy("MyPolicy", builder =>
+{
+    builder.AllowAnyOrigin()
+           .AllowAnyMethod()
+           .AllowAnyHeader();
+}));
+
 
 if (builder.Configuration.GetSection("Environment")?.Value == "Development")
 {
@@ -50,6 +57,7 @@ var app = builder.Build();
 app.UseHttpsRedirection();
 app.UseAuthorization();
 app.MapControllers();
+app.UseCors("MyPolicy");
 
 app.MapRoutes();
 
