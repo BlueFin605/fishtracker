@@ -1,0 +1,21 @@
+<form (ngSubmit)="postTrip()">
+    <div>
+      <label for="startTime">Start Time:</label>
+      <input type="datetime-local" id="startTime" [(ngModel)]="newTrip.startTime" name="startTime">
+    </div>
+    <div>
+      <label for="timeZone">Time Zone:</label>
+      <input type="text" id="timeZone" [(ngModel)]="newTrip.timeZone" name="timeZone">
+    </div>
+    <div>
+      <label for="notes">Notes:</label>
+      <textarea id="notes" [(ngModel)]="newTrip.notes" name="notes"></textarea>
+    </div>
+    <div>
+      <label for="tags">Tags:</label>
+      <select multiple id="tags" [(ngModel)]="newTrip.tags" name="tags">
+        <!-- Options for tags should be populated here -->
+      </select>
+    </div>
+    <button type="submit">Save Trip</button>
+  </form>

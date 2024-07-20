@@ -32,6 +32,17 @@ export class ApiService {
       return this.http.get<TripDetails[]>(apiUrl, { headers });
     }));
   }
+
+  postTrip(newTrip: NewTrip): Observable<TripDetails> {
+    const apiUrl = `${this.baseApiUrl}/trip`; // Construct full API URL
+    return this.tokenService.token.pipe(switchMap(jwt => {
+      const headers = new HttpHeaders({
+        Authorization: `Bearer ${jwt}`,
+      });
+      return this.http.post<TripDetails>(apiUrl, newTrip, { headers });
+    }));
+  }
+
 }
 export interface TripCatch {
   tripId: string;
@@ -51,6 +62,13 @@ export interface TripDetails {
   notes: string;
   catchSize: number;
   rating: TripRating;
+  tags: TripTags[];
+}
+
+export interface NewTrip {
+  startTime?: Date;
+  timeZone?: string;
+  notes: string;
   tags: TripTags[];
 }
 
