@@ -13,7 +13,7 @@
         </tr>
     </thead>
     <tbody>
-        <tr *ngFor="let trip of trips">
+        <tr *ngFor="let trip of trips" (click)="navigateToTripCatch(trip.tripId)">
             <td>{{ trip.subject }}</td>
             <td>{{ trip.tripId }}</td>
             <td>{{ trip.startTime }}</td>

@@ -6,7 +6,7 @@ import { TripsComponent } from './pages/trips/trips.component';
 import { NewTripComponent } from './pages/new-trip/new-trip.component';
 
 export const routes: Routes = [
-    { path: 'trip', component: TripCatchComponent },
+    { path: 'trip/:tripid', component: TripCatchComponent },
     { path: 'trips', component: TripsComponent },
     { path: 'newtrip', component: NewTripComponent },
     { path: 'debug', component: DebugDisplayComponent }

@@ -1,4 +1,4 @@
-<p>Trip Catch History</p>
+<!-- <p>Trip Catch History</p>
 <table>
     <thead class="custom-header">
         <tr>
@@ -8,7 +8,6 @@
             <th>When</th>
             <th>Size</th>
             <th>Length</th>
-            <!-- Add more table headers for additional properties -->
         </tr>
     </thead>
     <tbody>
@@ -19,8 +18,96 @@
             <td class="custom-cell">{{ item.caughtWhen }}</td>
             <td class="custom-cell">{{ item.caughtSize }}</td>
             <td class="custom-cell">{{ item.caughtLength }}</td>
-            <!-- Add more table cells for additional properties -->
         </tr>
     </tbody>
 </table>
+ -->
 
+ <!-- In trip-catch.component.html -->
+ <section>
+    <h2>Trip Details</h2>
+    <div>
+        <strong>Subject:</strong> {{ tripDetails.subject }}
+    </div>
+    <div>
+        <strong>Trip ID:</strong> {{ tripDetails.tripId }}
+    </div>
+    <div>
+        <strong>Start Time:</strong> {{ tripDetails.startTime | date:'medium' }}
+    </div>
+    <div>
+        <strong>End Time:</strong> {{ tripDetails.endTime | date:'medium' }}
+    </div>
+    <div>
+        <strong>Notes:</strong> {{ tripDetails.notes }}
+    </div>
+    <div>
+        <strong>Catch Size:</strong> {{ tripDetails.catchSize }}
+    </div>
+    <div>
+        <strong>Rating:</strong> {{ tripDetails.rating }}
+    </div>
+    <div>
+        <strong>Tags:</strong> <span *ngFor="let tag of tripDetails.tags">{{ tag }} </span>
+    </div>
+</section>
+
+<section>
+    <h2>New Catch</h2>
+    <form (ngSubmit)="postCatch()">
+        <div>
+            <label for="species">Species:</label>
+            <input type="text" id="species" name="species" [(ngModel)]="newCatch.speciesId">
+        </div>
+        <div>
+            <label for="caughtWhen">When:</label>
+            <input type="datetime-local" id="caughtWhen" name="caughtWhen" [(ngModel)]="newCatch.caughtWhen">
+        </div>
+        <div>
+            <label for="timeZone">Timezone:</label>
+            <input type="text" id="timeZone" name="timeZone" [(ngModel)]="newCatch.timeZone">
+        </div>
+        <div>
+            <label for="size">Size:</label>
+            <select id="size" name="size" [(ngModel)]="newCatch.caughtSize">
+                <option value="Small">Small</option>
+                <option value="Medium">Medium</option>
+                <option value="Large">Large</option>
+                <option value="ExtraLarge">ExtraLarge</option>
+            </select>
+        </div>
+        <div>
+            <label for="length">Length (cm):</label>
+            <input type="number" id="length" name="length" [(ngModel)]="newCatch.caughtLength">
+        </div>
+        <button type="submit">Add Catch</button>
+    </form>
+</section>
+
+<section>
+    <h2>All Catches</h2>
+    <ul>
+        <table>
+            <thead class="custom-header">
+                <tr>
+                    <th>Trip</th>
+                    <th>Catch</th>
+                    <th>Species</th>
+                    <th>When</th>
+                    <th>Size</th>
+                    <th>Length</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr *ngFor="let item of tripCatch">
+                    <td class="custom-cell">{{ item.tripId }}</td>
+                    <td class="custom-cell">{{ item.catchId }}</td>
+                    <td class="custom-cell">{{ item.speciesId }}</td>
+                    <td class="custom-cell">{{ item.caughtWhen }}</td>
+                    <td class="custom-cell">{{ item.caughtSize }}</td>
+                    <td class="custom-cell">{{ item.caughtLength }}</td>
+                </tr>
+            </tbody>
+        </table>
+            </ul>
+</section>

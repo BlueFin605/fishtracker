@@ -13,8 +13,8 @@ export class ApiService {
 
   constructor(private http: HttpClient, private tokenService: TokenService) {}
 
-  getTripCatch(): Observable<TripCatch[]> {
-    const apiUrl = `${this.baseApiUrl}/trip/5acb3a1b-9311-447b-95e5-7dfca626a3d2/catch`; // Construct full API URL
+  getTripCatch(tripid: string): Observable<TripCatch[]> {
+    const apiUrl = `${this.baseApiUrl}/trip/${tripid}/catch`; // Construct full API URL
     return this.tokenService.token.pipe(switchMap(jwt => {
       const headers = new HttpHeaders({
         Authorization: `Bearer ${jwt}`,
@@ -23,13 +23,24 @@ export class ApiService {
     }));
   }
 
-  getTrip(): Observable<TripDetails[]> {
+  getAllTrips(): Observable<TripDetails[]> {
     const apiUrl = `${this.baseApiUrl}/trip?view=relevant`; // Construct full API URL
     return this.tokenService.token.pipe(switchMap(jwt => {
       const headers = new HttpHeaders({
         Authorization: `Bearer ${jwt}`,
       });
       return this.http.get<TripDetails[]>(apiUrl, { headers });
+    }));
+  }
+
+  getTrip(tripid: string): Observable<TripDetails> {
+    const apiUrl = `${this.baseApiUrl}/trip/${tripid}`; // Construct full API URL
+    console.log(`tripid[${tripid}] url[${apiUrl}]`)
+    return this.tokenService.token.pipe(switchMap(jwt => {
+      const headers = new HttpHeaders({
+        Authorization: `Bearer ${jwt}`,
+      });
+      return this.http.get<TripDetails>(apiUrl, { headers });
     }));
   }
 
@@ -43,7 +54,18 @@ export class ApiService {
     }));
   }
 
+  postCatch(tripid: string, newCatch: NewCatch): Observable<TripCatch> {
+    const apiUrl = `${this.baseApiUrl}/trip/${tripid}/catch`; // Construct full API URL
+    console.log(JSON.stringify(newCatch));
+    return this.tokenService.token.pipe(switchMap(jwt => {
+      const headers = new HttpHeaders({
+        Authorization: `Bearer ${jwt}`,
+      });
+      return this.http.post<TripCatch>(apiUrl, newCatch, { headers });
+    }));
+  }
 }
+
 export interface TripCatch {
   tripId: string;
   catchId: string;
@@ -72,7 +94,29 @@ export interface NewTrip {
   tags: TripTags[];
 }
 
-enum TripRating
+export interface NewCatch {
+  speciesId: string;
+  caughtLocation: Location;
+  caughtWhen?: Date;
+  timeZone?: string;
+  caughtSize: FishSize;
+  caughtLength: number;
+}
+
+export interface Location {
+  longitude: number;
+  latitude: number;
+}
+
+export enum FishSize {
+  Undersize,
+  Small,
+  Medium,
+  Large,
+  VeryLarge
+}
+
+export enum TripRating
 {
     NonRated,
     Bust,
@@ -82,7 +126,7 @@ enum TripRating
     OutOfThisWorld
 }
 
-enum TripTags
+export enum TripTags
 {
     Consistent,
     IncomingTide,
