@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { ApiService, TripCatch, TripDetails, NewCatch } from '../../services/api.service';
+import { ApiService, CatchDetails, TripDetails, NewCatch } from '../../services/api.service';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute } from '@angular/router';
 import { FormsModule } from '@angular/forms'; // Add this line
@@ -13,7 +13,7 @@ import { FormsModule } from '@angular/forms'; // Add this line
 })
 export class TripCatchComponent implements OnInit {
   tripDetails: TripDetails = {} as TripDetails;
-  tripCatch: TripCatch[];
+  tripCatch: CatchDetails[];
   tripId: string = '';
   newCatch: NewCatch = {
     timeZone: 'New Zealand Standard Time',
