@@ -1,8 +1,7 @@
 import { Component } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
-import { HeaderComponent } from './components/header/header.component'; // Import the app-header component with correct path
-// import { Routes } from './app.routes'; // Import the app.routes file with correct path
-// import { RouterModule } from '@angular/router'; // Import RouterModule separately
+import { HeaderComponent } from './components/header/header.component';
+import { GoogleMapsLoaderService } from './google-maps-loader.service';
 
 @Component({
   selector: 'app-root',
@@ -15,6 +14,17 @@ import { HeaderComponent } from './components/header/header.component'; // Impor
 })
 export class AppComponent {
   title = 'fishtracker';
+
+  constructor(private googleMapsLoader: GoogleMapsLoaderService) {}
+
+  ngOnInit() {
+    // this.googleMapsLoader.loadScript().then(() => {
+    //   console.log('Google Maps API script loaded');
+    //   // Initialize your Google Maps here
+    // }).catch(error => {
+    //   console.error('Error loading Google Maps:', error);
+    // });
+  }  
 }
 
 // Import RouterModule.forRoot(Routes) in the application bootstrap

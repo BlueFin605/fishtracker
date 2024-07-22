@@ -80,6 +80,25 @@
             <label for="length">Length (cm):</label>
             <input type="number" id="length" name="length" [(ngModel)]="newCatch.caughtLength">
         </div>
+        <div>
+            <label for="caughtLocation">Location {{newCatch.caughtLocation?.latitude}}, {{newCatch.caughtLocation?.longitude}} (Select from map):</label>
+            <button (click)="toggleMapVisibility($event)">Show Map</button>
+            <!-- <a href="#" (click)="toggleMapVisibility()">Show Map</a> -->
+
+            <!-- Wrap your map container with *ngIf to control its visibility -->
+            <div *ngIf="mapVisible">            
+                <google-map
+                    height="400px"
+                    width="750px"
+                    [center]="center"
+                    [zoom]="zoom"
+                    (mapClick)="onMapClick($event)">
+                    <map-marker [position]="markerPosition" [options]="markerOptions" (mapDragend)="onMarkerDragEnd($event)" />
+                </google-map>
+                <input type="hidden" id="caughtLocation" name="caughtLocation" [(ngModel)]="newCatch.caughtLocation">
+            </div>
+        </div>
+
         <button type="submit">Add Catch</button>
     </form>
 </section>

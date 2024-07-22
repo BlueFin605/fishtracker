@@ -117,7 +117,7 @@ export interface NewTrip {
 
 export interface NewCatch {
   speciesId: string;
-  caughtLocation: Location;
+  caughtLocation?: Location;
   caughtWhen?: Date;
   timeZone?: string;
   caughtSize: FishSize;
