@@ -14,7 +14,8 @@ import { GoogleMapsLoaderService } from '../../google-maps-loader.service';
   imports: [CommonModule, FormsModule, GoogleMapsModule]
 })
 export class TripCatchComponent implements OnInit {
-  mapVisible = false;
+  currentPositionMapVisible = false;
+  catchHistoryMapVisible = false;
   tripDetails: TripDetails = {} as TripDetails;
   tripCatch: CatchDetails[];
   tripId: string = '';
@@ -25,8 +26,10 @@ export class TripCatchComponent implements OnInit {
 
   center: google.maps.LatLngLiteral = {lat: 24, lng: 12};
   zoom = 14;
-  markerOptions: google.maps.MarkerOptions = {draggable: true};
-  markerPosition: google.maps.LatLngLiteral = {} as google.maps.LatLngLiteral;
+  currentPositionMarkerOptions: google.maps.MarkerOptions = {draggable: true};
+  currentPositionMarkerPosition: google.maps.LatLngLiteral = {} as google.maps.LatLngLiteral;
+  catchHistoryMapMarkerOptions: google.maps.MarkerOptions = {draggable: false};
+  catchHistoryMapMarkerPosition: google.maps.LatLngLiteral[] = [];
 
   constructor(private route: ActivatedRoute, 
               private apiService: ApiService,
@@ -41,12 +44,12 @@ export class TripCatchComponent implements OnInit {
     this.fetchCatches(this.tripId);
     this.getCurrentLocation().then((position) => {
       this.center = position;
-      this.markerPosition = position;
+      this.currentPositionMarkerPosition = position;
       this.newCatch.caughtLocation = { latitude: position.lat, longitude: position.lng };
     }).catch((error) => {
       console.error('Error getting current location', error);
     });
-    console.log(JSON.stringify(this.markerPosition));
+    console.log(JSON.stringify(this.currentPositionMarkerPosition));
   }
 
   fetchTripDetails(tripid: string) {
@@ -58,19 +61,30 @@ export class TripCatchComponent implements OnInit {
   fetchCatches(tripid: string) {
     this.apiService.getTripCatch(tripid).subscribe(data => {
       this.tripCatch = data;
+      this.tripCatch.forEach(item => {
+        if (item.caughtLocation) {
+          const markerPosition: google.maps.LatLngLiteral = {
+            lat: item.caughtLocation.latitude,
+            lng: item.caughtLocation.longitude
+          };
+          this.catchHistoryMapMarkerPosition.push(markerPosition);
+        }
+      });
+  
     });
   }  
   
   postCatch() {
-    this.getCurrentLocation().then((position) => {
-      this.markerPosition = position;
-    }).catch((error) => {
-      console.error('Error getting current location', error);
-    });
-
     this.apiService.postCatch(this.tripId, this.newCatch).subscribe({
       next: (response) => {
         console.log('Catch saved successfully', response);
+        this.tripCatch.push(response);
+        const markerPosition: google.maps.LatLngLiteral = {
+          lat: response.caughtLocation.latitude,
+          lng: response.caughtLocation.longitude
+        };
+        this.catchHistoryMapMarkerPosition.push(markerPosition);
+
       },
       error: (error) => {
         console.error('Error saving catch', error);
@@ -80,6 +94,7 @@ export class TripCatchComponent implements OnInit {
   }
 
   getCurrentLocation(): Promise<google.maps.LatLngLiteral> {
+    console.log('getCurrentLocation');
     return new Promise((resolve, reject) => {
       if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition(
@@ -105,7 +120,8 @@ export class TripCatchComponent implements OnInit {
     if (event?.latLng == null)
       return;
 
-    this.markerPosition = event.latLng.toJSON();
+    this.currentPositionMarkerPosition = event.latLng.toJSON();
+    this.newCatch.caughtLocation = { latitude: this.currentPositionMarkerPosition.lat, longitude: this.currentPositionMarkerPosition.lng };    
   }
 
   onMarkerDragEnd(event: any) {
@@ -116,11 +132,11 @@ export class TripCatchComponent implements OnInit {
       this.newCatch.caughtLocation = { latitude: newLat, longitude: newLng };
   }
 
-  toggleMapVisibility(event: any) {
+  toggleCurrentPositionMapVisibility(event: any) {
     event.preventDefault();    
-    if (this.mapVisible == false) {
+    if (this.currentPositionMapVisible == false) {
         this.googleMapsLoader.loadScript().then(() => {
-          this.mapVisible = true;
+          this.currentPositionMapVisible = true;
           console.log('Google Maps API script loaded');
           // Initialize your Google Maps here
         }).catch(error => {
@@ -128,6 +144,21 @@ export class TripCatchComponent implements OnInit {
         });
     }
     
-    this.mapVisible = false;
+    this.currentPositionMapVisible = false;
   }
+
+  togglecatchHistoryVisibility(event: any): void {
+    event.preventDefault();    
+    if (this.catchHistoryMapVisible == false) {
+        this.googleMapsLoader.loadScript().then(() => {
+          this.catchHistoryMapVisible = true;
+          console.log('Google Maps API script loaded');
+          // Initialize your Google Maps here
+        }).catch(error => {
+          console.error('Error loading Google Maps:', error);
+        });
+    }
+    
+    this.catchHistoryMapVisible = false;
+  }  
 }

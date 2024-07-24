@@ -82,18 +82,18 @@
         </div>
         <div>
             <label for="caughtLocation">Location {{newCatch.caughtLocation?.latitude}}, {{newCatch.caughtLocation?.longitude}} (Select from map):</label>
-            <button (click)="toggleMapVisibility($event)">Show Map</button>
+            <button (click)="toggleCurrentPositionMapVisibility($event)">Show Map</button>
             <!-- <a href="#" (click)="toggleMapVisibility()">Show Map</a> -->
 
             <!-- Wrap your map container with *ngIf to control its visibility -->
-            <div *ngIf="mapVisible">            
+            <div *ngIf="currentPositionMapVisible">            
                 <google-map
                     height="400px"
                     width="750px"
                     [center]="center"
                     [zoom]="zoom"
                     (mapClick)="onMapClick($event)">
-                    <map-marker [position]="markerPosition" [options]="markerOptions" (mapDragend)="onMarkerDragEnd($event)" />
+                    <map-marker [position]="currentPositionMarkerPosition" [options]="currentPositionMarkerOptions" (mapDragend)="onMarkerDragEnd($event)" />
                 </google-map>
                 <input type="hidden" id="caughtLocation" name="caughtLocation" [(ngModel)]="newCatch.caughtLocation">
             </div>
@@ -105,6 +105,18 @@
 
 <section>
     <h2>All Catches</h2>
+    <button (click)="togglecatchHistoryVisibility($event)">Show catches on Map</button> <!-- Show on Maps button -->
+    <div *ngIf="catchHistoryMapVisible">            
+        <google-map
+            height="400px"
+            width="750px"
+            [center]="center"
+            [zoom]="zoom">
+            <map-marker *ngFor="let position of catchHistoryMapMarkerPosition" [position]="position" [options]="catchHistoryMapMarkerOptions" />
+        </google-map>
+        <!-- <input type="hidden" id="caughtLocation" name="caughtLocation" [(ngModel)]="newCatch.caughtLocation"> -->
+    </div>
+
     <ul>
         <table>
             <thead class="custom-header">
