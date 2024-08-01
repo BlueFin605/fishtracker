@@ -6,7 +6,7 @@ namespace FishTrackerLambda.Models.Lambda;
 public record class CatchDetails(
     string tripId,
     Guid catchId,
-    Guid SpeciesId,
+    String SpeciesId,
     Location caughtLocation,
     DateTimeOffset caughtWhen,
     FishSize caughtSize,

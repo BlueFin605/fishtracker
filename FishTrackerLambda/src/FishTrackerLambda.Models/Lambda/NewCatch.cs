@@ -1,7 +1,7 @@
 ﻿namespace FishTrackerLambda.Models.Lambda;
 
 public record class NewCatch(
-    Guid SpeciesId,
+    String SpeciesId,
     Location caughtLocation,
     DateTimeOffset? caughtWhen,
     String? timeZone,

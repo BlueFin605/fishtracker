@@ -15,7 +15,7 @@ namespace FishTrackerLambda.Models.Persistance
         [DynamoDBRangeKey]
         public string CatchId { get; set; }
 
-        public Guid SpeciesId { get; set; }
+        public string SpeciesId { get; set; }
         public Location CaughtLocation { get; set; }
         public string CaughtWhen { get; set; }
         public FishSize CaughtSize { get; set; }
@@ -26,7 +26,7 @@ namespace FishTrackerLambda.Models.Persistance
         public int? DynamoDbVersion { get; set; }
 
         [JsonConstructor]
-        public DynamoDbCatch(string tripId, Guid catchId, Guid speciesId, Location caughtLocation, DateTimeOffset caughtWhen, FishSize caughtSize, double caughtLength, WeatherAttributes? weather, int? dynamoDbVersion)
+        public DynamoDbCatch(string tripId, Guid catchId, string speciesId, Location caughtLocation, DateTimeOffset caughtWhen, FishSize caughtSize, double caughtLength, WeatherAttributes? weather, int? dynamoDbVersion)
         {
             TripId = tripId;
             CatchId = catchId.ToString();
@@ -43,6 +43,7 @@ namespace FishTrackerLambda.Models.Persistance
         {
             TripId = string.Empty;
             CatchId = string.Empty;
+            SpeciesId = string.Empty;
             CaughtWhen = string.Empty;
             CaughtLocation = new Location();
         }

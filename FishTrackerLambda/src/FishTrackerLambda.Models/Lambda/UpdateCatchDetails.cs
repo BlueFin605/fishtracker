@@ -1,7 +1,7 @@
 ﻿namespace FishTrackerLambda.Models.Lambda;
 
 public record class UpdateCatchDetails(
-    Guid? SpeciesId,
+    String? SpeciesId,
     Location? caughtLocation,
     DateTimeOffset? caughtWhen,
     FishSize? caughtSize,

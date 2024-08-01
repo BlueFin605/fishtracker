@@ -21,7 +21,7 @@ export class TripCatchComponent implements OnInit {
   tripId: string = '';
   newCatch: NewCatch = {
     timeZone: 'New Zealand Standard Time',
-    speciesId: '2baeb56a-9f54-4e18-96ef-8bff9427b3c6'
+    speciesId: 'Snapper'
   } as NewCatch;
 
   center: google.maps.LatLngLiteral = {lat: 24, lng: 12};
