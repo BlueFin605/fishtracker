@@ -26,7 +26,17 @@ public static class CatchDbTable
 
     internal static Task<HttpWrapper<IEnumerable<DynamoDbCatch>>> ReadAllCatchFromDynamoDb(string tripId, IAmazonDynamoDB client, ILogger logger)
     {
-        return DynamoDbHelper.GetDynamoDbRecords<DynamoDbCatch, string>(tripId.ToString(), client, logger);
+        return DynamoDbHelper.GetDynamoDbRecords<DynamoDbCatch, string>(tripId, client, logger);
+    }
+
+    internal static Task<HttpWrapper<IEnumerable<DynamoDbCatch>>> ReadAllCatchFromDynamoDb(this DynamoDbTrip record, IAmazonDynamoDB client, ILogger logger)
+    {
+        return DynamoDbHelper.GetDynamoDbRecords<DynamoDbCatch, string>(record.TripId, client, logger);
+    }
+
+    public static Task<HttpWrapper<DynamoDbCatch>> DeleteCatchInDynamodb(this DynamoDbCatch record, IAmazonDynamoDB client, ILogger logger)
+    {
+        return record.DeleteDynamoDbRecord(client, logger);
     }
 
     internal static DynamoDbCatch PatchCatch(this DynamoDbCatch record, UpdateCatchDetails updateCatch)
