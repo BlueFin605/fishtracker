@@ -1,33 +1,36 @@
 <section>
     <h2>All Trips</h2>
-    <label>
-      <input type="checkbox" (change)="toggleTrips($event)" unchecked>
-      Show All Trips
-    </label><table>
-    <thead>
-        <tr>
-            <th>Subject</th>
-            <th>Trip ID</th>
-            <th>Start</th>
-            <th>End</th>
-            <th>Notes</th>
-            <th>catchSize</th>
-            <th>rating</th>
-            <th>tags</th>
-          
-        </tr>
-    </thead>
-    <tbody>
-        <tr *ngFor="let trip of trips" (click)="navigateToTripCatch(trip.tripId)">
-            <td>{{ trip.subject }}</td>
-            <td>{{ trip.tripId }}</td>
-            <td>{{ trip.startTime }}</td>
-            <td>{{ trip.endTime }}</td>
-            <td>{{ trip.notes }}</td>
-            <td>{{ trip.catchSize }}</td>
-            <td>{{ trip.rating }}</td>
-            <td>{{ trip.tags }}</td>
-        </tr>
-    </tbody>
-</table>
+    <div class="switch-container">
+        <label class="switch">
+            <input type="checkbox" (change)="toggleTrips($event)" checked>
+            <span class="slider round"></span>
+        </label>
+        <span class="switch-label">Relevant Trips Only</span>
+    </div>
+    <table>
+        <thead>
+            <tr>
+                <th>Subject</th>
+                <th>Trip ID</th>
+                <th>Start</th>
+                <th>End</th>
+                <th>Notes</th>
+                <th>catchSize</th>
+                <th>rating</th>
+                <th>tags</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr *ngFor="let trip of trips" (click)="navigateToTripCatch(trip.tripId)">
+                <td>{{ trip.subject }}</td>
+                <td>{{ trip.tripId }}</td>
+                <td>{{ trip.startTime }}</td>
+                <td>{{ trip.endTime }}</td>
+                <td>{{ trip.notes }}</td>
+                <td>{{ trip.catchSize }}</td>
+                <td>{{ trip.rating }}</td>
+                <td>{{ trip.tags }}</td>
+            </tr>
+        </tbody>
+    </table>
 </section>

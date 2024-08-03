@@ -18,11 +18,11 @@ export class TripsComponent {
   }
 
   ngOnInit() {
-    this.getAllTrips(false);
+    this.getAllTrips(true);
   }
 
   getAllTrips(showAll: boolean) {
-    this.apiService.getAllTrips(!showAll).subscribe((data: TripDetails[]) => {
+    this.apiService.getAllTrips(showAll).subscribe((data: TripDetails[]) => {
       this.trips = data;
       console.log(`trips data ${JSON.stringify(this.trips)}`);
     });
