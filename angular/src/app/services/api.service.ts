@@ -45,6 +45,17 @@ export class ApiService {
     }));
   }
 
+  deleteTrip(tripid: string): Observable<CatchDetails[]> {
+    const apiUrl = `${this.baseApiUrl}/trip/${tripid}`; // Construct full API URL
+    console.log(`tripid[${tripid}] url[${apiUrl}]`)
+    return this.tokenService.token.pipe(switchMap(jwt => {
+      const headers = new HttpHeaders({
+        Authorization: `Bearer ${jwt}`,
+      });
+      return this.http.delete<CatchDetails[]>(apiUrl, { headers });
+    }));
+  }
+
   postTrip(newTrip: NewTrip): Observable<TripDetails> {
     const apiUrl = `${this.baseApiUrl}/trip`; // Construct full API URL
     return this.tokenService.token.pipe(switchMap(jwt => {

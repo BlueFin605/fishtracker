@@ -18,6 +18,7 @@
                 <th>catchSize</th>
                 <th>rating</th>
                 <th>tags</th>
+                <th>Actions</th>
             </tr>
         </thead>
         <tbody>
@@ -30,6 +31,9 @@
                 <td>{{ trip.catchSize }}</td>
                 <td>{{ trip.rating }}</td>
                 <td>{{ trip.tags }}</td>
+                <td>
+                    <i class="fas fa-trash" (click)="deleteTrip(trip.tripId, $event)"></i>
+                </td>
             </tr>
         </tbody>
     </table>

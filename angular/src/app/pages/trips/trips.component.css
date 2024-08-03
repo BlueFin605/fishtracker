@@ -58,3 +58,13 @@
     margin-left: 10px;
     font-size: 14px;
   }
+
+  .fas.fa-trash {
+    cursor: pointer;
+    color: red;
+    margin-left: 10px;
+  }
+  
+  .fas.fa-trash:hover {
+    color: darkred;
+  }
