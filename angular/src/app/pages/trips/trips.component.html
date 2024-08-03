@@ -1,4 +1,9 @@
-<table>
+<section>
+    <h2>All Trips</h2>
+    <label>
+      <input type="checkbox" (change)="toggleTrips($event)" unchecked>
+      Show All Trips
+    </label><table>
     <thead>
         <tr>
             <th>Subject</th>
@@ -25,3 +30,4 @@
         </tr>
     </tbody>
 </table>
+</section>

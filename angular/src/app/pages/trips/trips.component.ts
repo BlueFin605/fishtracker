@@ -18,13 +18,22 @@ export class TripsComponent {
   }
 
   ngOnInit() {
-    this.apiService.getAllTrips().subscribe((data: TripDetails[]) => {
+    this.getAllTrips(false);
+  }
+
+  getAllTrips(showAll: boolean) {
+    this.apiService.getAllTrips(!showAll).subscribe((data: TripDetails[]) => {
       this.trips = data;
-      console.log(`trips data ${JSON.stringify(this.trips)}`)
+      console.log(`trips data ${JSON.stringify(this.trips)}`);
     });
+  }
+
+  toggleTrips(event: Event) {
+    const checkbox = event.target as HTMLInputElement;
+    this.getAllTrips(checkbox.checked);
   }
 
   navigateToTripCatch(tripId: string) {
     this.router.navigate(['/trip', tripId]);
-  }  
+  }
 }

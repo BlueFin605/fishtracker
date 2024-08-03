@@ -23,8 +23,9 @@ export class ApiService {
     }));
   }
 
-  getAllTrips(): Observable<TripDetails[]> {
-    const apiUrl = `${this.baseApiUrl}/trip?view=relevant`; // Construct full API URL
+  getAllTrips(relevant: boolean): Observable<TripDetails[]> {
+    const view = relevant ? 'relevant' : 'all';
+    const apiUrl = `${this.baseApiUrl}/trip?view=${view}`; // Construct full API URL
     return this.tokenService.token.pipe(switchMap(jwt => {
       const headers = new HttpHeaders({
         Authorization: `Bearer ${jwt}`,
