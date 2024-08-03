@@ -36,6 +36,18 @@ namespace FishTrackerLambda.DataAccess
             return HttpWrapper<T>.Ok(q);
         }
 
+        public static async Task<HttpWrapper<T>> DeleteDynamoDbRecord<T>(this T record, IAmazonDynamoDB client, ILogger logger)
+        {
+            logger.LogInformation($"DynamoDbHelper::DeleteDynamoDbRecord");
+
+            var q = record;
+
+            var context = new DynamoDBContext(client);
+            await context.DeleteAsync<T>(q);
+
+            return HttpWrapper<T>.Ok(q);
+        }
+
         public static async Task<HttpWrapper<T>> GetDynamoDbRecord<T, P, S>(P part, S sortKey, IAmazonDynamoDB client, ILogger logger)
         {
             logger.LogInformation($"DynamoDbHelper::GetDynamoDbRecord part[{part}] sort[{sortKey}]");

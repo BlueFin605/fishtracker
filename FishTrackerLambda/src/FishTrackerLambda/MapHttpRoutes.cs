@@ -22,6 +22,12 @@ public static class MapHttpRoutes
             return await ExecuteService(app.Logger, $"GetTrip tripId:[{subjectClaim}][{tripId}]", async () => await tripService.GetTrip(subjectClaim, tripId));
         });
 
+        app.MapDelete("api/trip/{tripId}", async (IClaimHandler claimHandler, ICatchService catchService, ITripService tripService, ClaimsPrincipal user, string tripId) =>
+        {
+            string subjectClaim = claimHandler.ExtractSubject(user.Claims);
+            return await ExecuteService(app.Logger, $"DeleteTrip tripId:[{subjectClaim}][{tripId}]", async () => await tripService.DeleteTrip(subjectClaim, tripId));
+        });
+
         app.MapPost("api/trip", async (IClaimHandler claimHandler, ICatchService catchService, ITripService tripService, ClaimsPrincipal user, NewTrip newTrip) =>
         {
             string subjectClaim = claimHandler.ExtractSubject(user.Claims);

@@ -1,4 +1,5 @@
 ﻿using Amazon.DynamoDBv2;
+using FishTrackerLambda.ClaimHandler;
 using FishTrackerLambda.Functional;
 using FishTrackerLambda.Helpers;
 using FishTrackerLambda.Models.Lambda;
@@ -16,6 +17,11 @@ namespace FishTrackerLambda.DataAccess
         public static Task<HttpWrapper<DynamoDbTrip>> UpdateTripInDynamodb(this DynamoDbTrip record, IAmazonDynamoDB client, ILogger logger)
         {
             return record.UpdateDynamoDbRecord(client, logger);
+        }
+
+        public static Task<HttpWrapper<DynamoDbTrip>> DeleteTripInDynamodb(this DynamoDbTrip record, IAmazonDynamoDB client, ILogger logger)
+        {
+            return record.DeleteDynamoDbRecord(client, logger);
         }
 
         public static Task<HttpWrapper<DynamoDbTrip>> ReadTripFromDynamodb(String subject, string TripId, IAmazonDynamoDB client, ILogger logger)

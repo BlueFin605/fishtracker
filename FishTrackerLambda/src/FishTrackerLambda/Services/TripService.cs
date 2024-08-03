@@ -76,6 +76,14 @@ namespace FishTrackerLambda.ClaimHandler
                 .MapAsync(c => c.UpdateTripInDynamodb(m_client, m_logger))
                 .Map(c => c.ToTripDetails());
         }
+
+        public Task<HttpWrapper<TripDetails>> DeleteTrip(string subject, string tripId)
+        {
+            return TripDbTable
+                .ReadTripFromDynamodb(subject, tripId, m_client, m_logger)
+                .MapAsync(c => c.DeleteTripInDynamodb(m_client, m_logger))
+                .Map(c => c.ToTripDetails());
+        }
     }
 }
 
