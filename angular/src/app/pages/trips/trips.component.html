@@ -2,7 +2,7 @@
     <h2>All Trips</h2>
     <div class="switch-container">
         <label class="switch">
-            <input type="checkbox" (change)="toggleTrips($event)" checked>
+            <input type="checkbox" (change)="toggleTrips($event)" [checked]="relevantTrips">
             <span class="slider round"></span>
         </label>
         <span class="switch-label">Relevant Trips Only</span>

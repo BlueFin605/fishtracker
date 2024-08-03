@@ -2,6 +2,7 @@ import { Component } from '@angular/core';
 import {CommonModule} from '@angular/common';
 import { ApiService, TripDetails, CatchDetails } from '../../services/api.service';
 import { Router } from '@angular/router';
+import { FishTrackerSettingsService } from '../../services/fish-tracker-settings.service';
 
 @Component({
   selector: 'app-trips',
@@ -12,10 +13,13 @@ import { Router } from '@angular/router';
 })
 export class TripsComponent {
   trips: TripDetails[];
-  relevantTrips: boolean = true;
+  relevantTrips: boolean;
 
-  constructor(private router: Router, private apiService: ApiService) {
+  constructor(private router: Router, 
+              private apiService: ApiService,
+              private fishTrackerSettingsService: FishTrackerSettingsService) {
     this.trips = [];
+    this.relevantTrips = this.fishTrackerSettingsService.relevantTrips;
   }
 
   ngOnInit() {
@@ -47,6 +51,7 @@ export class TripsComponent {
   toggleTrips(event: Event) {
     const checkbox = event.target as HTMLInputElement;
     this.relevantTrips = checkbox.checked;
+    this.fishTrackerSettingsService.relevantTrips = this.relevantTrips; // Store the value in the service    
     this.getAllTrips();
   }
 
