@@ -29,8 +29,15 @@ export class TripsComponent {
     });
   }
 
-  deleteTrip(tripId: string, event: Event): void {
+  confirmDeleteTrip(tripId: string, event: Event): void {
     event.stopPropagation();
+    const confirmed = confirm('Are you sure you want to delete this trip?');
+    if (confirmed) {
+      this.deleteTrip(tripId);
+    }
+  }
+
+  deleteTrip(tripId: string): void {
     this.apiService.deleteTrip(tripId).subscribe((data: CatchDetails[]) => {
       console.log(`removed catch data ${JSON.stringify(data)}`);
       this.getAllTrips();

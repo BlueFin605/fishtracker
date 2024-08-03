@@ -32,7 +32,7 @@
                 <td>{{ trip.rating }}</td>
                 <td>{{ trip.tags }}</td>
                 <td>
-                    <i class="fas fa-trash" (click)="deleteTrip(trip.tripId, $event)"></i>
+                    <i class="fas fa-trash" (click)="confirmDeleteTrip(trip.tripId, $event)"></i>
                 </td>
             </tr>
         </tbody>
