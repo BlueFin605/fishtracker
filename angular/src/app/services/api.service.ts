@@ -121,7 +121,7 @@ export interface TripDetails {
 }
 
 export interface NewTrip {
-  startTime?: Date;
+  startTime?: string;
   timeZone?: string;
   notes: string;
   tags: TripTags[];

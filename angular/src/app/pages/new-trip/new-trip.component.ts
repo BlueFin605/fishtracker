@@ -3,6 +3,8 @@ import { ApiService, NewTrip } from '../../services/api.service';
 import { FormsModule } from '@angular/forms'; // Add this line
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router'; // Add this line
+import { toZonedTime } from 'date-fns-tz';
+import { formatISO } from 'date-fns';
 
 @Component({
   standalone: true,
@@ -14,14 +16,25 @@ import { Router } from '@angular/router'; // Add this line
 export class NewTripComponent {
   newTrip: NewTrip = {
     startTime: undefined,
-    timeZone: 'New Zealand Standard Time',
+    timeZone: 'Pacific/Auckland',
     notes: '',
     tags: []
   };
 
-  constructor(private apiService: ApiService, private router: Router) {}
+  startTime: Date | undefined = new Date();
 
-  postTrip() {
+  constructor(private apiService: ApiService, private router: Router) {}
+  ngOnInit() {
+    this.startTime = new Date();
+  }
+
+  postTrip() {    
+    if (this.startTime && this.newTrip.timeZone) {
+      const timeZone = 'Pacific/Auckland'; // Specify the desired time zone
+      const zonedTime = toZonedTime(this.startTime, this.newTrip.timeZone);
+      this.newTrip.startTime = formatISO(zonedTime);
+    }
+    
     this.apiService.postTrip(this.newTrip).subscribe({
       next: (response) => {
         console.log('Trip saved successfully', response);
