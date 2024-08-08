@@ -6,6 +6,7 @@ import { FormsModule } from '@angular/forms'; // Add this line
 import { GoogleMapsModule } from '@angular/google-maps'; // Add this line\
 import { GoogleMapsLoaderService } from '../../google-maps-loader.service';
 import { DateConversionService } from '../../services/date-conversion.service';
+import * as moment from 'moment-timezone';
 
 @Component({
   standalone: true,
@@ -21,9 +22,10 @@ export class TripCatchComponent implements OnInit {
   tripCatch: CatchDetails[];
   tripId: string = '';
   caughtWhen: Date | undefined = new Date();
+  timeZones: string[] = [];
 
   newCatch: NewCatch = {
-    timeZone: 'New Zealand Standard Time',
+    timeZone: 'UCT',
     speciesId: 'Snapper'
   } as NewCatch;
 
@@ -42,6 +44,8 @@ export class TripCatchComponent implements OnInit {
   }
 
   ngOnInit() {
+    this.timeZones = moment.tz.names();  
+    this.newCatch.timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;      
     this.tripId = this.route.snapshot.paramMap.get('tripid')!;
     console.log(`tripId: ${this.tripId}`);
     this.fetchTripDetails(this.tripId);

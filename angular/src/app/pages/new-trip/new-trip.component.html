@@ -4,9 +4,11 @@
       <input type="datetime-local" id="startTime" [(ngModel)]="startTime" name="startTime">
     </div>
     <div>
-      <label for="timeZone">Time Zone:</label>
-      <input type="text" id="timeZone" [(ngModel)]="newTrip.timeZone" name="timeZone">
-    </div>
+      <label for="timeZone">Timezone:</label>
+      <select id="timeZone" name="timeZone" [(ngModel)]="newTrip.timeZone">
+          <option *ngFor="let tz of timeZones" [value]="tz">{{ tz }}</option>
+      </select>
+    </div>        
     <div>
       <label for="notes">Notes:</label>
       <textarea id="notes" [(ngModel)]="newTrip.notes" name="notes"></textarea>

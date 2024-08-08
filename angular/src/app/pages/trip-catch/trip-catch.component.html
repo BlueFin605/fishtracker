@@ -65,8 +65,10 @@
         </div>
         <div>
             <label for="timeZone">Timezone:</label>
-            <input type="text" id="timeZone" name="timeZone" [(ngModel)]="newCatch.timeZone">
-        </div>
+            <select id="timeZone" name="timeZone" [(ngModel)]="newCatch.timeZone">
+                <option *ngFor="let tz of timeZones" [value]="tz">{{ tz }}</option>
+            </select>
+        </div>        
         <div>
             <label for="size">Size:</label>
             <select id="size" name="size" [(ngModel)]="newCatch.caughtSize">
