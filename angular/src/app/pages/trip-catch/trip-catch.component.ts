@@ -5,6 +5,7 @@ import { ActivatedRoute } from '@angular/router';
 import { FormsModule } from '@angular/forms'; // Add this line
 import { GoogleMapsModule } from '@angular/google-maps'; // Add this line\
 import { GoogleMapsLoaderService } from '../../google-maps-loader.service';
+import { DateConversionService } from '../../services/date-conversion.service';
 
 @Component({
   standalone: true,
@@ -19,6 +20,8 @@ export class TripCatchComponent implements OnInit {
   tripDetails: TripDetails = {} as TripDetails;
   tripCatch: CatchDetails[];
   tripId: string = '';
+  caughtWhen: Date | undefined = new Date();
+
   newCatch: NewCatch = {
     timeZone: 'New Zealand Standard Time',
     speciesId: 'Snapper'
@@ -33,7 +36,8 @@ export class TripCatchComponent implements OnInit {
 
   constructor(private route: ActivatedRoute, 
               private apiService: ApiService,
-              private googleMapsLoader: GoogleMapsLoaderService) {
+              private googleMapsLoader: GoogleMapsLoaderService,
+              private dateFormatter: DateConversionService) {
     this.tripCatch = [];
   }
 
@@ -75,6 +79,8 @@ export class TripCatchComponent implements OnInit {
   }  
   
   postCatch() {
+    this.newCatch.caughtWhen = this.dateFormatter.createLocalDate(this.caughtWhen, this.newCatch.timeZone);
+
     this.apiService.postCatch(this.tripId, this.newCatch).subscribe({
       next: (response) => {
         console.log('Catch saved successfully', response);

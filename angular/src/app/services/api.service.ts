@@ -130,7 +130,7 @@ export interface NewTrip {
 export interface NewCatch {
   speciesId: string;
   caughtLocation?: Location;
-  caughtWhen?: Date;
+  caughtWhen?: string;
   timeZone?: string;
   caughtSize: FishSize;
   caughtLength: number;
