@@ -26,7 +26,7 @@
     </div>
 </section>
 
-<section> <!-- New Catch-->
+<section  *ngIf="!tripDetails.endTime"> <!-- New Catch-->
     <h2>New Catch</h2>
     <form (ngSubmit)="postCatch()">
         <div>
