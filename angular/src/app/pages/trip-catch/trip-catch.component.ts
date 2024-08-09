@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { ApiService, CatchDetails, TripDetails, NewCatch } from '../../services/api.service';
+import { ApiService, CatchDetails, TripDetails, NewCatch, EndTripDetails } from '../../services/api.service';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute } from '@angular/router';
 import { FormsModule } from '@angular/forms'; // Add this line
@@ -23,6 +23,13 @@ export class TripCatchComponent implements OnInit {
   tripId: string = '';
   caughtWhen: Date | undefined = new Date();
   timeZones: string[] = [];
+  showEndTripModal: boolean = false;
+  endTripData: any = {
+    endTime: '',
+    notes: '',
+    rating: '',
+    tags: ''
+  };  
 
   newCatch: NewCatch = {
     timeZone: 'UCT',
@@ -170,5 +177,35 @@ export class TripCatchComponent implements OnInit {
     }
     
     this.catchHistoryMapVisible = false;
+  }  
+
+  openEndTripModal() {
+    this.showEndTripModal = true;
+  }
+
+  closeEndTripModal() {
+    this.showEndTripModal = false;
+  }
+
+  endTrip() {
+    const updatedTrip: EndTripDetails = {
+      endTime: this.endTripData.endTime = this.dateFormatter.createLocalDate(this.endTripData.endTime, this.newCatch.timeZone),
+      timeZone: this.newCatch.timeZone,
+      notes: this.endTripData.notes,
+      // rating: this.endTripData.rating
+      // tags: this.endTripData.tags.split(',').map(tag => tag.trim())
+    };
+
+    this.apiService.endTrip(this.tripDetails.tripId, updatedTrip).subscribe({
+      next: (response) => {
+        this.closeEndTripModal();
+        console.log('Trip ended successfully', response);
+        this.tripDetails = response;
+      },
+      error: (error) => {
+        console.error('Error ending trip', error);
+        // Handle error, e.g., show an error message
+      }
+    });
   }  
 }

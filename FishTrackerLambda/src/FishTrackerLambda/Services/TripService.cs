@@ -1,6 +1,7 @@
 ﻿using Amazon.DynamoDBv2;
 using FishTrackerLambda.DataAccess;
 using FishTrackerLambda.Functional;
+using FishTrackerLambda.Helpers;
 using FishTrackerLambda.Models.Lambda;
 using FishTrackerLambda.Models.Persistance;
 
@@ -96,6 +97,19 @@ namespace FishTrackerLambda.ClaimHandler
 
         }
 
+        public Task<HttpWrapper<TripDetails>> EndTrip(string subject, string tripId, EndTripDetails trip)
+        {
+            return CatchDbTable.ReadAllCatchFromDynamoDb(IdGenerator.GenerateTripKey(subject, tripId), m_client, m_logger)
+                .MapAsync(all =>
+                {
+                    return TripDbTable
+                        .ReadTripFromDynamodb(subject, tripId, m_client, m_logger)
+                        .Map(c => c.EndTrip(trip, all.Count()))
+                        .MapAsync(c => c.UpdateTripInDynamodb(m_client, m_logger))
+                        .Map(c => c.ToTripDetails());
+                });
+
+        }
     }
 }
 

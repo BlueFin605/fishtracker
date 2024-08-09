@@ -26,6 +26,33 @@
     </div>
 </section>
 
+<section *ngIf="!tripDetails.endTime"> <!-- End Trip Button -->
+    <button (click)="openEndTripModal()">End Trip</button>
+</section>
+
+<!-- End Trip Modal -->
+<div *ngIf="showEndTripModal" class="modal">
+    <div class="modal-content">
+        <span class="close" (click)="closeEndTripModal()">&times;</span>
+        <h2>End Trip</h2>
+        <form (ngSubmit)="endTrip()">
+            <label for="endTime">End Time:</label>
+            <input type="datetime-local" id="endTime" [(ngModel)]="endTripData.endTime" name="endTime" required>
+            
+            <label for="notes">Notes:</label>
+            <textarea id="notes" [(ngModel)]="endTripData.notes" name="notes"></textarea>
+            
+            <label for="rating">Rating:</label>
+            <input type="number" id="rating" [(ngModel)]="endTripData.rating" name="rating" min="1" max="5">
+            
+            <label for="tags">Tags:</label>
+            <input type="text" id="tags" [(ngModel)]="endTripData.tags" name="tags">
+            
+            <button type="submit">Submit</button>
+        </form>
+    </div>
+</div>
+
 <section  *ngIf="!tripDetails.endTime"> <!-- New Catch-->
     <h2>New Catch</h2>
     <form (ngSubmit)="postCatch()">

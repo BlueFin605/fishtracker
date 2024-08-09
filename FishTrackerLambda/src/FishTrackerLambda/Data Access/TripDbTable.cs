@@ -70,6 +70,23 @@ namespace FishTrackerLambda.DataAccess
                                     c.DynamoDbVersion);
         }
 
+        internal static DynamoDbTrip EndTrip(this DynamoDbTrip record, EndTripDetails trip, int size)
+        {
+            var c = record;
+
+            DateTimeOffset endTime = trip.endTime ?? DateConverter.GetLocalNow(trip.timeZone);
+
+            return new DynamoDbTrip(c.Subject,
+                                    c.TripId,
+                                    DateConverter.IsoFromString(c.StartTime),
+                                    endTime,
+                                    trip.notes ?? c.Notes,
+                                    (uint)size,
+                                    trip.rating ?? c.Rating,
+                                    trip.tags?.ToList() ?? c.Tags,
+                                    c.DynamoDbVersion);
+        }
+
         public static NewTrip FillInMissingData(this NewTrip newTrip)
         {
             DateTimeOffset startTime = newTrip.startTime ?? DateConverter.GetLocalNow(newTrip.timeZone);
@@ -78,7 +95,7 @@ namespace FishTrackerLambda.DataAccess
 
         public static DynamoDbTrip CreateNewDyanmoRecord(this NewTrip newTrip, string subject)
         {
-            var start = newTrip?.startTime ?? throw new Exception("Start time should not be null"); ;
+            var start = newTrip?.startTime ?? throw new Exception("Start time should not be null");
             return new DynamoDbTrip(subject,
                                     IdGenerator.GenerateTripId(start),
                                     start,

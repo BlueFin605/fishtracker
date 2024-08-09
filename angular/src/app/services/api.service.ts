@@ -66,6 +66,16 @@ export class ApiService {
     }));
   }
 
+  endTrip(tripid: string, patchTrip: EndTripDetails): Observable<TripDetails> {
+    const apiUrl = `${this.baseApiUrl}/trip/${tripid}/endTrip`; // Construct full API URL
+    return this.tokenService.token.pipe(switchMap(jwt => {
+      const headers = new HttpHeaders({
+        Authorization: `Bearer ${jwt}`,
+      });
+      return this.http.post<TripDetails>(apiUrl, patchTrip, { headers });
+    }));
+  }
+
   postCatch(tripid: string, newCatch: NewCatch): Observable<CatchDetails> {
     const apiUrl = `${this.baseApiUrl}/trip/${tripid}/catch`; // Construct full API URL
     console.log(JSON.stringify(newCatch));
@@ -118,6 +128,14 @@ export interface TripDetails {
   catchSize: number;
   rating: TripRating;
   tags: TripTags[];
+}
+
+export interface EndTripDetails {
+  endTime?: string;
+  timeZone?: string;
+  notes?: string;
+  rating?: TripRating;
+  tags?: TripTags[];
 }
 
 export interface NewTrip {
