@@ -1,30 +1,5 @@
-<!-- <p>Trip Catch History</p>
-<table>
-    <thead class="custom-header">
-        <tr>
-            <th>Trip</th>
-            <th>Catch</th>
-            <th>Species</th>
-            <th>When</th>
-            <th>Size</th>
-            <th>Length</th>
-        </tr>
-    </thead>
-    <tbody>
-        <tr *ngFor="let item of tripCatch">
-            <td class="custom-cell">{{ item.tripId }}</td>
-            <td class="custom-cell">{{ item.catchId }}</td>
-            <td class="custom-cell">{{ item.speciesId }}</td>
-            <td class="custom-cell">{{ item.caughtWhen }}</td>
-            <td class="custom-cell">{{ item.caughtSize }}</td>
-            <td class="custom-cell">{{ item.caughtLength }}</td>
-        </tr>
-    </tbody>
-</table>
- -->
-
- <!-- In trip-catch.component.html -->
- <section>
+<!-- In trip-catch.component.html -->
+<section>
     <h2>Trip Details</h2>
     <div>
         <strong>Subject:</strong> {{ tripDetails.subject }}
@@ -68,7 +43,7 @@
             <select id="timeZone" name="timeZone" [(ngModel)]="newCatch.timeZone">
                 <option *ngFor="let tz of timeZones" [value]="tz">{{ tz }}</option>
             </select>
-        </div>        
+        </div>
         <div>
             <label for="size">Size:</label>
             <select id="size" name="size" [(ngModel)]="newCatch.caughtSize">
@@ -83,19 +58,15 @@
             <input type="number" id="length" name="length" [(ngModel)]="newCatch.caughtLength">
         </div>
         <div>
-            <label for="caughtLocation">Location {{newCatch.caughtLocation?.latitude}}, {{newCatch.caughtLocation?.longitude}} (Select from map):</label>
+            <label for="caughtLocation">Location {{newCatch.caughtLocation?.latitude}},
+                {{newCatch.caughtLocation?.longitude}} (Select from map):</label>
             <button (click)="toggleCurrentPositionMapVisibility($event)">Show Map</button>
-            <!-- <a href="#" (click)="toggleMapVisibility()">Show Map</a> -->
 
-            <!-- Wrap your map container with *ngIf to control its visibility -->
-            <div *ngIf="currentPositionMapVisible">            
-                <google-map
-                    height="400px"
-                    width="750px"
-                    [center]="center"
-                    [zoom]="zoom"
+            <div *ngIf="currentPositionMapVisible">
+                <google-map height="400px" width="750px" [center]="center" [zoom]="zoom"
                     (mapClick)="onMapClick($event)">
-                    <map-marker [position]="currentPositionMarkerPosition" [options]="currentPositionMarkerOptions" (mapDragend)="onMarkerDragEnd($event)" />
+                    <map-marker [position]="currentPositionMarkerPosition" [options]="currentPositionMarkerOptions"
+                        (mapDragend)="onMarkerDragEnd($event)" />
                 </google-map>
                 <input type="hidden" id="caughtLocation" name="caughtLocation" [(ngModel)]="newCatch.caughtLocation">
             </div>
@@ -108,15 +79,11 @@
 <section>
     <h2>All Catches</h2>
     <button (click)="togglecatchHistoryVisibility($event)">Show catches on Map</button> <!-- Show on Maps button -->
-    <div *ngIf="catchHistoryMapVisible">            
-        <google-map
-            height="400px"
-            width="750px"
-            [center]="center"
-            [zoom]="zoom">
-            <map-marker *ngFor="let position of catchHistoryMapMarkerPosition" [position]="position" [options]="catchHistoryMapMarkerOptions" />
+    <div *ngIf="catchHistoryMapVisible">
+        <google-map height="400px" width="750px" [center]="center" [zoom]="zoom">
+            <map-marker *ngFor="let position of catchHistoryMapMarkerPosition" [position]="position"
+                [options]="catchHistoryMapMarkerOptions" />
         </google-map>
-        <!-- <input type="hidden" id="caughtLocation" name="caughtLocation" [(ngModel)]="newCatch.caughtLocation"> -->
     </div>
 
     <ul>
@@ -142,5 +109,5 @@
                 </tr>
             </tbody>
         </table>
-            </ul>
+    </ul>
 </section>
