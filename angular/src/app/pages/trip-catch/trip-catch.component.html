@@ -1,5 +1,4 @@
-<!-- In trip-catch.component.html -->
-<section>
+<section>  <!-- Trip Details -->
     <h2>Trip Details</h2>
     <div>
         <strong>Subject:</strong> {{ tripDetails.subject }}
@@ -8,10 +7,10 @@
         <strong>Trip ID:</strong> {{ tripDetails.tripId }}
     </div>
     <div>
-        <strong>Start Time:</strong> {{ tripDetails.startTime | date:'medium' }}
+        <strong>Start Time:</strong> {{ tripDetails.startTime | date:'MMMM d, y, h:mm a' }}
     </div>
     <div>
-        <strong>End Time:</strong> {{ tripDetails.endTime | date:'medium' }}
+        <strong>End Time:</strong> {{ tripDetails.endTime | date:'MMMM d, y, h:mm a' }}
     </div>
     <div>
         <strong>Notes:</strong> {{ tripDetails.notes }}
@@ -27,7 +26,7 @@
     </div>
 </section>
 
-<section>
+<section> <!-- New Catch-->
     <h2>New Catch</h2>
     <form (ngSubmit)="postCatch()">
         <div>
@@ -76,8 +75,8 @@
     </form>
 </section>
 
-<section>
-    <h2>All Catches</h2>
+<section> <!-- Catch History -->
+    <h2>Catch History</h2>
     <button (click)="togglecatchHistoryVisibility($event)">Show catches on Map</button> <!-- Show on Maps button -->
     <div *ngIf="catchHistoryMapVisible">
         <google-map height="400px" width="750px" [center]="center" [zoom]="zoom">
@@ -90,20 +89,16 @@
         <table>
             <thead class="custom-header">
                 <tr>
-                    <th>Trip</th>
-                    <th>Catch</th>
-                    <th>Species</th>
                     <th>When</th>
+                    <th>Species</th>
                     <th>Size</th>
                     <th>Length</th>
                 </tr>
             </thead>
             <tbody>
                 <tr *ngFor="let item of tripCatch">
-                    <td class="custom-cell">{{ item.tripId }}</td>
-                    <td class="custom-cell">{{ item.catchId }}</td>
+                    <td class="custom-cell">{{ item.caughtWhen | date:'MMMM d, y, h:mm a' }}</td>
                     <td class="custom-cell">{{ item.speciesId }}</td>
-                    <td class="custom-cell">{{ item.caughtWhen }}</td>
                     <td class="custom-cell">{{ item.caughtSize }}</td>
                     <td class="custom-cell">{{ item.caughtLength }}</td>
                 </tr>
