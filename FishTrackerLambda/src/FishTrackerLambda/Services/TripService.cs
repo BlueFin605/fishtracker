@@ -86,6 +86,16 @@ namespace FishTrackerLambda.ClaimHandler
                 .MapEachAsync(c => c.DeleteCatchInDynamodb(m_client, m_logger))
                 .Map(c => c.Select(r => r.ToCatchDetails()));
         }
+
+        public Task<HttpWrapper<IEnumerable<CatchDetails>>> FixTrips()
+        {
+            return Function
+                .InitAsync(CatchDbTable.ReadEntireCatchFromOldDynamoDb(m_client, m_logger))
+                .MapEachAsync(c => c.MigrateInDynamodb(m_client, m_logger))
+                .Map(c => c.Select(r => r.ToCatchDetails()));
+
+        }
+
     }
 }
 

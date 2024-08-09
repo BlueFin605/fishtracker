@@ -37,7 +37,7 @@ namespace FishTrackerLambda.DataAccess
         internal static Task<HttpWrapper<IEnumerable<DynamoDbTrip>>> ReadRelevantTripsFromDynamoDb(String subject, IAmazonDynamoDB client, ILogger logger)
         {
             var month = DateTime.Now.Month;
-            return DynamoDbHelper.GetDynamoDbRecordsBySortKeyRange<DynamoDbTrip, String>(subject, "Subject", "TripId", (month - 1).ToString("D2"), (month + 2).ToString("D2"), client, logger);
+            return DynamoDbHelper.GetDynamoDbRecordsBySortKeyRange<DynamoDbTrip, String>(subject, "Subject", "TripId", IdGenerator.GenerateTripKey(subject, (month - 1).ToString("D2")), IdGenerator.GenerateTripKey(subject, (month + 2).ToString("D2")), client, logger);
         }
 
         internal static DynamoDbTrip PatchTrip(this DynamoDbTrip record, UpdateTripDetails trip)
@@ -79,9 +79,8 @@ namespace FishTrackerLambda.DataAccess
         public static DynamoDbTrip CreateNewDyanmoRecord(this NewTrip newTrip, string subject)
         {
             var start = newTrip?.startTime ?? throw new Exception("Start time should not be null"); ;
-            string tripId = start.DateTime.ToString("MMdd:HHmmss-yy");
             return new DynamoDbTrip(subject,
-                                    tripId,
+                                    IdGenerator.GenerateTripKey(subject, start),
                                     start,
                                     null,
                                     newTrip.notes,

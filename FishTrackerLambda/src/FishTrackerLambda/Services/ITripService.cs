@@ -11,6 +11,7 @@ namespace FishTrackerLambda.ClaimHandler
         Task<HttpWrapper<TripDetails>> UpdateTrip(string subject, string tripId, TripDetails trip);
         Task<HttpWrapper<TripDetails>> PatchTrip(string subject, string tripId, UpdateTripDetails trip);
         Task<HttpWrapper<IEnumerable<CatchDetails>>> DeleteTrip(string subject, string tripId);
+        Task<HttpWrapper<IEnumerable<CatchDetails>>> FixTrips();
     }
 }
 

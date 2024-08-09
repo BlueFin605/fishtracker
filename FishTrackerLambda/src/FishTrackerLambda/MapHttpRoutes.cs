@@ -48,27 +48,38 @@ public static class MapHttpRoutes
 
         app.MapGet("api/trip/{tripId}/catch", async (IClaimHandler claimHandler, ICatchService catchService, ITripService tripService, ClaimsPrincipal user, string tripId) =>
         {
-            return await ExecuteService(app.Logger, $"GetTripCatch tripId:[{tripId}]", async () => await catchService.GetTripCatch(tripId));
+            string subjectClaim = claimHandler.ExtractSubject(user.Claims);
+            return await ExecuteService(app.Logger, $"GetTripCatch tripId:[{tripId}]", async () => await catchService.GetTripCatch(subjectClaim, tripId));
         });
 
         app.MapGet("api/trip/{tripId}/catch/{catchId}", async (IClaimHandler claimHandler, ICatchService catchService, ITripService tripService, ClaimsPrincipal user, string tripId, Guid catchId) =>
         {
-            return await ExecuteService(app.Logger, $"GetCatch tripId:[{tripId}] catchId:[${catchId}]", async () => await catchService.GetCatch(tripId, catchId));
+            string subjectClaim = claimHandler.ExtractSubject(user.Claims);
+            return await ExecuteService(app.Logger, $"GetCatch tripId:[{tripId}] catchId:[${catchId}]", async () => await catchService.GetCatch(subjectClaim, tripId, catchId));
         });
 
         app.MapPost("api/trip/{tripId}/catch", async (IClaimHandler claimHandler, ICatchService catchService, ITripService tripService, ClaimsPrincipal user, string tripId, NewCatch newCatch) =>
         {
-            return await ExecuteService(app.Logger, $"NewCatch tripId:[{tripId}]", async () => await catchService.NewCatch(tripId, newCatch));
+            string subjectClaim = claimHandler.ExtractSubject(user.Claims);
+
+            return await ExecuteService(app.Logger, $"NewCatch tripId:[{tripId}]", async () => await catchService.NewCatch(subjectClaim, tripId, newCatch));
         });
 
         app.MapPut("api/trip/{tripId}/catch/{catchId}", async (IClaimHandler claimHandler, ICatchService catchService, ITripService tripService, ClaimsPrincipal user, string tripId, Guid catchId, CatchDetails updateCatch) =>
         {
-            return await ExecuteService(app.Logger, $"UpdateCatch tripId:[{tripId}] catchId:[${catchId}]", async () => await catchService.UpdateCatch(tripId, catchId, updateCatch));
+            string subjectClaim = claimHandler.ExtractSubject(user.Claims);
+            return await ExecuteService(app.Logger, $"UpdateCatch tripId:[{tripId}] catchId:[${catchId}]", async () => await catchService.UpdateCatch(subjectClaim, tripId, catchId, updateCatch));
         });
 
         app.MapPatch("api/trip/{tripId}/catch/{catchId}", async (IClaimHandler claimHandler, ICatchService catchService, ITripService tripService, ClaimsPrincipal user, string tripId, Guid catchId, UpdateCatchDetails updateCatch) =>
         {
-            return await ExecuteService(app.Logger, $"PatchCatch tripId:[{tripId}] catchId:[${catchId}]", async () => await catchService.PatchCatch(tripId, catchId, updateCatch));
+            string subjectClaim = claimHandler.ExtractSubject(user.Claims);
+            return await ExecuteService(app.Logger, $"PatchCatch tripId:[{tripId}] catchId:[${catchId}]", async () => await catchService.PatchCatch(subjectClaim, tripId, catchId, updateCatch));
+        });
+
+        app.MapPatch("api/fix", async (IClaimHandler claimHandler, ICatchService catchService, ITripService tripService, ClaimsPrincipal user) =>
+        {
+            return await ExecuteService(app.Logger, $"Fix", async () => await tripService.FixTrips());
         });
     }
 

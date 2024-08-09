@@ -24,9 +24,9 @@ public static class CatchDbTable
         return DynamoDbHelper.GetDynamoDbRecord<DynamoDbCatch, string, string>(tripId, catchId.ToString(), client, logger);
     }
 
-    internal static Task<HttpWrapper<IEnumerable<DynamoDbCatch>>> ReadAllCatchFromDynamoDb(string tripId, IAmazonDynamoDB client, ILogger logger)
+    internal static Task<HttpWrapper<IEnumerable<DynamoDbCatch>>> ReadAllCatchFromDynamoDb(string tripKey, IAmazonDynamoDB client, ILogger logger)
     {
-        return DynamoDbHelper.GetDynamoDbRecords<DynamoDbCatch, string>(tripId, client, logger);
+        return DynamoDbHelper.GetDynamoDbRecords<DynamoDbCatch, string>(tripKey, client, logger);
     }
 
     internal static Task<HttpWrapper<IEnumerable<DynamoDbCatch>>> ReadAllCatchFromDynamoDb(this DynamoDbTrip record, IAmazonDynamoDB client, ILogger logger)
@@ -34,9 +34,31 @@ public static class CatchDbTable
         return DynamoDbHelper.GetDynamoDbRecords<DynamoDbCatch, string>(record.TripId, client, logger);
     }
 
+    internal static Task<HttpWrapper<IEnumerable<DynamoDbCatchOld>>> ReadEntireCatchFromOldDynamoDb(IAmazonDynamoDB client, ILogger logger)
+    {
+        return DynamoDbHelper.GetDynamoDbRecords<DynamoDbCatchOld>(client, logger);
+    }
+
     public static Task<HttpWrapper<DynamoDbCatch>> DeleteCatchInDynamodb(this DynamoDbCatch record, IAmazonDynamoDB client, ILogger logger)
     {
         return record.DeleteDynamoDbRecord(client, logger);
+    }
+
+    public static Task<HttpWrapper<DynamoDbCatch>> MigrateInDynamodb(this DynamoDbCatchOld record, IAmazonDynamoDB client, ILogger logger)
+    {
+        var newCatch = new DynamoDbCatch(IdGenerator.GenerateTripKey("google-oauth2|108727661728816284796", record.TripId),
+                                         Guid.Parse(record.CatchId),
+                                         record.TripId,
+                                         "google-oauth2|108727661728816284796",
+                                         record.SpeciesId,
+                                         record.CaughtLocation,
+                                         DateTimeOffset.Parse(record.CaughtWhen),
+                                         record.CaughtSize,
+                                         record.CaughtLength,
+                                         record.Weather,
+                                         null);
+
+        return DynamoDbHelper.SaveDynamoDbRecord(newCatch, client, logger);
     }
 
     internal static DynamoDbCatch PatchCatch(this DynamoDbCatch record, UpdateCatchDetails updateCatch)
@@ -45,8 +67,10 @@ public static class CatchDbTable
 
         var c = dbCatch; //.Value;
 
-        return new DynamoDbCatch(c.TripId,
+        return new DynamoDbCatch(c.TripKey,
                     Guid.Parse(c.CatchId),
+                    c.TripId,
+                    c.Subject,
                     updateCatch.SpeciesId ?? c.SpeciesId,
                     updateCatch.caughtLocation ?? c.CaughtLocation,
                     updateCatch.caughtWhen ?? DateTimeOffset.Parse(c.CaughtWhen),
@@ -62,8 +86,10 @@ public static class CatchDbTable
 
         var c = dbCatch; //.Value;
 
-        return new DynamoDbCatch(c.TripId,
+        return new DynamoDbCatch(c.TripKey,
                                 Guid.Parse(c.CatchId),
+                                c.TripId,
+                                c.Subject,
                                 updateCatch.SpeciesId,
                                 updateCatch.caughtLocation,
                                 updateCatch.caughtWhen,
@@ -80,10 +106,12 @@ public static class CatchDbTable
         return x;
     }
 
-    public static DynamoDbCatch CreateNewDyanmoRecord(this NewCatch newCatch, string tripId)
+    public static DynamoDbCatch CreateNewDyanmoRecord(this NewCatch newCatch, String subject, string tripId)
     {
-        return new DynamoDbCatch(tripId,
+        return new DynamoDbCatch(IdGenerator.GenerateTripKey(subject, tripId),
                                  Guid.NewGuid(),
+                                 tripId,
+                                 subject,
                                  newCatch.SpeciesId,
                                  newCatch.caughtLocation,
                                  newCatch.caughtWhen ?? throw new Exception("Date should not be null"),
