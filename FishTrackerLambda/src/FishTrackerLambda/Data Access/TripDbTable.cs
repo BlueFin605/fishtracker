@@ -80,7 +80,7 @@ namespace FishTrackerLambda.DataAccess
         {
             var start = newTrip?.startTime ?? throw new Exception("Start time should not be null"); ;
             return new DynamoDbTrip(subject,
-                                    IdGenerator.GenerateTripKey(subject, start),
+                                    IdGenerator.GenerateTripId(start),
                                     start,
                                     null,
                                     newTrip.notes,
