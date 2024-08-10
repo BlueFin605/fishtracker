@@ -3,11 +3,12 @@ import {CommonModule} from '@angular/common';
 import { ApiService, TripDetails, CatchDetails } from '../../services/api.service';
 import { Router } from '@angular/router';
 import { FishTrackerSettingsService } from '../../services/fish-tracker-settings.service';
+import { DateFormatModule } from '../../date-format.module';
 
 @Component({
   selector: 'app-trips',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, DateFormatModule],
   templateUrl: './trips.component.html',
   styleUrl: './trips.component.css'
 })

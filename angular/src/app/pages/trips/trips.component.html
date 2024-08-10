@@ -10,8 +10,6 @@
     <table>
         <thead>
             <tr>
-                <th>Subject</th>
-                <th>Trip ID</th>
                 <th>Start</th>
                 <th>End</th>
                 <th>Notes</th>
@@ -23,10 +21,8 @@
         </thead>
         <tbody>
             <tr *ngFor="let trip of trips" (click)="navigateToTripCatch(trip.tripId)">
-                <td>{{ trip.subject }}</td>
-                <td>{{ trip.tripId }}</td>
-                <td>{{ trip.startTime }}</td>
-                <td>{{ trip.endTime }}</td>
+                <td>{{ trip.startTime | dateFormat}}</td>
+                <td>{{ trip.endTime | dateFormat}}</td>
                 <td>{{ trip.notes }}</td>
                 <td>{{ trip.catchSize }}</td>
                 <td>{{ trip.rating }}</td>

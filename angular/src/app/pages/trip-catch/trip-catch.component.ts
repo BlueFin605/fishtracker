@@ -7,13 +7,14 @@ import { GoogleMapsModule } from '@angular/google-maps'; // Add this line\
 import { GoogleMapsLoaderService } from '../../google-maps-loader.service';
 import { DateConversionService } from '../../services/date-conversion.service';
 import * as moment from 'moment-timezone';
+import { DateFormatModule } from '../../date-format.module';
 
 @Component({
   standalone: true,
   selector: 'app-trip-catch',
   templateUrl: './trip-catch.component.html',
   styleUrls: ['./trip-catch.component.css'],
-  imports: [CommonModule, FormsModule, GoogleMapsModule]
+  imports: [CommonModule, FormsModule, GoogleMapsModule, DateFormatModule]
 })
 export class TripCatchComponent implements OnInit {
   currentPositionMapVisible = false;
