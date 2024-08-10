@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { ApiService, CatchDetails, TripDetails, NewCatch, EndTripDetails } from '../../services/api.service';
+import { ApiService, CatchDetails, TripDetails, NewCatch, EndTripDetails, TripRating, FishSize } from '../../services/api.service';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute } from '@angular/router';
 import { FormsModule } from '@angular/forms'; // Add this line
@@ -27,13 +27,14 @@ export class TripCatchComponent implements OnInit {
   endTripData: any = {
     endTime: '',
     notes: '',
-    rating: '',
+    rating: TripRating.Okay,
     tags: ''
   };  
 
   newCatch: NewCatch = {
     timeZone: 'UCT',
-    speciesId: 'Snapper'
+    speciesId: 'Snapper',
+    caughtSize: FishSize.Medium,
   } as NewCatch;
 
   center: google.maps.LatLngLiteral = {lat: 24, lng: 12};
@@ -42,6 +43,9 @@ export class TripCatchComponent implements OnInit {
   currentPositionMarkerPosition: google.maps.LatLngLiteral = {} as google.maps.LatLngLiteral;
   catchHistoryMapMarkerOptions: google.maps.MarkerOptions = {draggable: false};
   catchHistoryMapMarkerPosition: google.maps.LatLngLiteral[] = [];
+
+  ratingOptions = Object.values(TripRating);
+  sizeOptions = Object.values(FishSize);
 
   constructor(private route: ActivatedRoute, 
               private apiService: ApiService,
@@ -65,11 +69,14 @@ export class TripCatchComponent implements OnInit {
       console.error('Error getting current location', error);
     });
     console.log(JSON.stringify(this.currentPositionMarkerPosition));
+    console.log(`sizeOptions: ${this.sizeOptions}`);
+    console.log(`ratingOptions: ${this.ratingOptions}`);
   }
 
   fetchTripDetails(tripid: string) {
     this.apiService.getTrip(tripid).subscribe(data => {
       this.tripDetails = data;
+      console.log(`trip rating[${this.tripDetails.rating}]`);
     });
   }
   
@@ -189,10 +196,10 @@ export class TripCatchComponent implements OnInit {
 
   endTrip() {
     const updatedTrip: EndTripDetails = {
-      endTime: this.endTripData.endTime = this.dateFormatter.createLocalDate(this.endTripData.endTime, this.newCatch.timeZone),
+      endTime: this.dateFormatter.createLocalDate(this.endTripData.endTime, this.newCatch.timeZone),
       timeZone: this.newCatch.timeZone,
       notes: this.endTripData.notes,
-      // rating: this.endTripData.rating
+      rating: this.endTripData.rating
       // tags: this.endTripData.tags.split(',').map(tag => tag.trim())
     };
 
@@ -203,6 +210,7 @@ export class TripCatchComponent implements OnInit {
         this.tripDetails = response;
       },
       error: (error) => {
+        this.closeEndTripModal();
         console.error('Error ending trip', error);
         // Handle error, e.g., show an error message
       }

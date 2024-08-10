@@ -43,7 +43,11 @@
             <textarea id="notes" [(ngModel)]="endTripData.notes" name="notes"></textarea>
             
             <label for="rating">Rating:</label>
-            <input type="number" id="rating" [(ngModel)]="endTripData.rating" name="rating" min="1" max="5">
+            <select id="rating" [(ngModel)]="endTripData.rating" name="rating" required>
+                <option *ngFor="let option of ratingOptions" [value]="option">{{ option }}</option>
+            </select>
+
+            <!-- <input type="number" id="rating" [(ngModel)]="endTripData.rating" name="rating" min="1" max="5"> -->
             
             <label for="tags">Tags:</label>
             <input type="text" id="tags" [(ngModel)]="endTripData.tags" name="tags">
@@ -73,12 +77,8 @@
         <div>
             <label for="size">Size:</label>
             <select id="size" name="size" [(ngModel)]="newCatch.caughtSize">
-                <option value="Small">Small</option>
-                <option value="Medium">Medium</option>
-                <option value="Large">Large</option>
-                <option value="ExtraLarge">ExtraLarge</option>
-            </select>
-        </div>
+                <option *ngFor="let option of sizeOptions" [value]="option">{{ option }}</option>
+            </select>        </div>
         <div>
             <label for="length">Length (cm):</label>
             <input type="number" id="length" name="length" [(ngModel)]="newCatch.caughtLength">

@@ -162,23 +162,21 @@ export interface Location {
 }
 
 export enum FishSize {
-  Undersize,
-  Small,
-  Medium,
-  Large,
-  VeryLarge
+  Undersize = 'Undersize',
+  Small = 'Small',
+  Medium = 'Medium',
+  Large = 'Large',
+  VeryLarge = 'VeryLarge'
 }
 
-export enum TripRating
-{
-    NonRated,
-    Bust,
-    Okay,
-    Good,
-    Fantastic,
-    OutOfThisWorld
+export enum TripRating {
+  NonRated = 'NonRated',
+  Bust = 'Bust',
+  Okay = 'Okay',
+  Good = 'Good',
+  Fantastic = 'Fantastic',
+  OutOfThisWorld = 'OutOfThisWorld'
 }
-
 export enum TripTags
 {
     Consistent,
