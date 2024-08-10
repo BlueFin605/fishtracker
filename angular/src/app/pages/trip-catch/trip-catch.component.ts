@@ -73,6 +73,10 @@ export class TripCatchComponent implements OnInit {
     console.log(`ratingOptions: ${this.ratingOptions}`);
   }
 
+  formatNotes(notes: string): string {
+    return notes.replace(/\r\n/g, '<br>');
+  }
+  
   fetchTripDetails(tripid: string) {
     this.apiService.getTrip(tripid).subscribe(data => {
       this.tripDetails = data;

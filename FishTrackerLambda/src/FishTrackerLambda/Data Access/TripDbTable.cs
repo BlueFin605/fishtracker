@@ -48,7 +48,7 @@ namespace FishTrackerLambda.DataAccess
                                     c.TripId,
                                     trip.startTime ?? DateConverter.IsoFromString(c.StartTime),
                                     trip.endTime ?? (c.EndTime != null ? DateConverter.IsoFromString(c.EndTime) : null),
-                                    trip.notes ?? c.Notes,
+                                    AppendNotes(c.Notes,trip.notes),
                                     trip.catchSize ?? c.CatchSize,
                                     trip.rating ?? c.Rating,
                                     trip.tags?.ToList() ?? c.Tags,
@@ -80,7 +80,7 @@ namespace FishTrackerLambda.DataAccess
                                     c.TripId,
                                     DateConverter.IsoFromString(c.StartTime),
                                     endTime,
-                                    trip.notes ?? c.Notes,
+                                    AppendNotes(c.Notes, trip.notes),
                                     (uint)size,
                                     trip.rating ?? c.Rating,
                                     trip.tags?.ToList() ?? c.Tags,
@@ -117,6 +117,17 @@ namespace FishTrackerLambda.DataAccess
                                    t.CatchSize,
                                    t.Rating,
                                    t.Tags.ToHashSet());
+        }
+
+        private static string AppendNotes(string? notes, string? append)
+        {
+            if (string.IsNullOrWhiteSpace(append))
+                return notes ?? string.Empty;
+
+            if (notes == null)
+                return append ?? string.Empty;
+
+            return notes + "\r\n" + append;
         }
     }
 

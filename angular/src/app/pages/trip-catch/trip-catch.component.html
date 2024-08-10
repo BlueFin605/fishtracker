@@ -13,7 +13,8 @@
         <strong>End Time:</strong> {{ tripDetails.endTime | date:'MMMM d, y, h:mm a' }}
     </div>
     <div>
-        <strong>Notes:</strong> {{ tripDetails.notes }}
+        <strong>Notes:</strong><br>
+        <span [innerHTML]="formatNotes(tripDetails.notes)"></span>
     </div>
     <div>
         <strong>Catch Size:</strong> {{ tripDetails.catchSize }}
