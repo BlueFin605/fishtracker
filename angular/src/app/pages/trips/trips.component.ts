@@ -3,7 +3,7 @@ import {CommonModule} from '@angular/common';
 import { ApiService, TripDetails, CatchDetails } from '../../services/api.service';
 import { Router } from '@angular/router';
 import { FishTrackerSettingsService } from '../../services/fish-tracker-settings.service';
-import { DateFormatModule } from '../../date-format.module';
+import { DateFormatModule } from '../../components/date-format/date-format.module';
 
 @Component({
   selector: 'app-trips',

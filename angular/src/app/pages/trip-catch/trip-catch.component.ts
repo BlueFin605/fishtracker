@@ -7,7 +7,7 @@ import { GoogleMapsModule } from '@angular/google-maps'; // Add this line\
 import { GoogleMapsLoaderService } from '../../google-maps-loader.service';
 import { DateConversionService } from '../../services/date-conversion.service';
 import * as moment from 'moment-timezone';
-import { DateFormatModule } from '../../date-format.module';
+import { DateFormatModule } from '../../components/date-format/date-format.module';
 
 @Component({
   standalone: true,
