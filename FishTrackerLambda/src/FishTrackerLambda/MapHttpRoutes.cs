@@ -46,7 +46,7 @@ public static class MapHttpRoutes
             return await ExecuteService(app.Logger, $"PatchTrip tripId:[{subjectClaim}][{tripId}]", async () => await tripService.PatchTrip(subjectClaim, tripId, trip));
         });
 
-        app.MapPost("api/trip/{tripId}/endTrip", async (IClaimHandler claimHandler, ICatchService catchService, ITripService tripService, ClaimsPrincipal user, string tripId, EndTripDetails trip) =>
+        app.MapPost("api/trip/{tripId}/endtrip", async (IClaimHandler claimHandler, ICatchService catchService, ITripService tripService, ClaimsPrincipal user, string tripId, EndTripDetails trip) =>
         {
             string subjectClaim = claimHandler.ExtractSubject(user.Claims);
             return await ExecuteService(app.Logger, $"PatchTrip tripId:[{subjectClaim}][{tripId}]", async () => await tripService.EndTrip(subjectClaim, tripId, trip));
