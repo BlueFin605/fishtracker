@@ -67,7 +67,7 @@ export class ApiService {
   }
 
   endTrip(tripid: string, patchTrip: EndTripDetails): Observable<TripDetails> {
-    const apiUrl = `${this.baseApiUrl}/trip/${tripid}/endTrip`; // Construct full API URL
+    const apiUrl = `${this.baseApiUrl}/trip/${tripid}/endtrip`; // Construct full API URL
     return this.tokenService.token.pipe(switchMap(jwt => {
       const headers = new HttpHeaders({
         Authorization: `Bearer ${jwt}`,
