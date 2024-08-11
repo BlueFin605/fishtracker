@@ -1,31 +1,3 @@
-<section>  <!-- Trip Details -->
-    <h2>Trip Details</h2>
-    <div>
-        <strong>Subject:</strong> {{ tripDetails.subject }}
-    </div>
-    <div>
-        <strong>Trip ID:</strong> {{ tripDetails.tripId }}
-    </div>
-    <div>
-        <strong>Start Time:</strong> {{ tripDetails.startTime  | dateFormat }}
-    </div>
-    <div>
-        <strong>End Time:</strong> {{ tripDetails.endTime  | dateFormat }}
-    </div>
-    <div>
-        <strong>Notes:</strong><br>
-        <span [innerHTML]="formatNotes(tripDetails.notes)"></span>
-    </div>
-    <div>
-        <strong>Catch Size:</strong> {{ tripDetails.catchSize }}
-    </div>
-    <div>
-        <strong>Rating:</strong> {{ tripDetails.rating }}
-    </div>
-    <div>
-        <strong>Tags:</strong> <span *ngFor="let tag of tripDetails.tags">{{ tag }} </span>
-    </div>
-</section>
 
 <section *ngIf="!tripDetails.endTime"> <!-- End Trip Button -->
     <button (click)="openEndTripModal()">End Trip</button>
@@ -47,7 +19,7 @@
             <select id="rating" [(ngModel)]="endTripData.rating" name="rating" required>
                 <option *ngFor="let option of ratingOptions" [value]="option">{{ option }}</option>
             </select>
-
+            
             <!-- <input type="number" id="rating" [(ngModel)]="endTripData.rating" name="rating" min="1" max="5"> -->
             
             <label for="tags">Tags:</label>
@@ -80,57 +52,86 @@
             <select id="size" name="size" [(ngModel)]="newCatch.caughtSize">
                 <option *ngFor="let option of sizeOptions" [value]="option">{{ option }}</option>
             </select>        </div>
-        <div>
-            <label for="length">Length (cm):</label>
-            <input type="number" id="length" name="length" [(ngModel)]="newCatch.caughtLength">
-        </div>
-        <div>
-            <label for="caughtLocation">Location {{newCatch.caughtLocation?.latitude}},
-                {{newCatch.caughtLocation?.longitude}} (Select from map):</label>
-            <button (click)="toggleCurrentPositionMapVisibility($event)">Show Map</button>
-
-            <div *ngIf="currentPositionMapVisible">
-                <google-map height="400px" width="750px" [center]="center" [zoom]="zoom"
-                    (mapClick)="onMapClick($event)">
-                    <map-marker [position]="currentPositionMarkerPosition" [options]="currentPositionMarkerOptions"
-                        (mapDragend)="onMarkerDragEnd($event)" />
-                </google-map>
-                <input type="hidden" id="caughtLocation" name="caughtLocation" [(ngModel)]="newCatch.caughtLocation">
+            <div>
+                <label for="length">Length (cm):</label>
+                <input type="number" id="length" name="length" [(ngModel)]="newCatch.caughtLength">
             </div>
-        </div>
-
-        <button type="submit">Add Catch</button>
-    </form>
-</section>
-
-<section> <!-- Catch History -->
-    <h2>Catch History</h2>
-    <button (click)="togglecatchHistoryVisibility($event)">Show catches on Map</button> <!-- Show on Maps button -->
-    <div *ngIf="catchHistoryMapVisible">
-        <google-map height="400px" width="750px" [center]="center" [zoom]="zoom">
-            <map-marker *ngFor="let position of catchHistoryMapMarkerPosition" [position]="position"
+            <div>
+                <label for="caughtLocation">Location {{newCatch.caughtLocation?.latitude}},
+                    {{newCatch.caughtLocation?.longitude}} (Select from map):</label>
+                    <button (click)="toggleCurrentPositionMapVisibility($event)">Show Map</button>
+                    
+                    <div *ngIf="currentPositionMapVisible">
+                        <google-map height="400px" width="750px" [center]="center" [zoom]="zoom"
+                        (mapClick)="onMapClick($event)">
+                        <map-marker [position]="currentPositionMarkerPosition" [options]="currentPositionMarkerOptions"
+                        (mapDragend)="onMarkerDragEnd($event)" />
+                    </google-map>
+                    <input type="hidden" id="caughtLocation" name="caughtLocation" [(ngModel)]="newCatch.caughtLocation">
+                </div>
+            </div>
+            
+            <button type="submit">Add Catch</button>
+        </form>
+    </section>
+    
+    <section> <!-- Catch History -->
+        <h2>Catch History</h2>
+        <button (click)="togglecatchHistoryVisibility($event)">Show catches on Map</button> <!-- Show on Maps button -->
+        <div *ngIf="catchHistoryMapVisible">
+            <google-map height="400px" width="750px" [center]="center" [zoom]="zoom">
+                <map-marker *ngFor="let position of catchHistoryMapMarkerPosition" [position]="position"
                 [options]="catchHistoryMapMarkerOptions" />
-        </google-map>
-    </div>
-
-    <ul>
-        <table>
-            <thead>
-                <tr>
-                    <th>When</th>
-                    <th>Species</th>
-                    <th>Size</th>
-                    <th>Length</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr *ngFor="let item of tripCatch">
-                    <td>{{ item.caughtWhen | date:'MMMM d, y, h:mm a' }}</td>
-                    <td>{{ item.speciesId }}</td>
-                    <td>{{ item.caughtSize }}</td>
-                    <td>{{ item.caughtLength }}</td>
-                </tr>
-            </tbody>
-        </table>
-    </ul>
-</section>
+            </google-map>
+        </div>
+        
+        <ul>
+            <table>
+                <thead>
+                    <tr>
+                        <th>When</th>
+                        <th>Species</th>
+                        <th>Size</th>
+                        <th>Length</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr *ngFor="let item of tripCatch">
+                        <td>{{ item.caughtWhen | date:'MMMM d, y, h:mm a' }}</td>
+                        <td>{{ item.speciesId }}</td>
+                        <td>{{ item.caughtSize }}</td>
+                        <td>{{ item.caughtLength }}</td>
+                    </tr>
+                </tbody>
+            </table>
+        </ul>
+    </section>
+    
+    <section>  <!-- Trip Details -->
+        <h2>Trip Details</h2>
+        <div>
+            <strong>Subject:</strong> {{ tripDetails.subject }}
+        </div>
+        <div>
+            <strong>Trip ID:</strong> {{ tripDetails.tripId }}
+        </div>
+        <div>
+            <strong>Start Time:</strong> {{ tripDetails.startTime  | dateFormat }}
+        </div>
+        <div>
+            <strong>End Time:</strong> {{ tripDetails.endTime  | dateFormat }}
+        </div>
+        <div>
+            <strong>Notes:</strong><br>
+            <span [innerHTML]="formatNotes(tripDetails.notes)"></span>
+        </div>
+        <div>
+            <strong>Catch Size:</strong> {{ tripDetails.catchSize }}
+        </div>
+        <div>
+            <strong>Rating:</strong> {{ tripDetails.rating }}
+        </div>
+        <div>
+            <strong>Tags:</strong> <span *ngFor="let tag of tripDetails.tags">{{ tag }} </span>
+        </div>
+    </section>
