@@ -1,9 +1,11 @@
-<div>
-<app-auth-button></app-auth-button>
-<a class="nav-link" [routerLink]="['/debug']">Debug</a>
-<!-- <a class="nav-link" [routerLink]="['/trip']">Trip Catch</a> -->
-<a class="nav-link" [routerLink]="['/trips']">Trips</a>
-<a class="nav-link" [routerLink]="['/newtrip']">New Trip</a>
-</div>
-
-
+<header>
+    <div class="auth-button">
+      <app-auth-button></app-auth-button>
+    </div>
+    <nav class="nav-links">
+      <a class="nav-link" [routerLink]="['/debug']">Debug</a>
+      <!-- <a class="nav-link" [routerLink]="['/trip']">Trip Catch</a> -->
+      <a class="nav-link" [routerLink]="['/trips']">Trips</a>
+      <a class="nav-link" [routerLink]="['/newtrip']">New Trip</a>
+    </nav>
+  </header>

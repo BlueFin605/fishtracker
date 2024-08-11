@@ -1,0 +1,31 @@
+header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: #0056b3; /* Dark blue background */
+    color: white; /* White text color */
+    padding: 1em; /* Padding for spacing */
+    border-bottom: 2px solid #004494; /* Slightly darker border */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+}
+
+.auth-button {
+    margin-right: 1em; /* Margin to separate from nav links */
+}
+
+.nav-links {
+    display: flex;
+    gap: 1em; /* Space between nav links */
+}
+
+.nav-link {
+    color: white; /* White text color */
+    text-decoration: none; /* Remove underline */
+    padding: 0.5em 1em; /* Padding for spacing */
+    border-radius: 4px; /* Rounded corners */
+    transition: background-color 0.3s; /* Smooth transition */
+}
+
+.nav-link:hover {
+    background-color: #004494; /* Slightly darker background on hover */
+}
