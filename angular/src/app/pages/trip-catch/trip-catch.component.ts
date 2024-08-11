@@ -6,8 +6,9 @@ import { FormsModule } from '@angular/forms'; // Add this line
 import { GoogleMapsModule } from '@angular/google-maps'; // Add this line\
 import { GoogleMapsLoaderService } from '../../google-maps-loader.service';
 import { DateConversionService } from '../../services/date-conversion.service';
-import * as moment from 'moment-timezone';
+// import * as moment from 'moment-timezone';
 import { DateFormatModule } from '../../components/date-format/date-format.module';
+import { PreferencesService } from '../../services/preferences.service';
 
 @Component({
   standalone: true,
@@ -23,7 +24,7 @@ export class TripCatchComponent implements OnInit {
   tripCatch: CatchDetails[];
   tripId: string = '';
   caughtWhen: Date | undefined = new Date();
-  timeZones: string[] = [];
+  // timeZones: string[] = [];
   showEndTripModal: boolean = false;
   endTripData: any = {
     endTime: '',
@@ -51,13 +52,14 @@ export class TripCatchComponent implements OnInit {
   constructor(private route: ActivatedRoute, 
               private apiService: ApiService,
               private googleMapsLoader: GoogleMapsLoaderService,
-              private dateFormatter: DateConversionService) {
+              private dateFormatter: DateConversionService,
+              private preferencesService: PreferencesService) {
     this.tripCatch = [];
   }
 
   ngOnInit() {
-    this.timeZones = moment.tz.names();  
-    this.newCatch.timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;      
+    // this.timeZones = moment.tz.names();  
+    this.newCatch.timeZone = this.preferencesService.getTimeZone();
     this.tripId = this.route.snapshot.paramMap.get('tripid')!;
     console.log(`tripId: ${this.tripId}`);
     this.fetchTripDetails(this.tripId);
@@ -75,7 +77,7 @@ export class TripCatchComponent implements OnInit {
   }
 
   formatNotes(notes: string): string {
-    return notes.replace(/\r\n/g, '<br>');
+    return notes?.replace(/\r\n/g, '<br>');
   }
   
   fetchTripDetails(tripid: string) {

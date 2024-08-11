@@ -4,7 +4,8 @@ import { FormsModule } from '@angular/forms'; // Add this line
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router'; // Add this line
 import { DateConversionService } from '../../services/date-conversion.service';
-import * as moment from 'moment-timezone';
+// import * as moment from 'moment-timezone';
+import { PreferencesService } from '../../services/preferences.service';
 
 @Component({
   standalone: true,
@@ -23,15 +24,17 @@ export class NewTripComponent {
 
   startTime: Date | undefined = new Date();
 
-  timeZones: string[] = [];
+  // timeZones: string[] = [];
 
-  constructor(private apiService: ApiService, private router: Router, private dateFormatter: DateConversionService) {}
+  constructor(private apiService: ApiService, 
+              private router: Router, 
+              private dateFormatter: DateConversionService,
+              private preferencesService: PreferencesService) {}
 
   ngOnInit() {
     this.startTime = new Date();
-    this.timeZones = moment.tz.names();
-    this.newTrip.timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;      
-
+    // this.timeZones = moment.tz.names();
+    this.newTrip.timeZone = this.preferencesService.getTimeZone();      
   }
 
   postTrip() {    

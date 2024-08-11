@@ -69,12 +69,12 @@
             <label for="caughtWhen">When:</label>
             <input type="datetime-local" id="caughtWhen" name="caughtWhen" [(ngModel)]="caughtWhen">
         </div>
-        <div>
+        <!-- <div>
             <label for="timeZone">Timezone:</label>
             <select id="timeZone" name="timeZone" [(ngModel)]="newCatch.timeZone">
                 <option *ngFor="let tz of timeZones" [value]="tz">{{ tz }}</option>
             </select>
-        </div>
+        </div> -->
         <div>
             <label for="size">Size:</label>
             <select id="size" name="size" [(ngModel)]="newCatch.caughtSize">
