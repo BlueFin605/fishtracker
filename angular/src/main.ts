@@ -6,6 +6,7 @@ import { environment } from './environments/environment';
 import { RouterModule, provideRouter } from '@angular/router'; // Import RouterModule
 import { routes } from './app/app.routes'; // Import the app.routes file
 import { provideHttpClient } from "@angular/common/http";
+import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 
 bootstrapApplication(AppComponent, {
   providers: [
@@ -20,6 +21,6 @@ bootstrapApplication(AppComponent, {
         // scope: "openid profile email", //default scopes
         audience: "https://api.fishtracker.bluefin605.com"
       }
-    }),
+    }), provideAnimationsAsync(),
   ]
 }).catch((err) => console.error(err));

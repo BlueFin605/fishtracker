@@ -29,3 +29,14 @@ header {
 .nav-link:hover {
     background-color: #004494; /* Slightly darker background on hover */
 }
+
+.avatar-menu {
+    display: flex;
+    align-items: center;
+}
+
+.avatar {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+  }

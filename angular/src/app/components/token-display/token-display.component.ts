@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { AuthService } from '@auth0/auth0-angular';
-import { TokenService } from '../../services/token.service';
+import { AuthenticationService } from '../../services/authentication.service';
 
 @Component({
   selector: 'app-token-display',
@@ -14,9 +14,9 @@ export class TokenDisplayComponent implements OnInit {
   access_token: string;
   id_token: string;
 
-  constructor(public auth: AuthService, tokenService: TokenService) { 
+  constructor(public auth: AuthService, authenticationService: AuthenticationService) { 
     this.access_token = '';
-    tokenService.token.subscribe(t => {
+    authenticationService.token.subscribe(t => {
       this.access_token = t
     });
     this.id_token = "";
