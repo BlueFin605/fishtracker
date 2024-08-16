@@ -6,9 +6,11 @@ using FishTrackerLambda.Functional;
 using FishTrackerLambda.Helpers;
 using FishTrackerLambda.Models.Lambda;
 using FishTrackerLambda.Models.Persistance;
+using FishTrackerLambda.Services.Http;
+using Microsoft.Extensions.Logging;
 using Newtonsoft.Json.Linq;
 
-namespace FishTrackerLambda.ClaimHandler
+namespace FishTrackerLambda.Services
 {
 
     public class CatchService : ICatchService

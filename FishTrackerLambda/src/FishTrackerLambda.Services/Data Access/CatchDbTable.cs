@@ -4,6 +4,7 @@ using FishTrackerLambda.Functional;
 using FishTrackerLambda.Helpers;
 using FishTrackerLambda.Models.Lambda;
 using FishTrackerLambda.Models.Persistance;
+using Microsoft.Extensions.Logging;
 
 namespace FishTrackerLambda.DataAccess;
 

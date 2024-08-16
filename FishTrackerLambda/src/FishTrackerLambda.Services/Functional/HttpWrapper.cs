@@ -1,4 +1,6 @@
-﻿namespace FishTrackerLambda.Functional
+﻿using FishTrackerLambda.Services.Http;
+
+namespace FishTrackerLambda.Functional
 {
     public class HttpWrapper<T>
     {

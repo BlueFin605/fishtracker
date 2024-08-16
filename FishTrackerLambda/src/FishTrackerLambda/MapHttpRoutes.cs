@@ -3,9 +3,14 @@ using System.Security.Claims;
 using FishTrackerLambda.Functional;
 using FishTrackerLambda.Models.Lambda;
 using FishTrackerLambda.ClaimHandler;
+using FishTrackerLambda.Services;
 
 public static class MapHttpRoutes
 {
+    public static void myfunc(ILogger logger) {
+        var mres = Results.BadRequest();
+    }
+
     public static void MapRoutes(this WebApplication app)
     {
         app.MapGet("/", () => "Welcome to running ASP.NET Core Minimal API on AWS Lambda");
@@ -96,7 +101,11 @@ public static class MapHttpRoutes
         {
             logger.LogInformation(logDesc);
             var result = await func();
-            return result.Result;
+            var httpResult = result.Result;
+            if (httpResult.StatusCode == 200)
+                return Results.Ok(httpResult.Object);
+            else
+                return Results.StatusCode(httpResult.StatusCode);
         }
         catch (Exception e)
         {

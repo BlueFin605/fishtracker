@@ -19,17 +19,8 @@
     <ProjectReference Include="..\FishTrackerLambda.Models\FishTrackerLambda.Models.csproj">
       <GlobalPropertiesToRemove></GlobalPropertiesToRemove>
     </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
-    <None Remove="Functional\" />
-    <None Remove="Helpers\" />
-    <None Remove="Data Access\" />
-    <None Remove="Claim Handler\" />
-  </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Functional\" />
-    <Folder Include="Helpers\" />
-    <Folder Include="Data Access\" />
-    <Folder Include="Claim Handler\" />
+    <ProjectReference Include="..\FishTrackerLambda.Services\FishTrackerLambda.Services.csproj">
+      <GlobalPropertiesToRemove></GlobalPropertiesToRemove>
+    </ProjectReference>
   </ItemGroup>
 </Project>

@@ -1,7 +1,7 @@
 ﻿using FishTrackerLambda.Functional;
 using FishTrackerLambda.Models.Lambda;
 
-namespace FishTrackerLambda.ClaimHandler
+namespace FishTrackerLambda.Services
 {
     public interface ICatchService
     {

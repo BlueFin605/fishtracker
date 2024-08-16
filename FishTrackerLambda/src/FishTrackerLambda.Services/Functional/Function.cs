@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using FishTrackerLambda.Services.Http;
 
 namespace FishTrackerLambda.Functional
 {

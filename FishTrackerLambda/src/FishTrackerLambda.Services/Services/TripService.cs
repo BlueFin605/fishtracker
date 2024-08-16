@@ -4,8 +4,10 @@ using FishTrackerLambda.Functional;
 using FishTrackerLambda.Helpers;
 using FishTrackerLambda.Models.Lambda;
 using FishTrackerLambda.Models.Persistance;
+using FishTrackerLambda.Services.Http;
+using Microsoft.Extensions.Logging;
 
-namespace FishTrackerLambda.ClaimHandler
+namespace FishTrackerLambda.Services
 {
     public class TripService : ITripService
     {

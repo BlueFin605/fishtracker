@@ -3,6 +3,7 @@ using System.Text.Json.Serialization;
 using Amazon.DynamoDBv2;
 using Amazon.Runtime;
 using FishTrackerLambda.ClaimHandler;
+using FishTrackerLambda.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddSingleton<ICatchService, CatchService>();
