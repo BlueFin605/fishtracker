@@ -1,6 +1,12 @@
 ﻿using Amazon.Lambda.Core;
 using Amazon.Lambda.Annotations;
 using Amazon.Lambda.Annotations.APIGateway;
+using FishTrackerLambda.ClaimHandler;
+using FishTrackerLambda.Services;
+using System.Security.Claims;
+using Microsoft.AspNetCore.Mvc.ViewEngines;
+using FishTrackerLambda.Functional;
+using Microsoft.Extensions.Logging;
 
 [assembly: LambdaSerializer(typeof(Amazon.Lambda.Serialization.SystemTextJson.DefaultLambdaJsonSerializer))]
 
@@ -11,7 +17,19 @@ namespace FishTrackerLambda;
 /// </summary>
 public class Functions
 {
-    private ICalculatorService _calculatorService;
+    private IClaimHandler m_claimHandler;
+    private ICatchService m_catchService;
+    private ITripService m_tripService;
+    // private ClaimsPrincipal m_user;
+    private ILogger<Functions> m_logger;
+
+    public Functions(IClaimHandler claimHandler, ICatchService catchService, ITripService tripService, ILogger<Functions> logger)
+    {
+        m_claimHandler = claimHandler;
+        m_catchService = catchService;
+        m_tripService = tripService;
+        m_logger = logger;
+    }
 
     /// <summary>
     /// Default constructor.
@@ -23,90 +41,39 @@ public class Functions
     /// As an alternative, a dependency could be injected into each 
     /// Lambda function handler via the [FromServices] attribute.
     /// </remarks>
-    public Functions(ICalculatorService calculatorService)
-    {
-        _calculatorService = calculatorService;
-    }
 
     /// <summary>
     /// Root route that provides information about the other requests that can be made.
     /// </summary>
     /// <returns>API descriptions.</returns>
     [LambdaFunction()]
-    [HttpApi(LambdaHttpMethod.Get, "/")]
-    public string Default()
+    [HttpApi(LambdaHttpMethod.Get, "api/trip/")]
+    public async Task<IHttpResult> GetTrips()
     {
-        var docs = @"Lambda Calculator Home:
-You can make the following requests to invoke other Lambda functions perform calculator operations:
-/add/{x}/{y}
-/subtract/{x}/{y}
-/multiply/{x}/{y}
-/divide/{x}/{y}
-";
-        return docs;
+        // string subjectClaim = m_claimHandler.ExtractSubject(m_user.Claims);
+        string subjectClaim = "myprincipal";
+        string view = "all";
+        return await ExecuteService($"GetAllTrips tripId subject:[{subjectClaim}] view:[{view}]", async () => await m_tripService.GetTrips(subjectClaim, view));
     }
 
-    /// <summary>
-    /// Perform x + y
-    /// </summary>
-    /// <param name="x"></param>
-    /// <param name="y"></param>
-    /// <returns>Sum of x and y.</returns>
-    [LambdaFunction()]
-    [HttpApi(LambdaHttpMethod.Get, "/add/{x}/{y}")]
-    public int Add(int x, int y, ILambdaContext context)
+    private async Task<IHttpResult> ExecuteService<T>(string logDesc, Func<Task<HttpWrapper<T>>> func)
     {
-        var sum = _calculatorService.Add(x, y);
-
-        context.Logger.LogInformation($"{x} plus {y} is {sum}");
-        return sum;
+        try
+        {
+            m_logger.LogInformation(logDesc);
+            var result = await func();
+            var httpResult = result.Result;
+            m_logger.LogInformation($"response code:[{httpResult.StatusCode}] message:[{httpResult.Message}] object:[{httpResult.Object}]");
+            if (httpResult.StatusCode == 200)
+                return HttpResults.Ok(httpResult.Object);
+            else
+                return HttpResults.NewResult((System.Net.HttpStatusCode)httpResult.StatusCode, httpResult.Message);
+        }
+        catch (Exception e)
+        {
+            m_logger.LogError(e, $"{logDesc} Exception {e.Message}");
+            throw;
+        }
     }
 
-    /// <summary>
-    /// Perform x - y.
-    /// </summary>
-    /// <param name="x"></param>
-    /// <param name="y"></param>
-    /// <returns>x subtract y</returns>
-    [LambdaFunction()]
-    [HttpApi(LambdaHttpMethod.Get, "/subtract/{x}/{y}")]
-    public int Subtract(int x, int y, ILambdaContext context)
-    {
-        var difference = _calculatorService.Subtract(x, y);
-
-        context.Logger.LogInformation($"{x} subtract {y} is {difference}");
-        return difference;
-    }
-
-    /// <summary>
-    /// Perform x * y.
-    /// </summary>
-    /// <param name="x"></param>
-    /// <param name="y"></param>
-    /// <returns>x multiply y</returns>
-    [LambdaFunction()]
-    [HttpApi(LambdaHttpMethod.Get, "/multiply/{x}/{y}")]
-    public int Multiply(int x, int y, ILambdaContext context)
-    {
-        var product = _calculatorService.Multiply(x, y);
-
-        context.Logger.LogInformation($"{x} multiplied by {y} is {product}");
-        return product;
-    }
-
-    /// <summary>
-    /// Perform x / y.
-    /// </summary>
-    /// <param name="x"></param>
-    /// <param name="y"></param>
-    /// <returns>x divide y</returns>
-    [LambdaFunction()]
-    [HttpApi(LambdaHttpMethod.Get, "/divide/{x}/{y}")]
-    public int Divide(int x, int y, ILambdaContext context)
-    {
-        var quotient = _calculatorService.Divide(x, y);
-
-        context.Logger.LogInformation($"{x} divided by {y} is {quotient}");
-        return quotient;
-    }
 }

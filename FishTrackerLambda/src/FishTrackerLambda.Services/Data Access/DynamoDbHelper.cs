@@ -104,6 +104,7 @@ namespace FishTrackerLambda.DataAccess
                 var context = new DynamoDBContext(client);
                 var query = context.QueryAsync<T>(part /*queryOptions*/);
                 var items = await query.GetRemainingAsync();
+                logger.LogInformation($"items returned [{items.Count}]");
                 return HttpWrapper<IEnumerable<T>>.Ok(items);
             }
             catch (ResourceNotFoundException)

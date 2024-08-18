@@ -1,0 +1,14 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Resources:
+  FishTrackerLambdaFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: FishTrackerLambdaAnnotated::FishTrackerLambda.Functions_GetTrips_Generated::GetTrips
+      Runtime: dotnet8
+      CodeUri: ./src/FishTrackerLambdaAnnotated
+      MemorySize: 128
+      Timeout: 100
+      Environment:
+        Variables:
+          ASPNETCORE_ENVIRONMENT: Development
