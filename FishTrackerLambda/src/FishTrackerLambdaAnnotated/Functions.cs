@@ -7,6 +7,7 @@ using System.Security.Claims;
 using Microsoft.AspNetCore.Mvc.ViewEngines;
 using FishTrackerLambda.Functional;
 using Microsoft.Extensions.Logging;
+using Amazon.Lambda.APIGatewayEvents;
 
 [assembly: LambdaSerializer(typeof(Amazon.Lambda.Serialization.SystemTextJson.DefaultLambdaJsonSerializer))]
 
@@ -48,10 +49,10 @@ public class Functions
     /// <returns>API descriptions.</returns>
     [LambdaFunction()]
     [HttpApi(LambdaHttpMethod.Get, "api/trip/")]
-    public async Task<IHttpResult> GetTrips()
+    public async Task<IHttpResult> GetTrips(APIGatewayHttpApiV2ProxyRequest proxy)
     {
-        // string subjectClaim = m_claimHandler.ExtractSubject(m_user.Claims);
-        string subjectClaim = "myprincipal";
+         string subjectClaim = m_claimHandler.ExtractSubject(proxy);
+        //string subjectClaim = "myprincipal";
         string view = "all";
         return await ExecuteService($"GetAllTrips tripId subject:[{subjectClaim}] view:[{view}]", async () => await m_tripService.GetTrips(subjectClaim, view));
     }

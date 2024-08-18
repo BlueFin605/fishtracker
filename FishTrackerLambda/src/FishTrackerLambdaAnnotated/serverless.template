@@ -9,10 +9,16 @@
         "Tool": "Amazon.Lambda.Annotations",
         "SyncedEvents": [
           "RootGet"
-        ]
+        ],
+        "SyncedEventProperties": {
+          "RootGet": [
+            "Path",
+            "Method"
+          ]
+        }
       },
       "Properties": {
-        "Runtime": "dotnet6",
+        "Runtime": "dotnet8",
         "CodeUri": ".",
         "MemorySize": 256,
         "Timeout": 30,
