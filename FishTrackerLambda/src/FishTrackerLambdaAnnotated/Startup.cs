@@ -21,17 +21,11 @@ public class Startup
     /// </summary>
     public void ConfigureServices(IServiceCollection services)
     {
-        Console.WriteLine("dvide by zero iminent");
-        //var y = 10 + 5 - 15;
-        //var x = 10 / y;
+        Console.WriteLine("ConfigureServices");
 
         // Here we'll add an instance of our calculator service that will be used by each function
         services.AddSingleton<ICatchService, CatchService>();
         services.AddSingleton<ITripService, TripService>();
-
-        //// Example of creating the IConfiguration object and
-        //// adding it to the dependency injection container.
-        //var builder = new ConfigurationBuilder()
 
         var environment = System.Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? "Production";
         Console.WriteLine($"Environment  envvar[{System.Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT")}]  environment[{environment}]");
@@ -41,6 +35,7 @@ public class Startup
             .AddJsonFile($"appsettings.{environment}.json", optional: true)
             .AddEnvironmentVariables();
         var configuration = builder.Build();
+
         services.AddLogging(logging => SetupLogger(true, logging, configuration));
 
         configuration.GetChildren().ToList().ForEach(i => Console.WriteLine($"key:[{i.Key}] value:[{i.Value}] path:[{i.Path}]"));
@@ -70,10 +65,6 @@ public class Startup
         }
 
         services.AddSingleton<IConfiguration>(configuration);
-
-        //// Example of using the AWSSDK.Extensions.NETCore.Setup NuGet package to add
-        //// the Amazon S3 service client to the dependency injection container.
-        //services.AddAWSService<Amazon.S3.IAmazonS3>();
     }
 
     static void SetupLogger(bool isDevelopment, ILoggingBuilder logging, IConfiguration configuration)

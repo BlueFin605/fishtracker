@@ -3,22 +3,277 @@
   "Transform": "AWS::Serverless-2016-10-31",
   "Description": "An AWS Serverless Application. This template is partially managed by Amazon.Lambda.Annotations (v1.0.0.0).",
   "Resources": {
+    "FishTrackerLambdaFunctionsCreateTripGenerated": {
+      "Type": "AWS::Serverless::Function",
+      "Metadata": {
+        "Tool": "Amazon.Lambda.Annotations",
+        "SyncedEvents": [
+          "RootPost"
+        ]
+      },
+      "Properties": {
+        "Runtime": "dotnet6",
+        "CodeUri": ".",
+        "MemorySize": 256,
+        "Timeout": 30,
+        "Policies": [
+          "AWSLambdaBasicExecutionRole"
+        ],
+        "PackageType": "Zip",
+        "Handler": "FishTrackerLambdaAnnotated::FishTrackerLambda.Functions_CreateTrip_Generated::CreateTrip",
+        "Events": {
+          "RootPost": {
+            "Type": "HttpApi",
+            "Properties": {
+              "Path": "api/trip",
+              "Method": "POST"
+            }
+          }
+        }
+      }
+    },
+    "FishTrackerLambdaFunctionsDeleteTripGenerated": {
+      "Type": "AWS::Serverless::Function",
+      "Metadata": {
+        "Tool": "Amazon.Lambda.Annotations",
+        "SyncedEvents": [
+          "RootDelete"
+        ]
+      },
+      "Properties": {
+        "Runtime": "dotnet6",
+        "CodeUri": ".",
+        "MemorySize": 256,
+        "Timeout": 30,
+        "Policies": [
+          "AWSLambdaBasicExecutionRole"
+        ],
+        "PackageType": "Zip",
+        "Handler": "FishTrackerLambdaAnnotated::FishTrackerLambda.Functions_DeleteTrip_Generated::DeleteTrip",
+        "Events": {
+          "RootDelete": {
+            "Type": "HttpApi",
+            "Properties": {
+              "Path": "api/trip/{tripId}",
+              "Method": "DELETE"
+            }
+          }
+        }
+      }
+    },
+    "FishTrackerLambdaFunctionsGetCatchesGenerated": {
+      "Type": "AWS::Serverless::Function",
+      "Metadata": {
+        "Tool": "Amazon.Lambda.Annotations",
+        "SyncedEvents": [
+          "RootGet"
+        ]
+      },
+      "Properties": {
+        "Runtime": "dotnet6",
+        "CodeUri": ".",
+        "MemorySize": 256,
+        "Timeout": 30,
+        "Policies": [
+          "AWSLambdaBasicExecutionRole"
+        ],
+        "PackageType": "Zip",
+        "Handler": "FishTrackerLambdaAnnotated::FishTrackerLambda.Functions_GetCatches_Generated::GetCatches",
+        "Events": {
+          "RootGet": {
+            "Type": "HttpApi",
+            "Properties": {
+              "Path": "api/trip/{tripId}/catch",
+              "Method": "GET"
+            }
+          }
+        }
+      }
+    },
+    "FishTrackerLambdaFunctionsGetCatchGenerated": {
+      "Type": "AWS::Serverless::Function",
+      "Metadata": {
+        "Tool": "Amazon.Lambda.Annotations",
+        "SyncedEvents": [
+          "RootGet"
+        ]
+      },
+      "Properties": {
+        "Runtime": "dotnet6",
+        "CodeUri": ".",
+        "MemorySize": 256,
+        "Timeout": 30,
+        "Policies": [
+          "AWSLambdaBasicExecutionRole"
+        ],
+        "PackageType": "Zip",
+        "Handler": "FishTrackerLambdaAnnotated::FishTrackerLambda.Functions_GetCatch_Generated::GetCatch",
+        "Events": {
+          "RootGet": {
+            "Type": "HttpApi",
+            "Properties": {
+              "Path": "api/trip/{tripId}/catch/{catchId}",
+              "Method": "GET"
+            }
+          }
+        }
+      }
+    },
+    "FishTrackerLambdaFunctionsNewCatchGenerated": {
+      "Type": "AWS::Serverless::Function",
+      "Metadata": {
+        "Tool": "Amazon.Lambda.Annotations",
+        "SyncedEvents": [
+          "RootPost"
+        ]
+      },
+      "Properties": {
+        "Runtime": "dotnet6",
+        "CodeUri": ".",
+        "MemorySize": 256,
+        "Timeout": 30,
+        "Policies": [
+          "AWSLambdaBasicExecutionRole"
+        ],
+        "PackageType": "Zip",
+        "Handler": "FishTrackerLambdaAnnotated::FishTrackerLambda.Functions_NewCatch_Generated::NewCatch",
+        "Events": {
+          "RootPost": {
+            "Type": "HttpApi",
+            "Properties": {
+              "Path": "api/trip/{tripId}/catch",
+              "Method": "POST"
+            }
+          }
+        }
+      }
+    },
+    "FishTrackerLambdaFunctionsUpdateCatchGenerated": {
+      "Type": "AWS::Serverless::Function",
+      "Metadata": {
+        "Tool": "Amazon.Lambda.Annotations",
+        "SyncedEvents": [
+          "RootPut"
+        ]
+      },
+      "Properties": {
+        "Runtime": "dotnet6",
+        "CodeUri": ".",
+        "MemorySize": 256,
+        "Timeout": 30,
+        "Policies": [
+          "AWSLambdaBasicExecutionRole"
+        ],
+        "PackageType": "Zip",
+        "Handler": "FishTrackerLambdaAnnotated::FishTrackerLambda.Functions_UpdateCatch_Generated::UpdateCatch",
+        "Events": {
+          "RootPut": {
+            "Type": "HttpApi",
+            "Properties": {
+              "Path": "api/trip/{tripId}/catch/{catchId}",
+              "Method": "PUT"
+            }
+          }
+        }
+      }
+    },
+    "FishTrackerLambdaFunctionsPatchCatchGenerated": {
+      "Type": "AWS::Serverless::Function",
+      "Metadata": {
+        "Tool": "Amazon.Lambda.Annotations",
+        "SyncedEvents": [
+          "RootPatch"
+        ]
+      },
+      "Properties": {
+        "Runtime": "dotnet6",
+        "CodeUri": ".",
+        "MemorySize": 256,
+        "Timeout": 30,
+        "Policies": [
+          "AWSLambdaBasicExecutionRole"
+        ],
+        "PackageType": "Zip",
+        "Handler": "FishTrackerLambdaAnnotated::FishTrackerLambda.Functions_PatchCatch_Generated::PatchCatch",
+        "Events": {
+          "RootPatch": {
+            "Type": "HttpApi",
+            "Properties": {
+              "Path": "api/trip/{tripId}/catch/{catchId}",
+              "Method": "PATCH"
+            }
+          }
+        }
+      }
+    },
+    "FishTrackerLambdaFunctionsFixTripsGenerated": {
+      "Type": "AWS::Serverless::Function",
+      "Metadata": {
+        "Tool": "Amazon.Lambda.Annotations",
+        "SyncedEvents": [
+          "RootPatch"
+        ]
+      },
+      "Properties": {
+        "Runtime": "dotnet6",
+        "CodeUri": ".",
+        "MemorySize": 256,
+        "Timeout": 30,
+        "Policies": [
+          "AWSLambdaBasicExecutionRole"
+        ],
+        "PackageType": "Zip",
+        "Handler": "FishTrackerLambdaAnnotated::FishTrackerLambda.Functions_FixTrips_Generated::FixTrips",
+        "Events": {
+          "RootPatch": {
+            "Type": "HttpApi",
+            "Properties": {
+              "Path": "api/fix",
+              "Method": "PATCH"
+            }
+          }
+        }
+      }
+    },
+    "FishTrackerLambdaFunctionsUpdateTripGenerated": {
+      "Type": "AWS::Serverless::Function",
+      "Metadata": {
+        "Tool": "Amazon.Lambda.Annotations",
+        "SyncedEvents": [
+          "RootPut"
+        ]
+      },
+      "Properties": {
+        "Runtime": "dotnet6",
+        "CodeUri": ".",
+        "MemorySize": 256,
+        "Timeout": 30,
+        "Policies": [
+          "AWSLambdaBasicExecutionRole"
+        ],
+        "PackageType": "Zip",
+        "Handler": "FishTrackerLambdaAnnotated::FishTrackerLambda.Functions_UpdateTrip_Generated::UpdateTrip",
+        "Events": {
+          "RootPut": {
+            "Type": "HttpApi",
+            "Properties": {
+              "Path": "api/trip/{tripId}",
+              "Method": "PUT"
+            }
+          }
+        }
+      }
+    },
     "FishTrackerLambdaFunctionsGetTripsGenerated": {
       "Type": "AWS::Serverless::Function",
       "Metadata": {
         "Tool": "Amazon.Lambda.Annotations",
         "SyncedEvents": [
           "RootGet"
-        ],
-        "SyncedEventProperties": {
-          "RootGet": [
-            "Path",
-            "Method"
-          ]
-        }
+        ]
       },
       "Properties": {
-        "Runtime": "dotnet8",
+        "Runtime": "dotnet6",
         "CodeUri": ".",
         "MemorySize": 256,
         "Timeout": 30,
@@ -33,6 +288,93 @@
             "Properties": {
               "Path": "api/trip/",
               "Method": "GET"
+            }
+          }
+        }
+      }
+    },
+    "FishTrackerLambdaFunctionsGetTripGenerated": {
+      "Type": "AWS::Serverless::Function",
+      "Metadata": {
+        "Tool": "Amazon.Lambda.Annotations",
+        "SyncedEvents": [
+          "RootGet"
+        ]
+      },
+      "Properties": {
+        "Runtime": "dotnet6",
+        "CodeUri": ".",
+        "MemorySize": 256,
+        "Timeout": 30,
+        "Policies": [
+          "AWSLambdaBasicExecutionRole"
+        ],
+        "PackageType": "Zip",
+        "Handler": "FishTrackerLambdaAnnotated::FishTrackerLambda.Functions_GetTrip_Generated::GetTrip",
+        "Events": {
+          "RootGet": {
+            "Type": "HttpApi",
+            "Properties": {
+              "Path": "api/trip/{tripId}",
+              "Method": "GET"
+            }
+          }
+        }
+      }
+    },
+    "FishTrackerLambdaFunctionsPatchTripGenerated": {
+      "Type": "AWS::Serverless::Function",
+      "Metadata": {
+        "Tool": "Amazon.Lambda.Annotations",
+        "SyncedEvents": [
+          "RootPatch"
+        ]
+      },
+      "Properties": {
+        "Runtime": "dotnet6",
+        "CodeUri": ".",
+        "MemorySize": 256,
+        "Timeout": 30,
+        "Policies": [
+          "AWSLambdaBasicExecutionRole"
+        ],
+        "PackageType": "Zip",
+        "Handler": "FishTrackerLambdaAnnotated::FishTrackerLambda.Functions_PatchTrip_Generated::PatchTrip",
+        "Events": {
+          "RootPatch": {
+            "Type": "HttpApi",
+            "Properties": {
+              "Path": "api/trip/{tripId}",
+              "Method": "PATCH"
+            }
+          }
+        }
+      }
+    },
+    "FishTrackerLambdaFunctionsEndTripGenerated": {
+      "Type": "AWS::Serverless::Function",
+      "Metadata": {
+        "Tool": "Amazon.Lambda.Annotations",
+        "SyncedEvents": [
+          "RootPatch"
+        ]
+      },
+      "Properties": {
+        "Runtime": "dotnet6",
+        "CodeUri": ".",
+        "MemorySize": 256,
+        "Timeout": 30,
+        "Policies": [
+          "AWSLambdaBasicExecutionRole"
+        ],
+        "PackageType": "Zip",
+        "Handler": "FishTrackerLambdaAnnotated::FishTrackerLambda.Functions_EndTrip_Generated::EndTrip",
+        "Events": {
+          "RootPatch": {
+            "Type": "HttpApi",
+            "Properties": {
+              "Path": "api/trip/{tripId}/endtrip",
+              "Method": "PATCH"
             }
           }
         }

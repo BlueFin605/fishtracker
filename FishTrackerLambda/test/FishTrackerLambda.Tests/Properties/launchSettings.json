@@ -7,7 +7,7 @@
     "FishTrackerLambda.Tests": {
       "commandName": "Project",
       "launchBrowser": true,
-      "applicationUrl": "http://localhost:14258",
+      "applicationUrl": "http://localhost:1406",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
       }

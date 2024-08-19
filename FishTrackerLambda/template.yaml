@@ -12,3 +12,21 @@ Resources:
       Environment:
         Variables:
           ASPNETCORE_ENVIRONMENT: Development
+          AWS_SAM_LOCAL_LOG_LEVEL: debug
+      Events:
+        GetTrips:
+          Type: Api
+          Properties:
+            Path: /api/trip
+            Method: get
+            RestApiId:
+              Ref: ApiGatewayRestApi
+  ApiGatewayRestApi:
+    Type: AWS::Serverless::Api
+    Properties:
+      Name: FishTrackerApi
+      StageName: dev
+      Cors:
+        AllowMethods: "'GET,POST,PUT,DELETE,OPTIONS'"
+        AllowHeaders: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token,Cookies'"
+        AllowOrigin: "'*'"
