@@ -19,6 +19,7 @@
     <PackageReference Include="Microsoft.Extensions.Configuration" Version="8.0.0" />
     <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="8.0.0" />
     <PackageReference Include="Microsoft.Extensions.Configuration.EnvironmentVariables" Version="8.0.0" />
+    <PackageReference Include="AWS.Lambda.Powertools.Logging" Version="1.5.1" />
   </ItemGroup>
   <!-- 
     The FrameworkReference is used to reduce the deployment bundle size by not having to include 

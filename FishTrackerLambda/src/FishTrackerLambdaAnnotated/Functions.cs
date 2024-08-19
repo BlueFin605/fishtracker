@@ -211,7 +211,11 @@ public class Functions
                 var resp = new APIGatewayHttpApiV2ProxyResponse();
                 resp.StatusCode = 200;
                 resp.Body = JsonSerializer.Serialize(httpResult.Object, m_jsonOptions);
-                resp.Headers = new Dictionary<string, string> { { "Content-Type", "application/json" } };
+                resp.Headers = new Dictionary<string, string> { { "Content-Type", "application/json" },
+                                                                { "access-control-allow-headers", "Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token,x-amz-content-sha256"},
+                                                                { "access-control-allow-methods", "GET,PUT,PATCH,DELETE,PUSH,OPTIONS"},
+                                                                { "access-control-allow-origin", "*"}
+                                                              };
                 return resp;
                 //return HttpResults.Ok(httpResult.Object).AddHeader("target-language", "mylang");
             }

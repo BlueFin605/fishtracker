@@ -1,7 +1,7 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Transform: AWS::Serverless-2016-10-31
 Resources:
-  FishTrackerLambdaFunction:
+  GetTripsFunction:
     Type: AWS::Serverless::Function
     Properties:
       Handler: FishTrackerLambdaAnnotated::FishTrackerLambda.Functions_GetTrips_Generated::GetTrips
@@ -21,6 +21,238 @@ Resources:
             Method: get
             RestApiId:
               Ref: ApiGatewayRestApi
+
+  GetTripFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: FishTrackerLambdaAnnotated::FishTrackerLambda.Functions_GetTrip_Generated::GetTrip
+      Runtime: dotnet8
+      CodeUri: ./src/FishTrackerLambdaAnnotated
+      MemorySize: 128
+      Timeout: 100
+      Environment:
+        Variables:
+          ASPNETCORE_ENVIRONMENT: Development
+          AWS_SAM_LOCAL_LOG_LEVEL: debug
+      Events:
+        GetTrip:
+          Type: Api
+          Properties:
+            Path: /api/trip/{tripId}
+            Method: get
+            RestApiId:
+              Ref: ApiGatewayRestApi
+
+  CreateTripFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: FishTrackerLambdaAnnotated::FishTrackerLambda.Functions_CreateTrip_Generated::CreateTrip
+      Runtime: dotnet8
+      CodeUri: ./src/FishTrackerLambdaAnnotated
+      MemorySize: 128
+      Timeout: 100
+      Environment:
+        Variables:
+          ASPNETCORE_ENVIRONMENT: Development
+          AWS_SAM_LOCAL_LOG_LEVEL: debug
+      Events:
+        CreateTrip:
+          Type: Api
+          Properties:
+            Path: /api/trip
+            Method: post
+            RestApiId:
+              Ref: ApiGatewayRestApi
+
+  UpdateTripFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: FishTrackerLambdaAnnotated::FishTrackerLambda.Functions_UpdateTrip_Generated::UpdateTrip
+      Runtime: dotnet8
+      CodeUri: ./src/FishTrackerLambdaAnnotated
+      MemorySize: 128
+      Timeout: 100
+      Environment:
+        Variables:
+          ASPNETCORE_ENVIRONMENT: Development
+          AWS_SAM_LOCAL_LOG_LEVEL: debug
+      Events:
+        UpdateTrip:
+          Type: Api
+          Properties:
+            Path: /api/trip/{tripId}
+            Method: put
+            RestApiId:
+              Ref: ApiGatewayRestApi
+
+  DeleteTripFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: FishTrackerLambdaAnnotated::FishTrackerLambda.Functions_DeleteTrip_Generated::DeleteTrip
+      Runtime: dotnet8
+      CodeUri: ./src/FishTrackerLambdaAnnotated
+      MemorySize: 128
+      Timeout: 100
+      Environment:
+        Variables:
+          ASPNETCORE_ENVIRONMENT: Development
+          AWS_SAM_LOCAL_LOG_LEVEL: debug
+      Events:
+        DeleteTrip:
+          Type: Api
+          Properties:
+            Path: /api/trip/{tripId}
+            Method: delete
+            RestApiId:
+              Ref: ApiGatewayRestApi
+
+  GetCatchesFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: FishTrackerLambdaAnnotated::FishTrackerLambda.Functions_GetCatches_Generated::GetCatches
+      Runtime: dotnet8
+      CodeUri: ./src/FishTrackerLambdaAnnotated
+      MemorySize: 128
+      Timeout: 100
+      Environment:
+        Variables:
+          ASPNETCORE_ENVIRONMENT: Development
+          AWS_SAM_LOCAL_LOG_LEVEL: debug
+      Events:
+        GetCatches:
+          Type: Api
+          Properties:
+            Path: /api/trip/{tripId}/catch
+            Method: get
+            RestApiId:
+              Ref: ApiGatewayRestApi
+
+  GetCatchFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: FishTrackerLambdaAnnotated::FishTrackerLambda.Functions_GetCatch_Generated::GetCatch
+      Runtime: dotnet8
+      CodeUri: ./src/FishTrackerLambdaAnnotated
+      MemorySize: 128
+      Timeout: 100
+      Environment:
+        Variables:
+          ASPNETCORE_ENVIRONMENT: Development
+          AWS_SAM_LOCAL_LOG_LEVEL: debug
+      Events:
+        GetCatch:
+          Type: Api
+          Properties:
+            Path: /api/trip/{tripId}/catch/{catchId}
+            Method: get
+            RestApiId:
+              Ref: ApiGatewayRestApi
+
+  NewCatchFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: FishTrackerLambdaAnnotated::FishTrackerLambda.Functions_NewCatch_Generated::NewCatch
+      Runtime: dotnet8
+      CodeUri: ./src/FishTrackerLambdaAnnotated
+      MemorySize: 128
+      Timeout: 100
+      Environment:
+        Variables:
+          ASPNETCORE_ENVIRONMENT: Development
+          AWS_SAM_LOCAL_LOG_LEVEL: debug
+      Events:
+        NewCatch:
+          Type: Api
+          Properties:
+            Path: /api/trip/{tripId}/catch
+            Method: post
+            RestApiId:
+              Ref: ApiGatewayRestApi
+
+  UpdateCatchFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: FishTrackerLambdaAnnotated::FishTrackerLambda.Functions_UpdateCatch_Generated::UpdateCatch
+      Runtime: dotnet8
+      CodeUri: ./src/FishTrackerLambdaAnnotated
+      MemorySize: 128
+      Timeout: 100
+      Environment:
+        Variables:
+          ASPNETCORE_ENVIRONMENT: Development
+          AWS_SAM_LOCAL_LOG_LEVEL: debug
+      Events:
+        UpdateCatch:
+          Type: Api
+          Properties:
+            Path: /api/trip/{tripId}/catch/{catchId}
+            Method: put
+            RestApiId:
+              Ref: ApiGatewayRestApi
+
+  PatchCatchFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: FishTrackerLambdaAnnotated::FishTrackerLambda.Functions_PatchCatch_Generated::PatchCatch
+      Runtime: dotnet8
+      CodeUri: ./src/FishTrackerLambdaAnnotated
+      MemorySize: 128
+      Timeout: 100
+      Environment:
+        Variables:
+          ASPNETCORE_ENVIRONMENT: Development
+          AWS_SAM_LOCAL_LOG_LEVEL: debug
+      Events:
+        PatchCatch:
+          Type: Api
+          Properties:
+            Path: /api/trip/{tripId}/catch/{catchId}
+            Method: patch
+            RestApiId:
+              Ref: ApiGatewayRestApi
+
+  DeleteCatchFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: FishTrackerLambdaAnnotated::FishTrackerLambda.Functions_DeleteCatch_Generated::DeleteCatch
+      Runtime: dotnet8
+      CodeUri: ./src/FishTrackerLambdaAnnotated
+      MemorySize: 128
+      Timeout: 100
+      Environment:
+        Variables:
+          ASPNETCORE_ENVIRONMENT: Development
+          AWS_SAM_LOCAL_LOG_LEVEL: debug
+      Events:
+        DeleteCatch:
+          Type: Api
+          Properties:
+            Path: /api/trip/{tripId}/catch/{catchId}
+            Method: delete
+            RestApiId:
+              Ref: ApiGatewayRestApi
+
+  PatchFixFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: FishTrackerLambdaAnnotated::FishTrackerLambda.Functions_PatchFix_Generated::PatchFix
+      Runtime: dotnet8
+      CodeUri: ./src/FishTrackerLambdaAnnotated
+      MemorySize: 128
+      Timeout: 100
+      Environment:
+        Variables:
+          ASPNETCORE_ENVIRONMENT: Development
+          AWS_SAM_LOCAL_LOG_LEVEL: debug
+      Events:
+        PatchFix:
+          Type: Api
+          Properties:
+            Path: /api/fix
+            Method: patch
+            RestApiId:
+              Ref: ApiGatewayRestApi
+
   ApiGatewayRestApi:
     Type: AWS::Serverless::Api
     Properties:

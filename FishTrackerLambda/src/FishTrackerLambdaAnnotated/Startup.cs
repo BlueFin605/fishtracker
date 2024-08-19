@@ -5,6 +5,7 @@ using FishTrackerLambda.Services;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using System.Text.Json.Serialization;
 
 namespace FishTrackerLambda;
 
@@ -38,7 +39,7 @@ public class Startup
 
         services.AddLogging(logging => SetupLogger(true, logging, configuration));
 
-        configuration.GetChildren().ToList().ForEach(i => Console.WriteLine($"key:[{i.Key}] value:[{i.Value}] path:[{i.Path}]"));
+        //configuration.GetChildren().ToList().ForEach(i => Console.WriteLine($"key:[{i.Key}] value:[{i.Value}] path:[{i.Path}]"));
 
         if (configuration.GetSection("Environment")?.Value == "Development")
         {
@@ -48,8 +49,6 @@ public class Startup
             {
                 Console.WriteLine("setup aws dynamo client");
                 AmazonDynamoDBConfig clientConfig = new AmazonDynamoDBConfig();
-                // Set the endpoint URL
-                //clientConfig.ServiceURL = "http://localhost:8000";
                 clientConfig.ServiceURL = "http://dynamodb-local:8000";
                 var credentials = new BasicAWSCredentials("dummy", "dummy");
                 AmazonDynamoDBClient client = new AmazonDynamoDBClient(credentials, clientConfig);
@@ -65,6 +64,11 @@ public class Startup
         }
 
         services.AddSingleton<IConfiguration>(configuration);
+
+        services.AddControllers().AddJsonOptions(options =>
+    {
+        options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+    });
     }
 
     static void SetupLogger(bool isDevelopment, ILoggingBuilder logging, IConfiguration configuration)
