@@ -78,18 +78,18 @@ public class Startup
             throw new ArgumentNullException(nameof(logging));
         }
 
-        // Create and populate LambdaLoggerOptions object
-        //var loggerOptions = new LambdaLoggerOptions
-        //{
-        //    IncludeCategory = true,
-        //    IncludeLogLevel = true,
-        //    IncludeNewline = true,
-        //    IncludeEventId = true,
-        //    IncludeException = true
-        //};
+         //Create and populate LambdaLoggerOptions object
+        var loggerOptions = new LambdaLoggerOptions
+        {
+            IncludeCategory = true,
+            IncludeLogLevel = true,
+            IncludeNewline = true,
+            IncludeEventId = true,
+            IncludeException = true
+        };
 
-        //// Configure Lambda logging
-        //logging.AddLambdaLogger(loggerOptions);
+        // Configure Lambda logging
+        logging.AddLambdaLogger(loggerOptions);
 
         logging.SetMinimumLevel(LogLevel.Trace);
 
