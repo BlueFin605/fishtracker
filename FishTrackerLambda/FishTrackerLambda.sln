@@ -9,8 +9,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FishTrackerLambda.Models", 
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FishTrackerLambda", "src\FishTrackerLambda\FishTrackerLambda.csproj", "{41932222-A756-493B-8915-A2920A3D542A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FishTrackerLambdaAnnotated", "src\FishTrackerLambdaAnnotated\FishTrackerLambdaAnnotated.csproj", "{686F0F23-8B2D-415A-BC2C-BE688DF4F778}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FishTrackerLambda.Services", "src\FishTrackerLambda.Services\FishTrackerLambda.Services.csproj", "{CE5C2A5F-B091-4F8E-800A-53EE046301CE}"
 EndProject
 Global
@@ -31,10 +29,6 @@ Global
 		{41932222-A756-493B-8915-A2920A3D542A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{41932222-A756-493B-8915-A2920A3D542A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{41932222-A756-493B-8915-A2920A3D542A}.Release|Any CPU.Build.0 = Release|Any CPU
-		{686F0F23-8B2D-415A-BC2C-BE688DF4F778}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{686F0F23-8B2D-415A-BC2C-BE688DF4F778}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{686F0F23-8B2D-415A-BC2C-BE688DF4F778}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{686F0F23-8B2D-415A-BC2C-BE688DF4F778}.Release|Any CPU.Build.0 = Release|Any CPU
 		{CE5C2A5F-B091-4F8E-800A-53EE046301CE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{CE5C2A5F-B091-4F8E-800A-53EE046301CE}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{CE5C2A5F-B091-4F8E-800A-53EE046301CE}.Release|Any CPU.ActiveCfg = Release|Any CPU
