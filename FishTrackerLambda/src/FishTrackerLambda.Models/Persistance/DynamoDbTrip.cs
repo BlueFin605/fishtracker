@@ -11,24 +11,20 @@ namespace FishTrackerLambda.Models.Persistance
         public string Subject { get; set; }
         [DynamoDBRangeKey]
         public string TripId { get; set;  }
-        //[DynamoDBProperty]
         public string StartTime { get; set;  }
-        //[DynamoDBProperty]
         public string? EndTime { get; set;  }
-        //[DynamoDBProperty]
         public string Notes { get; set;  }
-        //[DynamoDBProperty]
         public uint CatchSize { get; set;  }
-        //[DynamoDBProperty]
         public TripRating Rating { get; set;  }
-        //[DynamoDBProperty]
         public List<TripTags> Tags { get; set;  }
+        public String[] Species { get; set; }
+        public String DefaultSpecies { get; set; }
 
         [DynamoDBVersion]
         public int? DynamoDbVersion { get; set; }
 
         [JsonConstructor]
-        public DynamoDbTrip(string subject, string tripId, DateTimeOffset startTime, DateTimeOffset? endTime, string notes, uint catchSize, TripRating rating, List<TripTags> tags, int? dynamoDbVersion)
+        public DynamoDbTrip(string subject, string tripId, DateTimeOffset startTime, DateTimeOffset? endTime, string notes, uint catchSize, TripRating rating, List<TripTags> tags, String[] species, String defaultSpecies, int? dynamoDbVersion)
         {
             Subject = subject;
             TripId = tripId;
@@ -39,6 +35,8 @@ namespace FishTrackerLambda.Models.Persistance
             Rating = rating;
             Tags = tags;
             DynamoDbVersion = dynamoDbVersion;
+            Species = species;
+            DefaultSpecies = defaultSpecies;
         }
 
         public DynamoDbTrip()
@@ -49,6 +47,8 @@ namespace FishTrackerLambda.Models.Persistance
             Notes = string.Empty;
             Tags = new List<TripTags>();
             Notes = string.Empty;
+            Species = new string[0];
+            DefaultSpecies = string.Empty;
         }
 
     }

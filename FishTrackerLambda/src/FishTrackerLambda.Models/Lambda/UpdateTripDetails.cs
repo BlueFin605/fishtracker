@@ -6,5 +6,7 @@ public record class UpdateTripDetails(
     String? notes,
     uint? catchSize,
     TripRating? rating,
-    HashSet<TripTags>? tags
+    HashSet<TripTags>? tags,
+    String[]? species,
+    String? defaultSpecies
 );

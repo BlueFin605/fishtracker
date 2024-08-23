@@ -4,5 +4,7 @@ public record class NewTrip(
     DateTimeOffset? startTime,
     String? timeZone,
     String notes,
-    HashSet<TripTags> tags
+    HashSet<TripTags> tags,
+    String[] species,
+    String defaultSpecies
 );

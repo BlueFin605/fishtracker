@@ -53,6 +53,8 @@ namespace FishTrackerLambda.DataAccess
                                     trip.catchSize ?? c.CatchSize,
                                     trip.rating ?? c.Rating,
                                     trip.tags?.ToList() ?? c.Tags,
+                                    trip.species ?? c.Species,
+                                    trip.defaultSpecies ?? c.DefaultSpecies,
                                     c.DynamoDbVersion); ;
         }
 
@@ -68,6 +70,8 @@ namespace FishTrackerLambda.DataAccess
                                     trip.catchSize,
                                     trip.rating,
                                     trip.tags.ToList(),
+                                    trip.species,
+                                    trip.defaultSpecies,
                                     c.DynamoDbVersion);
         }
 
@@ -85,13 +89,15 @@ namespace FishTrackerLambda.DataAccess
                                     (uint)size,
                                     trip.rating ?? c.Rating,
                                     trip.tags?.ToList() ?? c.Tags,
+                                    c.Species,
+                                    c.DefaultSpecies,
                                     c.DynamoDbVersion);
         }
 
         public static NewTrip FillInMissingData(this NewTrip newTrip)
         {
             DateTimeOffset startTime = newTrip.startTime ?? DateConverter.GetLocalNow(newTrip.timeZone);
-            return new NewTrip(startTime, newTrip.timeZone, newTrip.notes, newTrip.tags);
+            return new NewTrip(startTime, newTrip.timeZone, newTrip.notes, newTrip.tags, newTrip.species, newTrip.defaultSpecies);
         }
 
         public static DynamoDbTrip CreateNewDyanmoRecord(this NewTrip newTrip, string subject)
@@ -105,6 +111,8 @@ namespace FishTrackerLambda.DataAccess
                                     0,
                                     TripRating.NonRated,
                                     newTrip?.tags?.ToList() ?? new List<TripTags>(),
+                                    newTrip?.species ?? new string[0],
+                                    newTrip?.defaultSpecies ?? string.Empty,
                                     null);
         }
 
@@ -117,7 +125,9 @@ namespace FishTrackerLambda.DataAccess
                                    t.Notes,
                                    t.CatchSize,
                                    t.Rating,
-                                   t.Tags.ToHashSet());
+                                   t.Tags.ToHashSet(),
+                                   t.Species,
+                                   t.DefaultSpecies);
         }
 
         private static string AppendNotes(string? notes, string? append)
