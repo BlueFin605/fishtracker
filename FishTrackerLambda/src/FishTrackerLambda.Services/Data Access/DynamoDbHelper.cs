@@ -71,6 +71,28 @@ namespace FishTrackerLambda.DataAccess
             }
         }
 
+        public static async Task<HttpWrapper<T>> GetDynamoDbRecord<T, P>(P part, IAmazonDynamoDB client, ILogger logger)
+        {
+            logger.LogInformation($"DynamoDbHelper::GetDynamoDbRecord part[{part}]");
+
+            try
+            {
+                var context = new DynamoDBContext(client);
+                var record = await context.LoadAsync<T>(part);
+                return record == null ? HttpWrapper<T>.NotFound : HttpWrapper<T>.Ok(record);
+            }
+            catch (ResourceNotFoundException)
+            {
+                logger.LogInformation($"GetDynamoDbRecord:[{part}] ResourceNotFoundException - creating empty");
+                return HttpWrapper<T>.NotFound;
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, $"GetDynamoDbRecord:[{part}] Exception:[{ex.Message}] [Type[{ex.GetType()}]");
+                throw;
+            }
+        }
+
         public static async Task<HttpWrapper<IEnumerable<T>>> GetDynamoDbRecords<T>(IAmazonDynamoDB client, ILogger logger)
         {
             logger.LogInformation($"DynamoDbHelper::GetDynamoDbRecords");

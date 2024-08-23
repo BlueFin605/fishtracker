@@ -8,6 +8,8 @@ using FishTrackerLambda.Services;
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddSingleton<ICatchService, CatchService>();
 builder.Services.AddSingleton<ITripService, TripService>();
+builder.Services.AddSingleton<ISettingsService, SettingsService>();
+builder.Services.AddSingleton<IProfileService, ProfileService>();
 builder.Services.AddLogging(logging => SetupLogger(false, logging, builder.Configuration));
 
 builder.Services.ConfigureHttpJsonOptions(options =>

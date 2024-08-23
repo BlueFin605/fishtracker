@@ -86,6 +86,30 @@ namespace FishTrackerLambda.Functional
 
             return value != null ? new HttpWrapper<R>(mapper(value)) : throw new Exception("Mapping null value");
         }
+
+        public static async Task<HttpWrapper<T>> OnResult<T>(this Task<HttpWrapper<T>> record, uint result, Func<T> mapper)
+        {
+            var waitedRec = await record;
+
+            if (waitedRec.Continue == true || waitedRec.Result.StatusCode != result)
+            {
+                return waitedRec;
+            }
+
+            return new HttpWrapper<T>(mapper());
+        }
+
+        public static async Task<HttpWrapper<T>> OnResultAsync<T>(this Task<HttpWrapper<T>> record, uint result, Func<Task<HttpWrapper<T>>> mapper)
+        {
+            var waitedRec = await record;
+
+            if (waitedRec.Continue == true)
+            {
+                return waitedRec;
+            }
+
+            return await mapper();
+        }
     }
 }
 

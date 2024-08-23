@@ -11,11 +11,11 @@ namespace FishTrackerLambda.Services
 {
     public class TripService : ITripService
     {
-        private readonly ILogger<CatchService> m_logger;
+        private readonly ILogger<TripService> m_logger;
 
         private readonly IAmazonDynamoDB m_client;
 
-        public TripService(ILogger<CatchService> logger, IAmazonDynamoDB client)
+        public TripService(ILogger<TripService> logger, IAmazonDynamoDB client)
         {
             m_logger = logger;
             m_client = client;
