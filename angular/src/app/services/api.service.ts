@@ -13,6 +13,26 @@ export class ApiService {
 
   constructor(private http: HttpClient, private authService: AuthenticationService) {}
 
+  getProfile(): Observable<ProfileDetails[]> {
+    const apiUrl = `${this.baseApiUrl}/profile`; // Construct full API URL
+    return this.authService.token.pipe(switchMap(jwt => {
+      const headers = new HttpHeaders({
+        Authorization: `Bearer ${jwt}`,
+      });
+      return this.http.get<ProfileDetails[]>(apiUrl, { headers });
+    }));
+  }
+
+  getSettings(): Observable<SettingsDetails[]> {
+    const apiUrl = `${this.baseApiUrl}/settings`; // Construct full API URL
+    return this.authService.token.pipe(switchMap(jwt => {
+      const headers = new HttpHeaders({
+        Authorization: `Bearer ${jwt}`,
+      });
+      return this.http.get<SettingsDetails[]>(apiUrl, { headers });
+    }));
+  }
+
   getTripCatch(tripid: string): Observable<CatchDetails[]> {
     const apiUrl = `${this.baseApiUrl}/trip/${tripid}/catch`; // Construct full API URL
     return this.authService.token.pipe(switchMap(jwt => {
@@ -128,6 +148,8 @@ export interface TripDetails {
   catchSize: number;
   rating: TripRating;
   tags: TripTags[];
+  species: string[];
+  defaultSpecies: string;
 }
 
 export interface EndTripDetails {
@@ -143,6 +165,8 @@ export interface NewTrip {
   timeZone?: string;
   notes: string;
   tags: TripTags[];
+  species: string[];
+  defaultSpecies: string;
 }
 
 export interface NewCatch {
@@ -199,3 +223,12 @@ export enum TripTags
     Rainy
 }
 
+export interface ProfileDetails {
+  timeZone?: string;
+  species: string[];
+  defaultSpecies: string;
+}
+
+export interface SettingsDetails {
+  species: string[];
+}

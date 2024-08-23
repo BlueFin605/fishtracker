@@ -19,5 +19,8 @@
         <!-- Options for tags should be populated here -->
       </select>
     </div>
+    <div>
+      <app-species-selector [speciesList]="speciesList" (speciesSelected)="onSpeciesSelected($event)"></app-species-selector>      
+    </div>
     <button type="submit">Save Trip</button>
   </form>

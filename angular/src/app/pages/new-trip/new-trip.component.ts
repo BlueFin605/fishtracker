@@ -6,35 +6,47 @@ import { Router } from '@angular/router'; // Add this line
 import { DateConversionService } from '../../services/date-conversion.service';
 // import * as moment from 'moment-timezone';
 import { PreferencesService } from '../../services/preferences.service';
-
+import { FishTrackerSettingsService } from '../../services/fish-tracker-settings.service';
+import { SpeciesSelector} from '../../components/species-selector-component/species-selector.component';
 @Component({
   standalone: true,
   selector: 'app-new-trip',
   templateUrl: './new-trip.component.html',
   styleUrls: ['./new-trip.component.css'],
-  imports: [CommonModule, FormsModule]
+  imports: [CommonModule, FormsModule, SpeciesSelector]
 })
 export class NewTripComponent {
   newTrip: NewTrip = {
     startTime: undefined,
     timeZone: 'UTC',
     notes: '',
-    tags: []
+    tags: [],
+    species: [],
+    defaultSpecies: ''
   };
 
   startTime: Date | undefined = new Date();
+  speciesList: string[] = [];
 
   // timeZones: string[] = [];
 
   constructor(private apiService: ApiService, 
               private router: Router, 
               private dateFormatter: DateConversionService,
-              private preferencesService: PreferencesService) {}
+              private preferencesService: PreferencesService,
+              private settingsService: FishTrackerSettingsService) {}
 
   ngOnInit() {
     this.startTime = new Date();
     // this.timeZones = moment.tz.names();
-    this.newTrip.timeZone = this.preferencesService.getTimeZone();      
+    this.newTrip.timeZone = this.preferencesService.getTimeZone();   
+    this.settingsService.profile.subscribe(s => { this.speciesList = s.species;; 
+                                                 this.newTrip.defaultSpecies = s.defaultSpecies;});
+  }
+
+  onSpeciesSelected(species: string[]) {
+    this.newTrip.species = species;
+    console.log(this.newTrip.species);
   }
 
   postTrip() {    
