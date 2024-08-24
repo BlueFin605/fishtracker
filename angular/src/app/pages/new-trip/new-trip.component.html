@@ -22,7 +22,7 @@
     <div>
       <label for="targetSpecies">Target Species:</label>
       <div class="target-species-box">
-        <app-species-selector [speciesList]="speciesList" (speciesSelected)="onSpeciesSelected($event)"></app-species-selector>      
+        <app-species-selector [speciesList]="speciesList" [(selectedSpecies)]="newTrip.species"></app-species-selector>      
       </div>
     </div>
     <div>

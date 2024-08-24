@@ -8,6 +8,7 @@ import { DateConversionService } from '../../services/date-conversion.service';
 import { PreferencesService } from '../../services/preferences.service';
 import { FishTrackerSettingsService } from '../../services/fish-tracker-settings.service';
 import { SpeciesSelector} from '../../components/species-selector-component/species-selector.component';
+
 @Component({
   standalone: true,
   selector: 'app-new-trip',
@@ -40,6 +41,7 @@ export class NewTripComponent implements OnInit {
     this.newTrip.timeZone = this.preferencesService.getTimeZone();   
     this.settingsService.profile.subscribe(s => { 
                                                  this.speciesList = s.species;
+                                                 this.newTrip.species = s.species;
                                                  this.newTrip.defaultSpecies = s.defaultSpecies;});
   }
 
