@@ -159,7 +159,7 @@
     <div class="basic-mode">
         <h2>Basic Mode</h2>
         <div *ngFor="let size of fishSizes">
-            <button (click)="onFishSizeSelected(size)">{{ size }}</button>
+            <button (click)="onFishSizeSelected(size)">{{ size }} {{ tripDetails.defaultSpecies }}</button>
         </div>
     </div>
 </section>
