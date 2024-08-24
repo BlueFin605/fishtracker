@@ -12,3 +12,11 @@
   .checkbox-container label {
     margin-left: 5px;
   }
+
+  .sunken-box {
+    border: 1px solid #ccc;
+    padding: 10px;
+    box-shadow: inset 2px 2px 5px rgba(0, 0, 0, 0.1);
+    background-color: #f9f9f9;
+    border-radius: 4px;
+  }
