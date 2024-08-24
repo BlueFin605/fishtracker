@@ -1,4 +1,4 @@
 <div *ngFor="let species of speciesList">
-    <input type="checkbox" [value]="species" (change)="onSpeciesChange(species, $event)">
+    <input type="checkbox" [value]="species" [checked]="selectedSpecies.includes(species)" (change)="onSpeciesChange(species, $event)">
     {{ species }}
-    </div>
+  </div>

@@ -14,13 +14,16 @@
       <textarea id="notes" [(ngModel)]="newTrip.notes" name="notes"></textarea>
     </div>
     <div>
+      <label for="targetSpecies">Target Species:</label>
+      <div class="target-species-box">
+        <app-species-selector [speciesList]="speciesList" (speciesSelected)="onSpeciesSelected($event)"></app-species-selector>      
+      </div>
+    </div>
+    <div>
       <label for="tags">Tags:</label>
       <select multiple id="tags" [(ngModel)]="newTrip.tags" name="tags">
         <!-- Options for tags should be populated here -->
       </select>
-    </div>
-    <div>
-      <app-species-selector [speciesList]="speciesList" (speciesSelected)="onSpeciesSelected($event)"></app-species-selector>      
     </div>
     <button type="submit">Save Trip</button>
   </form>

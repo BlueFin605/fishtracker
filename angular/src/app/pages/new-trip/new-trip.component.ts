@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { ApiService, NewTrip } from '../../services/api.service';
 import { FormsModule } from '@angular/forms'; // Add this line
 import { CommonModule } from '@angular/common';
@@ -15,7 +15,7 @@ import { SpeciesSelector} from '../../components/species-selector-component/spec
   styleUrls: ['./new-trip.component.css'],
   imports: [CommonModule, FormsModule, SpeciesSelector]
 })
-export class NewTripComponent {
+export class NewTripComponent implements OnInit {
   newTrip: NewTrip = {
     startTime: undefined,
     timeZone: 'UTC',
@@ -28,8 +28,6 @@ export class NewTripComponent {
   startTime: Date | undefined = new Date();
   speciesList: string[] = [];
 
-  // timeZones: string[] = [];
-
   constructor(private apiService: ApiService, 
               private router: Router, 
               private dateFormatter: DateConversionService,
@@ -37,10 +35,11 @@ export class NewTripComponent {
               private settingsService: FishTrackerSettingsService) {}
 
   ngOnInit() {
+    console.log(`ngOnInit`);
     this.startTime = new Date();
-    // this.timeZones = moment.tz.names();
     this.newTrip.timeZone = this.preferencesService.getTimeZone();   
-    this.settingsService.profile.subscribe(s => { this.speciesList = s.species;; 
+    this.settingsService.profile.subscribe(s => { 
+                                                 this.speciesList = s.species;
                                                  this.newTrip.defaultSpecies = s.defaultSpecies;});
   }
 
