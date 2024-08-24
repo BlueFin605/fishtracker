@@ -1,0 +1,14 @@
+<form (ngSubmit)="saveProfileDetails()">
+    <div>
+      <label for="defaultSpecies">Default Species:</label>
+      <input type="text" id="defaultSpecies" [(ngModel)]="profileDetails.defaultSpecies" name="defaultSpecies">
+    </div>
+    <div>
+      <label for="targetSpecies">Target Species:</label>
+      <div class="target-species-box">
+        <app-species-selector [speciesList]="settings.species" (speciesSelected)="onSpeciesSelected($event)"></app-species-selector>      
+      </div>
+    </div>
+    <!-- Add other profile-related fields here -->
+    <button type="submit">Save Profile</button>
+  </form>

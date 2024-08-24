@@ -13,23 +13,33 @@ export class ApiService {
 
   constructor(private http: HttpClient, private authService: AuthenticationService) {}
 
-  getProfile(): Observable<ProfileDetails[]> {
+  getProfile(): Observable<ProfileDetails> {
     const apiUrl = `${this.baseApiUrl}/profile`; // Construct full API URL
     return this.authService.token.pipe(switchMap(jwt => {
       const headers = new HttpHeaders({
         Authorization: `Bearer ${jwt}`,
       });
-      return this.http.get<ProfileDetails[]>(apiUrl, { headers });
+      return this.http.get<ProfileDetails>(apiUrl, { headers });
     }));
   }
 
-  getSettings(): Observable<SettingsDetails[]> {
+  postProfile(profile: ProfileDetails): Observable<ProfileDetails> {
+    const apiUrl = `${this.baseApiUrl}/profile`; // Construct full API URL
+    return this.authService.token.pipe(switchMap(jwt => {
+      const headers = new HttpHeaders({
+        Authorization: `Bearer ${jwt}`,
+      });
+      return this.http.patch<ProfileDetails>(apiUrl, profile, { headers });
+    }));
+  }
+
+  getSettings(): Observable<SettingsDetails> {
     const apiUrl = `${this.baseApiUrl}/settings`; // Construct full API URL
     return this.authService.token.pipe(switchMap(jwt => {
       const headers = new HttpHeaders({
         Authorization: `Bearer ${jwt}`,
       });
-      return this.http.get<SettingsDetails[]>(apiUrl, { headers });
+      return this.http.get<SettingsDetails>(apiUrl, { headers });
     }));
   }
 

@@ -37,7 +37,8 @@ export class HeaderComponent {
 
   onPreferences() {
     // Navigate to preferences page or open preferences dialog
-    this.router.navigate(['/preferences']);
+    this.router.navigate(['/profile']);    
+    // this.router.navigate(['/preferences']);
   }
 
   onLogout() {
