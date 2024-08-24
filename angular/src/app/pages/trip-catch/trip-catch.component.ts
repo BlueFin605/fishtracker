@@ -49,6 +49,9 @@ export class TripCatchComponent implements OnInit {
   ratingOptions = Object.values(TripRating);
   sizeOptions = Object.values(FishSize);
 
+  isAdvancedMode: boolean = false;
+  fishSizes = Object.values(FishSize); // Use the FishSize enum
+
   constructor(private route: ActivatedRoute, 
               private apiService: ApiService,
               private googleMapsLoader: GoogleMapsLoaderService,
@@ -74,6 +77,10 @@ export class TripCatchComponent implements OnInit {
     console.log(JSON.stringify(this.currentPositionMarkerPosition));
     console.log(`sizeOptions: ${this.sizeOptions}`);
     console.log(`ratingOptions: ${this.ratingOptions}`);
+  }
+
+  toggleMode() {
+    this.isAdvancedMode = !this.isAdvancedMode;
   }
 
   formatNotes(notes: string): string {
@@ -199,6 +206,38 @@ export class TripCatchComponent implements OnInit {
 
   closeEndTripModal() {
     this.showEndTripModal = false;
+  }
+  
+  onFishSizeSelected(size: FishSize) {
+    this.getCurrentLocation().then((position) => {
+      const mycatch: NewCatch = {
+       caughtWhen: this.dateFormatter.createLocalDate(this.caughtWhen, this.newCatch.timeZone),
+       speciesId: this.tripDetails.defaultSpecies,
+       caughtSize: size,
+       caughtLocation: { latitude: position.lat, longitude: position.lng },
+       caughtLength: 0
+     }
+    
+     this.apiService.postCatch(this.tripId, mycatch).subscribe({
+       next: (response) => {
+         console.log('Catch saved successfully', response);
+         this.tripCatch.push(response);
+         const markerPosition: google.maps.LatLngLiteral = {
+           lat: response.caughtLocation.latitude,
+           lng: response.caughtLocation.longitude
+         };
+         this.catchHistoryMapMarkerPosition.push(markerPosition);
+    
+       },
+       error: (error) => {
+         console.error('Error saving catch', error);
+         // Handle error, e.g., show an error message
+       }
+     });
+    }).catch((error) => {
+      console.error('Error getting current location', error);
+    });
+
   }
 
   endTrip() {

@@ -1,57 +1,64 @@
-
-<section *ngIf="!tripDetails.endTime"> <!-- End Trip Button -->
-    <button (click)="openEndTripModal()">End Trip</button>
+<section>
+    <button (click)="toggleMode()">
+        Switch to {{ isAdvancedMode ? 'Basic' : 'Advanced' }} Mode
+    </button>
 </section>
 
-<!-- End Trip Modal -->
-<div *ngIf="showEndTripModal" class="modal">
-    <div class="modal-content">
-        <span class="close" (click)="closeEndTripModal()">&times;</span>
-        <h2>End Trip</h2>
-        <form (ngSubmit)="endTrip()">
-            <label for="endTime">End Time:</label>
-            <input type="datetime-local" id="endTime" [(ngModel)]="endTripData.endTime" name="endTime" required>
-            
-            <label for="notes">Notes:</label>
-            <textarea id="notes" [(ngModel)]="endTripData.notes" name="notes"></textarea>
-            
-            <label for="rating">Rating:</label>
-            <select id="rating" [(ngModel)]="endTripData.rating" name="rating" required>
-                <option *ngFor="let option of ratingOptions" [value]="option">{{ option }}</option>
-            </select>
-            
-            <!-- <input type="number" id="rating" [(ngModel)]="endTripData.rating" name="rating" min="1" max="5"> -->
-            
-            <label for="tags">Tags:</label>
-            <input type="text" id="tags" [(ngModel)]="endTripData.tags" name="tags">
-            
-            <button type="submit">Submit</button>
-        </form>
-    </div>
-</div>
+<section *ngIf="isAdvancedMode">
+    <section *ngIf="!tripDetails.endTime"> <!-- End Trip Button -->
+        <button (click)="openEndTripModal()">End Trip</button>
+    </section>
 
-<section  *ngIf="!tripDetails.endTime"> <!-- New Catch-->
-    <h2>New Catch</h2>
-    <form (ngSubmit)="postCatch()">
-        <div>
-            <label for="species">Species:</label>
-            <input type="text" id="species" name="species" [(ngModel)]="newCatch.speciesId">
+    <!-- End Trip Modal -->
+    <div *ngIf="showEndTripModal" class="modal">
+        <div class="modal-content">
+            <span class="close" (click)="closeEndTripModal()">&times;</span>
+            <h2>End Trip</h2>
+            <form (ngSubmit)="endTrip()">
+                <label for="endTime">End Time:</label>
+                <input type="datetime-local" id="endTime" [(ngModel)]="endTripData.endTime" name="endTime" required>
+
+                <label for="notes">Notes:</label>
+                <textarea id="notes" [(ngModel)]="endTripData.notes" name="notes"></textarea>
+
+                <label for="rating">Rating:</label>
+                <select id="rating" [(ngModel)]="endTripData.rating" name="rating" required>
+                    <option *ngFor="let option of ratingOptions" [value]="option">{{ option }}</option>
+                </select>
+
+                <!-- <input type="number" id="rating" [(ngModel)]="endTripData.rating" name="rating" min="1" max="5"> -->
+
+                <label for="tags">Tags:</label>
+                <input type="text" id="tags" [(ngModel)]="endTripData.tags" name="tags">
+
+                <button type="submit">Submit</button>
+            </form>
         </div>
-        <div>
-            <label for="caughtWhen">When:</label>
-            <input type="datetime-local" id="caughtWhen" name="caughtWhen" [(ngModel)]="caughtWhen">
-        </div>
-        <!-- <div>
+    </div>
+
+    <section *ngIf="!tripDetails.endTime"> <!-- New Catch-->
+        <h2>New Catch</h2>
+        <form (ngSubmit)="postCatch()">
+            <div>
+                <label for="species">Species:</label>
+                <input type="text" id="species" name="species" [(ngModel)]="newCatch.speciesId">
+            </div>
+            <div>
+                <label for="caughtWhen">When:</label>
+                <input type="datetime-local" id="caughtWhen" name="caughtWhen" [(ngModel)]="caughtWhen">
+            </div>
+            <!-- <div>
             <label for="timeZone">Timezone:</label>
             <select id="timeZone" name="timeZone" [(ngModel)]="newCatch.timeZone">
                 <option *ngFor="let tz of timeZones" [value]="tz">{{ tz }}</option>
             </select>
         </div> -->
-        <div>
-            <label for="size">Size:</label>
-            <select id="size" name="size" [(ngModel)]="newCatch.caughtSize">
-                <option *ngFor="let option of sizeOptions" [value]="option">{{ option }}</option>
-            </select>        </div>
+            <div>
+                <label for="size">Size:</label>
+                <select id="size" name="size" [(ngModel)]="newCatch.caughtSize">
+                    <option *ngFor="let option of sizeOptions" [value]="option">{{ option }}</option>
+                </select>
+            </div>
             <div>
                 <label for="length">Length (cm):</label>
                 <input type="number" id="length" name="length" [(ngModel)]="newCatch.caughtLength">
@@ -59,32 +66,33 @@
             <div>
                 <label for="caughtLocation">Location {{newCatch.caughtLocation?.latitude}},
                     {{newCatch.caughtLocation?.longitude}} (Select from map):</label>
-                    <button (click)="toggleCurrentPositionMapVisibility($event)">Show Map</button>
-                    
-                    <div *ngIf="currentPositionMapVisible">
-                        <google-map height="400px" width="750px" [center]="center" [zoom]="zoom"
+                <button (click)="toggleCurrentPositionMapVisibility($event)">Show Map</button>
+
+                <div *ngIf="currentPositionMapVisible">
+                    <google-map height="400px" width="750px" [center]="center" [zoom]="zoom"
                         (mapClick)="onMapClick($event)">
                         <map-marker [position]="currentPositionMarkerPosition" [options]="currentPositionMarkerOptions"
-                        (mapDragend)="onMarkerDragEnd($event)" />
+                            (mapDragend)="onMarkerDragEnd($event)" />
                     </google-map>
-                    <input type="hidden" id="caughtLocation" name="caughtLocation" [(ngModel)]="newCatch.caughtLocation">
+                    <input type="hidden" id="caughtLocation" name="caughtLocation"
+                        [(ngModel)]="newCatch.caughtLocation">
                 </div>
             </div>
-            
+
             <button type="submit">Add Catch</button>
         </form>
     </section>
-    
+
     <section> <!-- Catch History -->
         <h2>Catch History</h2>
         <button (click)="togglecatchHistoryVisibility($event)">Show catches on Map</button> <!-- Show on Maps button -->
         <div *ngIf="catchHistoryMapVisible">
             <google-map height="400px" width="750px" [center]="center" [zoom]="zoom">
                 <map-marker *ngFor="let position of catchHistoryMapMarkerPosition" [position]="position"
-                [options]="catchHistoryMapMarkerOptions" />
+                    [options]="catchHistoryMapMarkerOptions" />
             </google-map>
         </div>
-        
+
         <ul>
             <table>
                 <thead>
@@ -106,8 +114,8 @@
             </table>
         </ul>
     </section>
-    
-    <section>  <!-- Trip Details -->
+
+    <section> <!-- Trip Details -->
         <h2>Trip Details</h2>
         <div>
             <strong>Subject:</strong> {{ tripDetails.subject }}
@@ -116,10 +124,10 @@
             <strong>Trip ID:</strong> {{ tripDetails.tripId }}
         </div>
         <div>
-            <strong>Start Time:</strong> {{ tripDetails.startTime  | dateFormat }}
+            <strong>Start Time:</strong> {{ tripDetails.startTime | dateFormat }}
         </div>
         <div>
-            <strong>End Time:</strong> {{ tripDetails.endTime  | dateFormat }}
+            <strong>End Time:</strong> {{ tripDetails.endTime | dateFormat }}
         </div>
         <div>
             <strong>Notes:</strong><br>
@@ -142,5 +150,16 @@
             <ul>
                 <li *ngFor="let specie of tripDetails.species">{{ specie }}</li>
             </ul>
-        </div>      
+        </div>
     </section>
+</section>
+
+<section *ngIf="!isAdvancedMode">
+    <!-- Basic Mode Content -->
+    <div class="basic-mode">
+        <h2>Basic Mode</h2>
+        <div *ngFor="let size of fishSizes">
+            <button (click)="onFishSizeSelected(size)">{{ size }}</button>
+        </div>
+    </div>
+</section>
