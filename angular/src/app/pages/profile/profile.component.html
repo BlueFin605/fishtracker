@@ -1,14 +1,16 @@
 <form (ngSubmit)="saveProfileDetails()">
-    <div>
-      <label for="defaultSpecies">Default Species:</label>
-      <input type="text" id="defaultSpecies" [(ngModel)]="profileDetails.defaultSpecies" name="defaultSpecies">
+  <div>
+    <label for="defaultSpecies">Default Species:</label>
+    <select id="defaultSpecies" [(ngModel)]="profileDetails.defaultSpecies" name="defaultSpecies">
+      <option *ngFor="let species of profileDetails.species" [value]="species">{{ species }}</option>
+    </select>
+  </div>
+  <div>
+    <label for="targetSpecies">Target Species:</label>
+    <div class="target-species-box">
+      <app-species-selector [speciesList]="settings.species" [(selectedSpecies)]="profileDetails.species"></app-species-selector>      
     </div>
-    <div>
-      <label for="targetSpecies">Target Species:</label>
-      <div class="target-species-box">
-        <app-species-selector [speciesList]="settings.species" [(selectedSpecies)]="profileDetails.species"></app-species-selector>      
-      </div>
-    </div>
-    <!-- Add other profile-related fields here -->
-    <button type="submit">Save Profile</button>
-  </form>
+  </div>
+  <!-- Add other profile-related fields here -->
+  <button type="submit">Save Profile</button>
+</form>

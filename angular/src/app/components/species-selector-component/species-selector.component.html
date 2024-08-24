@@ -1,12 +1,14 @@
 <div>
   <label>Select Species:</label>
-  <div *ngFor="let species of speciesList">
-    <input 
-      type="checkbox" 
-      [id]="species" 
-      [value]="species" 
-      [checked]="selectedSpecies.includes(species)" 
-      (change)="onSpeciesSelected($event, species)">
-    <label [for]="species">{{ species }}</label>
+  <div class="container">
+    <div class="checkbox-container" *ngFor="let species of speciesList">
+      <input 
+        type="checkbox" 
+        [id]="species" 
+        [value]="species" 
+        [checked]="selectedSpecies.includes(species)" 
+        (change)="onSpeciesSelected($event, species)">
+      <label [for]="species">{{ species }}</label>
+    </div>
   </div>
 </div>

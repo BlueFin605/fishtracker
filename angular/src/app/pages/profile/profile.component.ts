@@ -25,8 +25,8 @@ export class ProfileComponent implements OnInit {
   constructor(private apiService: ApiService) {}
 
   ngOnInit(): void {
-    this.loadProfileDetails();
     this.loadSettings();
+    this.loadProfileDetails();
   }
 
   loadProfileDetails(): void {
@@ -36,7 +36,7 @@ export class ProfileComponent implements OnInit {
   }
 
   loadSettings(): void {
-      this.apiService.getSettings().subscribe(s => this.settings = s);
+    this.apiService.getSettings().subscribe(s => this.settings = s);
   }
 
   saveProfileDetails(): void {
@@ -49,10 +49,9 @@ export class ProfileComponent implements OnInit {
       }
     });
   }
-  
+
   onSpeciesSelected(species: string[]) {
     this.profileDetails.species = species;
     console.log(this.profileDetails.species);
   }
-
 }
