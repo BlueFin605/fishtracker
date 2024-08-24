@@ -134,4 +134,13 @@
         <div>
             <strong>Tags:</strong> <span *ngFor="let tag of tripDetails.tags">{{ tag }} </span>
         </div>
+        <div>
+            <strong>Default Species:</strong> {{ tripDetails.defaultSpecies }}
+        </div>
+        <div>
+            <strong>Target Species:</strong>
+            <ul>
+                <li *ngFor="let specie of tripDetails.species">{{ specie }}</li>
+            </ul>
+        </div>      
     </section>

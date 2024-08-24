@@ -14,6 +14,12 @@
       <textarea id="notes" [(ngModel)]="newTrip.notes" name="notes"></textarea>
     </div>
     <div>
+      <label for="targetSpecies">Default Species:</label>
+      <select id="targetSpecies" [(ngModel)]="newTrip.defaultSpecies" name="targetSpecies">
+        <option *ngFor="let species of speciesList" [value]="species">{{ species }}</option>
+      </select>
+    </div>    
+    <div>
       <label for="targetSpecies">Target Species:</label>
       <div class="target-species-box">
         <app-species-selector [speciesList]="speciesList" (speciesSelected)="onSpeciesSelected($event)"></app-species-selector>      
