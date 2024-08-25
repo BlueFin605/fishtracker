@@ -1,8 +1,12 @@
-<section>
-    <button (click)="toggleMode()">
-        Switch to {{ isAdvancedMode ? 'Basic' : 'Advanced' }} Mode
-    </button>
-</section>
+<!-- <section> -->
+    <div class="switch-container">
+        <label class="switch">
+            <input type="checkbox" (change)="toggleMode()" [checked]="isAdvancedMode">
+            <span class="slider round"></span>
+        </label>
+        <span class="switch-label">Advanced</span>
+    </div>
+<!-- </section> -->
 
 <section *ngIf="isAdvancedMode">
     <section *ngIf="!tripDetails.endTime"> <!-- End Trip Button -->
