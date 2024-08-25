@@ -262,4 +262,28 @@ export class TripCatchComponent implements OnInit {
       }
     });
   }  
+
+  getButtonClass(size: string): string {
+    switch (size.toLowerCase()) {
+      case 'undersize':
+        return 'button-undersize';
+      case 'small':
+        return 'button-small';
+      case 'medium':
+        return 'button-medium';
+      case 'large':
+        return 'button-large';
+      case 'verylarge':
+        return 'button-verylarge';
+      default:
+        return '';
+    }
+  }
+
+  formatSize(size: string): string {
+    if (size.toLowerCase() === 'verylarge') {
+      return 'Very Large';
+    }
+    return size;
+  }  
 }

@@ -1,0 +1,39 @@
+.basic-mode .button-wrapper {
+    flex: 1; /* Ensure each button wrapper takes equal space */
+}
+
+.basic-mode button {
+    display: block;
+    width: calc(100% - 10px); /* Subtracting 10px to account for the 5px border on each side */
+    height: 15vh; /* Each button takes 20% of the viewport height */
+    /* border: 5px solid black; Add the 5px border */
+    box-sizing: border-box; /* Ensure padding and border are included in the element's total width and height */
+    margin: 0; /* Remove any default margin */
+    padding: 10px; /* Optional: Add padding for better appearance */
+}
+
+/* Specific button sizes with corresponding colors and text sizes */
+.basic-mode .button-undersize {
+    /* background-color: red; */
+    font-size: 14px; /* Base font size */
+}
+
+.basic-mode .button-small {
+    /* background-color: #FFA500; Orange */
+    font-size: 16px; /* Slightly larger */
+}
+
+.basic-mode .button-medium {
+    /* background-color: #FFFF00; Yellow */
+    font-size: 18px; /* Slightly larger */
+}
+
+.basic-mode .button-large {
+    /* background-color: #ADFF2F; Light Green */
+    font-size: 20px; /* Slightly larger */
+}
+
+.basic-mode .button-verylarge {
+    /* background-color: #008000; Green */
+    font-size: 22px; /* Slightly larger */
+}

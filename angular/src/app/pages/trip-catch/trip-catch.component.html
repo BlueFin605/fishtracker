@@ -157,9 +157,11 @@
 <section *ngIf="!isAdvancedMode">
     <!-- Basic Mode Content -->
     <div class="basic-mode">
-        <h2>Basic Mode</h2>
-        <div *ngFor="let size of fishSizes">
-            <button (click)="onFishSizeSelected(size)">{{ size }} {{ tripDetails.defaultSpecies }}</button>
+      <!-- <h2>Basic Mode</h2> -->
+      <div class="button-container">
+        <div *ngFor="let size of fishSizes" class="button-wrapper">
+          <button  [ngClass]="getButtonClass(size)" (click)="onFishSizeSelected(size)">{{ formatSize(size) }} {{ tripDetails.defaultSpecies }}</button>
         </div>
+      </div>
     </div>
-</section>
+  </section>
