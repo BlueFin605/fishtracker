@@ -1,4 +1,4 @@
-<!-- <section> -->
+    <div class="advanced">
     <div class="switch-container">
         <label class="switch">
             <input type="checkbox" (change)="toggleMode()" [checked]="isAdvancedMode">
@@ -6,7 +6,7 @@
         </label>
         <span class="switch-label">Advanced</span>
     </div>
-<!-- </section> -->
+</div>
 
 <section *ngIf="isAdvancedMode">
     <section *ngIf="!tripDetails.endTime"> <!-- End Trip Button -->
