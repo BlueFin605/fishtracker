@@ -1,62 +1,44 @@
+// src/app/services/authentication.service.ts
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { Observable, ReplaySubject } from 'rxjs';
-import { switchMap } from 'rxjs/operators';
-import { HttpHeaders } from '@angular/common/http';
-import { AuthService } from '@auth0/auth0-angular';
+import { Router } from '@angular/router';
+import { environment } from '../../environments/environment';
 
 @Injectable({
   providedIn: 'root'
 })
 export class AuthenticationService {
-  private userProfile: any;
-  private tokenSubject: ReplaySubject<string> = new ReplaySubject(1);
-  public token: Observable<string> = this.tokenSubject.asObservable();
+  // private clientId = '5gipvjjpmpeqagcqpv5kpnu7uu';
+  // private domain = 'fishtracker-prod';
+  private redirectUri = 'http://localhost:4200/callback';
 
-  constructor(private http: HttpClient, public auth: AuthService) {
-    console.log('Authentication service initialized');
-    this.auth.getAccessTokenSilently().subscribe(
-      (token: string) => {
-        this.tokenSubject.next(token); // Emit the token to subscribers
-        //console.log(token); // Use the token here
-      },
-      (error) => {
-        console.error('Error fetching access token:', error)
-      }
-    );
+  constructor(private router: Router) {}
+
+  signIn() {
+    const url = `https://${environment.domain}.auth.${environment.region}.amazoncognito.com/login?response_type=token&client_id=${environment.clientId}&redirect_uri=${encodeURIComponent(this.redirectUri)}&scope=openid+profile+email`;    
+    // const url = `https://fishtracker-prod.auth.ap-southeast-2.amazoncognito.com/login?
+    //   response_type=code&
+    //   client_id=${environment.clientId}&
+    //   redirect_uri=${encodeURIComponent(this.redirectUri)}&
+    //   scope=openid+profile+email`;
+    window.location.href = url;    
+    console.log(url);
+    window.location.href = url;
   }
 
-  // Method to fetch user profile from IDP
-  fetchUserProfile(): Observable<any> {
-    return this.token.pipe(switchMap(jwt => {
-      const headers = new HttpHeaders({
-        Authorization: `Bearer ${jwt}`,
-      });
-      return this.http.get('https://dev-ox5simjuwx546rx2.us.auth0.com/userinfo', { headers });
-    }));
-
-    // return this.http.get('https://dev-ox5simjuwx546rx2.us.auth0.com/userinfo'); // Replace with your IDP's user info endpoint
+  signOut() {
+    localStorage.removeItem('id_token');
+    localStorage.removeItem('access_token');
+    this.router.navigate(['/']);
   }
 
-  // Method to get the stored user profile
-  getUserProfile() {
-    return this.userProfile;
+  isAuthenticated(): boolean {
+    return !!localStorage.getItem('id_token');
   }
 
-  // Method to set the user profile
-  setUserProfile(profile: any) {
-    this.userProfile = profile;
-  }
+  get id_token(): string | null {
+    return localStorage.getItem('id_token');
+  }  
 
-  isAuthenticated(): Observable<boolean> {
-    return this.auth.isAuthenticated$;
-  }
-
-  login() {
-    this.auth.loginWithRedirect();
-  }
-
-  logout() {
-    this.auth.logout({ logoutParams: { returnTo: document.location.origin } });
-  }
-}
+  get access_token(): string | null {
+    return localStorage.getItem('access_token');
+  }  }

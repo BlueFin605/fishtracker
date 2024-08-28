@@ -4,7 +4,6 @@ import { RouterLink, Router } from '@angular/router';
 import { MatIconModule } from '@angular/material/icon';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatButtonModule } from '@angular/material/button';
-import { AuthService } from '@auth0/auth0-angular';
 import { CommonModule } from '@angular/common'; // Import CommonModule
 import { AuthenticationService } from '../../services/authentication.service';
 
@@ -22,16 +21,18 @@ import { AuthenticationService } from '../../services/authentication.service';
   styleUrl: './header.component.css'
 })
 export class HeaderComponent {
-  userProfile: any;
+  // userProfile: any = {};
 
   constructor(private router: Router, public authService: AuthenticationService) { }
 
   ngOnInit() {
-    this.authService.fetchUserProfile().subscribe(profile => {
-      this.userProfile = profile;
-      console.log('User profile:', profile);
-      this.authService.setUserProfile(profile);
-    });
+    // if (this.authService.isAuthenticated()) {
+    //   this.authService.getUserAttributes().then(attributes => {
+    //     this.userProfile = attributes;
+    //   }).catch(error => {
+    //     console.error('Error fetching user attributes', error);
+    //   });
+    // }  
   }
 
 

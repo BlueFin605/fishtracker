@@ -1,5 +1,4 @@
 import { Component, OnInit } from '@angular/core';
-import { AuthService } from '@auth0/auth0-angular';
 import { AuthenticationService } from '../../services/authentication.service';
 
 @Component({
@@ -14,15 +13,14 @@ export class TokenDisplayComponent implements OnInit {
   access_token: string;
   id_token: string;
 
-  constructor(public auth: AuthService, authenticationService: AuthenticationService) { 
+  constructor(private authenticationService: AuthenticationService) { 
     this.access_token = '';
-    authenticationService.token.subscribe(t => {
-      this.access_token = t
-    });
-    this.id_token = "";
+    this.id_token = '';
   }
 
   ngOnInit(): void {
+    this.access_token = this.authenticationService.access_token ?? "";
+    this.id_token = this.authenticationService.id_token ?? "";
     // this.auth.getAccessTokenSilently().subscribe(
     //   (token: string) => {
     //     this.access_token = token;
@@ -33,14 +31,14 @@ export class TokenDisplayComponent implements OnInit {
     //   }
     // );    
 
-    this.auth.idTokenClaims$.subscribe({
-      next: (claims) => {
-        // Step 3: Use getIdTokenClaims to retrieve the ID token claims
-        this.id_token = claims?.__raw ?? ""; // Step 4: Access the __raw property to get the JWT, provide default value of empty string
-        // console.log('ID Token (JWT):', jwt);
-      },
-      error: (error) => console.error('Error fetching ID token claims:', error)
-    });
+    // this.auth.idTokenClaims$.subscribe({
+    //   next: (claims) => {
+    //     // Step 3: Use getIdTokenClaims to retrieve the ID token claims
+    //     this.id_token = claims?.__raw ?? ""; // Step 4: Access the __raw property to get the JWT, provide default value of empty string
+    //     // console.log('ID Token (JWT):', jwt);
+    //   },
+    //   error: (error) => console.error('Error fetching ID token claims:', error)
+    // });
   }
 
 }
