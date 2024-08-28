@@ -1,10 +1,8 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpHeaders, HTTP_INTERCEPTORS } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { switchMap } from 'rxjs/operators';
 import { AuthenticationService } from './authentication.service';
 import { environment } from '../../environments/environment';
-import { AuthInterceptor } from './auth.interceptor';
 
 @Injectable({
   providedIn: 'root',
