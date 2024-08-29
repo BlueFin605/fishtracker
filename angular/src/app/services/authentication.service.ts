@@ -9,12 +9,11 @@ import { environment } from '../../environments/environment';
 export class AuthenticationService {
   // private clientId = '5gipvjjpmpeqagcqpv5kpnu7uu';
   // private domain = 'fishtracker-prod';
-  private redirectUri = 'http://localhost:4200/callback';
 
   constructor(private router: Router) {}
 
   signIn() {
-    const url = `https://${environment.domain}.auth.${environment.region}.amazoncognito.com/login?response_type=token&client_id=${environment.clientId}&redirect_uri=${encodeURIComponent(this.redirectUri)}&scope=openid+profile+email`;    
+    const url = `https://${environment.domain}.auth.${environment.region}.amazoncognito.com/login?response_type=token&client_id=${environment.clientId}&redirect_uri=${encodeURIComponent(environment.redirectUri)}&scope=openid+profile+email`;    
     // const url = `https://fishtracker-prod.auth.ap-southeast-2.amazoncognito.com/login?
     //   response_type=code&
     //   client_id=${environment.clientId}&
