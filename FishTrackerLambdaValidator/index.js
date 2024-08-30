@@ -1,17 +1,58 @@
+import { CognitoJwtVerifier } from "aws-jwt-verify";
 const lib = require('./lib');
 let data;
 
 // Lambda function index.handler - thin wrapper around lib.authenticate
 module.exports.handler = async (event, context, callback) => {
+
+  console.log(event)
+  console.log(context)
+
+  const token = event.headers.Authorization || event.headers.authorization;
+  console.log(token);
+
+  // Verifier that expects valid access tokens:
+  const verifier = CognitoJwtVerifier.create({
+    userPoolId: "eu-central-1_mM4RIUG7b",
+    tokenUse: "access",
+    clientId: "580bdivmu2jc8p09aj8cl8ffid",
+  });
+
   try {
-    console.log(event)
-    console.log(context)
+    const payload = await verifier.verify(token.replace("Bearer ", ""));
+    console.log("Token is valid. Payload:", payload);
+  } catch (err) {
+    console.log("Token not valid!", err);
+    return {
+      statusCode: 401,
+      body: JSON.stringify({ message: "Unauthorized" }),
+    };
+  }
+
+  // Continue with your logic
+  try {
     data = await lib.authenticate(event);
-    console.log(data)
+    console.log(data);
+    return {
+      statusCode: 200,
+      body: JSON.stringify(data),
+    };
+  } catch (err) {
+    console.log("Error authenticating", err);
+    return {
+      statusCode: 500,
+      body: JSON.stringify({ message: "Internal Server Error" }),
+    };
   }
-  catch (err) {
-      console.log(err);
-      return context.fail("Unauthorized");
-  }
-  return data;
+  // try {
+  //   console.log(event)
+  //   console.log(context)
+  //   data = await lib.authenticate(event);
+  //   console.log(data)
+  // }
+  // catch (err) {
+  //     console.log(err);
+  //     return context.fail("Unauthorized");
+  // }
+  // return data;
 };
