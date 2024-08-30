@@ -5,7 +5,10 @@ let data;
 // Lambda function index.handler - thin wrapper around lib.authenticate
 module.exports.handler = async (event, context, callback) => {
 
+  console.log('lmabda validator')
+  console.log('event')
   console.log(event)
+  console.log('context')
   console.log(context)
 
   const token = event.headers.Authorization || event.headers.authorization;
