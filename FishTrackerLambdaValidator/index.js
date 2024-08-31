@@ -29,6 +29,7 @@ module.exports.handler = async (event, context, callback) => {
       policyDocument: common.getPolicyDocument('Allow', event.methodArn),
       context: { scope: payload.scope }
     }
+    console.log(data);
     return data;
   } catch (error) {
     console.log('error', error);
