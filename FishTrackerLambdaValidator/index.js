@@ -10,7 +10,7 @@ module.exports.handler = async (event, context, callback) => {
     console.log(context);
 
     // Extract the token from the Authorization header
-    const token = event.headers.Authorization || event.headers.authorization;
+    const token = event.authorizationToken;
     console.log(`token:[${token}]`);
 
     if (!token) {
