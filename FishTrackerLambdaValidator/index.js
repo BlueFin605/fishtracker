@@ -1,4 +1,5 @@
 const { CognitoJwtVerifier } = require("aws-jwt-verify");
+const common = require('./common.js');
 
 // Initialize the Cognito JWT Verifier
 const verifier = CognitoJwtVerifier.create({
@@ -11,7 +12,7 @@ const verifier = CognitoJwtVerifier.create({
 module.exports.handler = async (event, context, callback) => {
   console.log('event', event);
   console.log('context', context);
-  
+
   const token = event.authorizationToken;
 
   if (!token) {
@@ -23,7 +24,12 @@ module.exports.handler = async (event, context, callback) => {
     console.log(token);
     const payload = await verifier.verify(token.replace("Bearer ", ""));
     console.log('verfied okay', payload);
-    return callback(null, generatePolicy('user', 'Allow', event.methodArn));
+    var data = {
+      principalId: payload.sub,
+      policyDocument: common.getPolicyDocument('Allow', event.methodArn),
+      context: { scope: payload.scope }
+    }
+    return data;
   } catch (error) {
     console.log('error', error);
     return context.fail("Unauthorized");    

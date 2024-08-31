@@ -1,6 +1,7 @@
 const { CognitoJwtVerifier } = require("aws-jwt-verify");
 const axios = require('axios'); // Add axios for intercepting network requests
 const lib = require('./lib');
+const common = require('./common.js');
 
 // Verifier configuration
 const verifier = CognitoJwtVerifier.create({
@@ -20,25 +21,14 @@ async function testToken() {
     try {
         const payload = await verifier.verify(event.authorizationToken.replace("Bearer ", ""));
         console.log("Token is valid. Payload:", payload);
+        var data = {
+            principalId: payload.sub,
+            policyDocument: common.getPolicyDocument('Allow', 'arn:aws:execute-api:eu-central-1:083148603667:nqof2u3o25/Prod/GET/api/settings'),
+            context: { scope: payload.scope }
+          }
+      
     } catch (err) {
         console.log("Token not valid!", err);
-    }
-
-
-    // Continue with your logic
-    try {
-        data = await lib.authenticate(event);
-        console.log(data);
-        return {
-            statusCode: 200,
-            body: JSON.stringify(data),
-        };
-    } catch (err) {
-        console.log("Error authenticating", err);
-        return {
-            statusCode: 500,
-            body: JSON.stringify({ message: "Internal Server Error" }),
-        };
     }
 }
 
