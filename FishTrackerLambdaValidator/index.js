@@ -32,7 +32,7 @@ module.exports.handler = async (event, context, callback) => {
         userPoolId: "eu-central-1_mM4RIUG7b",
         tokenUse: "access",
         clientId: "580bdivmu2jc8p09aj8cl8ffid",
-        // No need to set jwksUri manually
+        jwksUri: 'https://cognito-idp.eu-central-1.amazonaws.com/eu-central-1_mM4RIUG7/.well-known/jwks.json' // Ensure this URI is correct
     });
 
     try {
