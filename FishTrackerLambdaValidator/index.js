@@ -9,6 +9,9 @@ const verifier = CognitoJwtVerifier.create({
 
 // Lambda function index.handler - AWS API Gateway custom validator of JWT token
 module.exports.handler = async (event, context, callback) => {
+  console.log('event', event);
+  console.log('context', context);
+  
   const token = event.authorizationToken;
 
   if (!token) {
