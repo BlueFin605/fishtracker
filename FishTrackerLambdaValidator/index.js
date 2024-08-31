@@ -1,16 +1,18 @@
 const { CognitoJwtVerifier } = require("aws-jwt-verify");
+const axios = require('axios'); // Add axios for intercepting network requests
 const lib = require('./lib');
 let data;
 
 // Lambda function index.handler - thin wrapper around lib.authenticate
 module.exports.handler = async (event, context, callback) => {
+
+    console.log(event);
+    console.log(context);
+
     // Extract the token from the Authorization header
-    console.log(`event:[${JSON.stringify(event)}]`);
-    console.log(`context:[${JSON.stringify(context)}]`);
-
-    const token = event.authorizationToken;
-
+    const token = event.headers.Authorization || event.headers.authorization;
     console.log(`token:[${token}]`);
+
     if (!token) {
         return {
             statusCode: 401,
@@ -18,11 +20,19 @@ module.exports.handler = async (event, context, callback) => {
         };
     }
 
+    // Intercept network request to log JWKS URI
+    const originalGet = axios.get;
+    axios.get = async function(url, ...args) {
+        console.log(`Fetching JWKS from URI: ${url}`);
+        return originalGet.call(this, url, ...args);
+    };
+
     // Verifier that expects valid access tokens:
     const verifier = CognitoJwtVerifier.create({
         userPoolId: "eu-central-1_mM4RIUG7b",
         tokenUse: "access",
         clientId: "580bdivmu2jc8p09aj8cl8ffid",
+        // No need to set jwksUri manually
     });
 
     try {
