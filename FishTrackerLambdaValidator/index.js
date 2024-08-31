@@ -18,11 +18,11 @@ module.exports.handler = async (event, context, callback) => {
 
   try {
     console.log(token);
-    const payload = await verifier.verify(token);
+    const payload = await verifier.verify(token.replace("Bearer ", ""));
     console.log('verfied okay', payload);
     return callback(null, generatePolicy('user', 'Allow', event.methodArn));
   } catch (error) {
     console.log('error', error);
-    return callback("Unauthorized");   // Return a 401 Unauthorized response   
+    return context.fail("Unauthorized");    
   }
 };
