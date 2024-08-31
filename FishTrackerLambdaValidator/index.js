@@ -7,8 +7,8 @@ module.exports.handler = async (event, context, callback) => {
     // Extract the token from the Authorization header
     console.log(`event:[${JSON.stringify(event)}]`);
     console.log(`context:[${JSON.stringify(context)}]`);
-    
-    const token = event.headers.Authorization || event.headers.authorization;
+
+    const token = event.authorizationToken;
 
     console.log(`token:[${token}]`);
     if (!token) {
