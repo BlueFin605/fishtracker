@@ -21,12 +21,13 @@ async function testToken() {
     try {
         const payload = await verifier.verify(event.authorizationToken.replace("Bearer ", ""));
         console.log("Token is valid. Payload:", payload);
+        var statement = common.getPolicyDocument('Allow', 'arn:aws:execute-api:eu-central-1:083148603667:nqof2u3o25/Prod/GET/api/settings');
         var data = {
             principalId: payload.sub,
-            policyDocument: common.getPolicyDocument('Allow', 'arn:aws:execute-api:eu-central-1:083148603667:nqof2u3o25/Prod/GET/api/settings'),
+            policyDocument: statement,
             context: { scope: payload.scope }
           }
-      
+        return data;
     } catch (err) {
         console.log("Token not valid!", err);
     }
