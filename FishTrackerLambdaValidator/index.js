@@ -9,25 +9,17 @@ const verifier = CognitoJwtVerifier.create({
 
 // Lambda function index.handler - AWS API Gateway custom validator of JWT token
 module.exports.handler = async (event, context, callback) => {
-    const token = event.authorizationToken;
+  const token = event.authorizationToken;
 
-    if (!token) {
-        return callback(null, {
-            statusCode: 401,
-            body: JSON.stringify({ message: "Unauthorized: No token provided" })
-        });
-    }
+  if (!token) {
+    console.log('missing token');
+    return callback("Unauthorized");   // Return a 401 Unauthorized response
+  }
 
-    try {
-        const payload = await verifier.verify(token);
-        return callback(null, {
-            statusCode: 200,
-            body: JSON.stringify({ message: "Token is valid", payload })
-        });
-    } catch (error) {
-        return callback(null, {
-            statusCode: 401,
-            body: JSON.stringify({ message: "Unauthorized: Invalid token", error: error.message })
-        });
-    }
+  try {
+    const payload = await verifier.verify(token);
+    return callback(null, generatePolicy('user', 'Allow', event.methodArn));
+  } catch (error) {
+    return callback("Unauthorized");   // Return a 401 Unauthorized response   
+  }
 };
