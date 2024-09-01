@@ -3,7 +3,7 @@ const common = require('./common.js');
 
 // Initialize the Cognito JWT Verifier
 const verifier = CognitoJwtVerifier.create({
-  userPoolId: "eu-central-1_mM4RIUG7b",
+  userPoolId: "eu-central-1_E3tnXRwUE",
   tokenUse: "access",
   clientId: "6a1k8mh59fmah76tr3uua6r8at",
 });
