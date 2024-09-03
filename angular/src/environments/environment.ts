@@ -1,7 +1,9 @@
 export const environment = {
   production: true,
-  auth0Domain: 'AUTH0_DOMAIN',
-  auth0ClientId: 'AUTH0_CLIENTID',
+  clientId: 'COGNITO_CLIENTID',
+  domain: 'COGNITO_DOMAIN',
+  region: 'COGNITO_REGION',
+  redirectUri: 'COGNITO_REDIRECT',
   apiUrl: 'https://api.fishtracker.bluefin605.com/api',
   googleMapiApi: 'GOOGLE_API_KEY'
 };

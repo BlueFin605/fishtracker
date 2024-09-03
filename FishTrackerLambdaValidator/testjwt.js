@@ -1,5 +1,15 @@
+const { CognitoJwtVerifier } = require("aws-jwt-verify");
+const axios = require('axios'); // Add axios for intercepting network requests
 const lib = require('./lib');
-let data;
+const common = require('./common.js');
+
+// Verifier configuration
+const verifier = CognitoJwtVerifier.create({
+    userPoolId: "eu-central-1_mM4RIUG7b",
+    tokenUse: "access",
+    clientId: "580bdivmu2jc8p09aj8cl8ffid",
+    // jwksUri: 'https://cognito-idp.eu-central-1.amazonaws.com/eu-central-1_mM4RIUG7/.well-known/jwks.json'
+});
 
 const event = {
     type: 'TOKEN',
@@ -9,14 +19,18 @@ const event = {
 
 async function testToken() {
     try {
-        data = await lib.authenticate(event);
-        console.log(data)
-      }
-      catch (err) {
-          console.log(err);
-          return context.fail("Unauthorized");
-      }
-      return data;    
+        const payload = await verifier.verify(event.authorizationToken.replace("Bearer ", ""));
+        console.log("Token is valid. Payload:", payload);
+        var statement = common.getPolicyDocument('Allow', 'arn:aws:execute-api:eu-central-1:083148603667:nqof2u3o25/Prod/GET/api/settings');
+        var data = {
+            principalId: payload.sub,
+            policyDocument: statement,
+            context: { scope: payload.scope }
+          }
+        return data;
+    } catch (err) {
+        console.log("Token not valid!", err);
+    }
 }
 
 testToken();

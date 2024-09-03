@@ -1,4 +1,4 @@
-<ng-container *ngIf="authService.isAuthenticated() | async; else loggedOut">
+<ng-container *ngIf="authService.isAuthenticated() ; else loggedOut">
     <header>
         <nav class="nav-links">
             <a class="nav-link" [routerLink]="['/debug']">Debug</a>
@@ -7,14 +7,14 @@
         </nav>
         <div class="avatar-menu">
             <button mat-icon-button [matMenuTriggerFor]="menu">
-                <img *ngIf="userProfile" [src]="userProfile.picture" alt="Avatar" class="avatar">
-                <mat-icon *ngIf="!userProfile">account_circle</mat-icon> </button>
+              <!-- <img *ngIf="userProfile.picture" [src]="userProfile.picture" alt="Avatar" class="avatar"> -->
+              <!-- <mat-icon *ngIf="!userProfile.picture">account_circle</mat-icon> -->
+            </button>
             <mat-menu #menu="matMenu">
-                <button mat-menu-item (click)="onPreferences()">Preferences</button>
-                <app-auth-button></app-auth-button>
+              <button mat-menu-item (click)="onPreferences()">Preferences</button>
+              <app-auth-button></app-auth-button>
             </mat-menu>
-        </div>
-    </header>
+          </div>    </header>
 </ng-container>
 
 <ng-template #loggedOut>

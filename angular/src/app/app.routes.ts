@@ -5,8 +5,10 @@ import { DebugDisplayComponent } from './pages/debug-display/debug-display.compo
 import { TripsComponent } from './pages/trips/trips.component';
 import { NewTripComponent } from './pages/new-trip/new-trip.component';
 import { ProfileComponent} from './pages/profile/profile.component';
+import { CallbackComponent } from './pages/callback/callback.component';
 
 export const routes: Routes = [
+    { path: 'callback', component: CallbackComponent },
     { path: 'trip/:tripid', component: TripCatchComponent },
     { path: 'trips', component: TripsComponent },
     { path: 'newtrip', component: NewTripComponent },

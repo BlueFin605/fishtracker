@@ -3,19 +3,7 @@ require('dotenv').config({ silent: true });
 const jwksClient = require('jwks-rsa');
 const jwt = require('jsonwebtoken');
 const util = require('util');
-
-const getPolicyDocument = (effect, resource) => {
-    const policyDocument = {
-        Version: '2012-10-17', // default version
-        Statement: [{
-            Action: 'execute-api:Invoke', // default action
-            Effect: effect,
-            Resource: resource,
-        }]
-    };
-    return policyDocument;
-}
-
+const common = require('./common.js');
 
 // extract and return the Bearer Token from the Lambda event parameters
 const getToken = (params) => {
@@ -57,7 +45,7 @@ module.exports.authenticate = (params) => {
         })
         .then((decoded)=> ({
             principalId: decoded.sub,
-            policyDocument: getPolicyDocument('Allow', params.methodArn),
+            policyDocument: common.getPolicyDocument('Allow', params.methodArn),
             context: { scope: decoded.scope }
         }));
 }

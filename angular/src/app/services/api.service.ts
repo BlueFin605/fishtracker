@@ -1,120 +1,69 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { switchMap } from 'rxjs/operators';
 import { AuthenticationService } from './authentication.service';
 import { environment } from '../../environments/environment';
 
 @Injectable({
-  providedIn: 'root'
-})
-export class ApiService {
+  providedIn: 'root',
+ })
+ export class ApiService {
   private baseApiUrl = environment.apiUrl; // Use environment variable for base API URL
 
   constructor(private http: HttpClient, private authService: AuthenticationService) {}
 
   getProfile(): Observable<ProfileDetails> {
     const apiUrl = `${this.baseApiUrl}/profile`; // Construct full API URL
-    return this.authService.token.pipe(switchMap(jwt => {
-      const headers = new HttpHeaders({
-        Authorization: `Bearer ${jwt}`,
-      });
-      return this.http.get<ProfileDetails>(apiUrl, { headers });
-    }));
+    return this.http.get<ProfileDetails>(apiUrl);
   }
 
   postProfile(profile: ProfileDetails): Observable<ProfileDetails> {
     const apiUrl = `${this.baseApiUrl}/profile`; // Construct full API URL
-    return this.authService.token.pipe(switchMap(jwt => {
-      const headers = new HttpHeaders({
-        Authorization: `Bearer ${jwt}`,
-      });
-      return this.http.patch<ProfileDetails>(apiUrl, profile, { headers });
-    }));
+    return this.http.patch<ProfileDetails>(apiUrl, profile);
   }
 
   getSettings(): Observable<SettingsDetails> {
     const apiUrl = `${this.baseApiUrl}/settings`; // Construct full API URL
-    return this.authService.token.pipe(switchMap(jwt => {
-      const headers = new HttpHeaders({
-        Authorization: `Bearer ${jwt}`,
-      });
-      return this.http.get<SettingsDetails>(apiUrl, { headers });
-    }));
+    return this.http.get<SettingsDetails>(apiUrl);
   }
 
   getTripCatch(tripid: string): Observable<CatchDetails[]> {
     const apiUrl = `${this.baseApiUrl}/trip/${tripid}/catch`; // Construct full API URL
-    return this.authService.token.pipe(switchMap(jwt => {
-      const headers = new HttpHeaders({
-        Authorization: `Bearer ${jwt}`,
-      });
-      return this.http.get<CatchDetails[]>(apiUrl, { headers });
-    }));
+    return this.http.get<CatchDetails[]>(apiUrl);
   }
 
   getAllTrips(relevant: boolean): Observable<TripDetails[]> {
     const view = relevant ? 'relevant' : 'all';
     const apiUrl = `${this.baseApiUrl}/trip?view=${view}`; // Construct full API URL
-    return this.authService.token.pipe(switchMap(jwt => {
-      const headers = new HttpHeaders({
-        Authorization: `Bearer ${jwt}`,
-      });
-      return this.http.get<TripDetails[]>(apiUrl, { headers });
-    }));
+    return this.http.get<TripDetails[]>(apiUrl);
   }
 
   getTrip(tripid: string): Observable<TripDetails> {
     const apiUrl = `${this.baseApiUrl}/trip/${tripid}`; // Construct full API URL
     console.log(`tripid[${tripid}] url[${apiUrl}]`)
-    return this.authService.token.pipe(switchMap(jwt => {
-      const headers = new HttpHeaders({
-        Authorization: `Bearer ${jwt}`,
-      });
-      return this.http.get<TripDetails>(apiUrl, { headers });
-    }));
+    return this.http.get<TripDetails>(apiUrl);
   }
 
   deleteTrip(tripid: string): Observable<CatchDetails[]> {
     const apiUrl = `${this.baseApiUrl}/trip/${tripid}`; // Construct full API URL
-    console.log(`tripid[${tripid}] url[${apiUrl}]`)
-    return this.authService.token.pipe(switchMap(jwt => {
-      const headers = new HttpHeaders({
-        Authorization: `Bearer ${jwt}`,
-      });
-      return this.http.delete<CatchDetails[]>(apiUrl, { headers });
-    }));
+    console.log(`tripid[${tripid}] url[${apiUrl}]`);
+    return this.http.delete<CatchDetails[]>(apiUrl);
   }
 
   postTrip(newTrip: NewTrip): Observable<TripDetails> {
     const apiUrl = `${this.baseApiUrl}/trip`; // Construct full API URL
-    return this.authService.token.pipe(switchMap(jwt => {
-      const headers = new HttpHeaders({
-        Authorization: `Bearer ${jwt}`,
-      });
-      return this.http.post<TripDetails>(apiUrl, newTrip, { headers });
-    }));
+    return this.http.post<TripDetails>(apiUrl, newTrip);
   }
 
   endTrip(tripid: string, patchTrip: EndTripDetails): Observable<TripDetails> {
     const apiUrl = `${this.baseApiUrl}/trip/${tripid}/endtrip`; // Construct full API URL
-    return this.authService.token.pipe(switchMap(jwt => {
-      const headers = new HttpHeaders({
-        Authorization: `Bearer ${jwt}`,
-      });
-      return this.http.post<TripDetails>(apiUrl, patchTrip, { headers });
-    }));
+    return this.http.post<TripDetails>(apiUrl, patchTrip);
   }
 
   postCatch(tripid: string, newCatch: NewCatch): Observable<CatchDetails> {
     const apiUrl = `${this.baseApiUrl}/trip/${tripid}/catch`; // Construct full API URL
     console.log(JSON.stringify(newCatch));
-    return this.authService.token.pipe(switchMap(jwt => {
-      const headers = new HttpHeaders({
-        Authorization: `Bearer ${jwt}`,
-      });
-      return this.http.post<CatchDetails>(apiUrl, newCatch, { headers });
-    }));
+    return this.http.post<CatchDetails>(apiUrl, newCatch);
   }
 }
 

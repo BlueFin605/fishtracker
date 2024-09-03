@@ -6,14 +6,14 @@ import {AuthenticationService} from '../../services/authentication.service';
 @Component({
   selector: 'app-auth-button',
   template: `
-    <ng-container *ngIf="auth.isAuthenticated() | async; else loggedOut">
-      <button mat-menu-item (click)="auth.logout()">
+    <ng-container *ngIf="auth.isAuthenticated(); else loggedOut">
+      <button mat-menu-item (click)="auth.signOut()">
         Log out
       </button>
     </ng-container>
 
     <ng-template #loggedOut>
-      <button mat-menu-item (click)="auth.login()">Log in</button>
+      <button mat-menu-item (click)="auth.signIn()">Log in</button>
     </ng-template>
   `,
   standalone: true,
