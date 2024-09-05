@@ -5,7 +5,7 @@ const common = require('./common.js');
 const verifier = CognitoJwtVerifier.create({
   userPoolId: "eu-central-1_E3tnXRwUE",
   tokenUse: "access",
-  clientId: "6a1k8mh59fmah76tr3uua6r8at",
+  clientId: "3vp247pdllrp56904lleukrr65",
 });
 
 // Lambda function index.handler - AWS API Gateway custom validator of JWT token

@@ -1,38 +1,38 @@
+// src/app/auth-callback/auth-callback.component.ts
+import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
+import { AuthenticationService } from '../../services/authentication.service';
 
 @Component({
   standalone: true,
   selector: 'app-callback',
-  template: '<p>Loading...</p>'
+  templateUrl: './callback.component.html'
 })
 export class CallbackComponent implements OnInit {
-  constructor(private router: Router) {}
 
-  ngOnInit() {
-    console.log('Full URL:', window.location.href);
-    console.log('Hash    :', window.location.hash);
+  constructor(
+    private route: ActivatedRoute,
+    private router: Router,
+    private authService: AuthenticationService
+  ) { }
 
-    const fragment = new URLSearchParams(window.location.hash.substring(1));
-    const accessToken = fragment.get('access_token');
-    const idToken = fragment.get('id_token');
-    const refreshToken = fragment.get('refresh_token');
-
-    console.log('Access Token:', accessToken);
-    console.log('ID Token    :', idToken);
-    console.log('Refresh Token:', refreshToken);
-    
-    if (accessToken) {
-      localStorage.setItem('access_token', accessToken);
-    }
-
-    if (idToken) {
-      localStorage.setItem('id_token', idToken);
-    }
-
-    if (refreshToken) {
-      localStorage.setItem('refresh_token', refreshToken);
-    }
-
-    this.router.navigate(['/']);  }
+  ngOnInit(): void {
+    this.route.queryParams.subscribe(params => {
+      const code = params['code'];
+      if (code) {
+        this.authService.handleAuthCallback(code).subscribe(
+          () => {
+            this.router.navigate(['/']); // Redirect to home or another page after successful authentication
+          },
+          error => {
+            console.error('Authentication error', error);
+            // Handle error (e.g., show an error message)
+          }
+        );
+      } else {
+        // Handle missing code (e.g., show an error message)
+      }
+    });
+  }
 }
