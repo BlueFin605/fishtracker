@@ -17,8 +17,7 @@ export class AuthenticationService {
   private accessTokenSubject: BehaviorSubject<string> = new BehaviorSubject<string>('');
   public accessToken$: Observable<string> = this.accessTokenSubject.asObservable();
 
-  // private loginUrl = `${environment.domain}/login?response_type=code&client_id=${environment.clientId}&redirect_uri=${encodeURIComponent(environment.redirectUri)}&scope=openid+profile+email`;
-     private loginUrl = `${environment.domain}/oauth2/authorize?client_id=${environment.clientId}&response_type=code&scope=aws.cognito.signin.user.admin+email+openid+profile&redirect_uri=${encodeURIComponent(environment.redirectUri)}`;
+  private loginUrl = `${environment.domain}/oauth2/authorize?client_id=${environment.clientId}&response_type=code&scope=aws.cognito.signin.user.admin+email+openid+profile&redirect_uri=${encodeURIComponent(environment.redirectUri)}`;
   private tokenUrl = `${environment.domain}/oauth2/token`;
 
   constructor(private router: Router, private http: HttpClient, private pkceService: PkceService) {}
