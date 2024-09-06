@@ -141,6 +141,10 @@ export class AuthenticationService {
   get access_token(): string | null {
     return localStorage.getItem('access_token');  
   }
+
+  get refresh_token(): string | null {
+    return localStorage.getItem('refresh_token');  
+  }
 }
 
 // src/app/interfaces/user-profile.interface.ts
