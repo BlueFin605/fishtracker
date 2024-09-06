@@ -19,6 +19,7 @@ export class AuthenticationService {
 
   private loginUrl = `${environment.domain}/oauth2/authorize?client_id=${environment.clientId}&response_type=code&scope=aws.cognito.signin.user.admin+email+openid+profile&redirect_uri=${encodeURIComponent(environment.redirectUri)}`;
   private tokenUrl = `${environment.domain}/oauth2/token`;
+  private userInfoUrl = `${environment.domain}/oauth2/userInfo`;
 
   constructor(private router: Router, private http: HttpClient, private pkceService: PkceService) {}
 
@@ -110,6 +111,10 @@ export class AuthenticationService {
     );
   }
 
+  getUserInfo(): Observable<UserProfile> {
+    return this.http.get<UserProfile>(this.userInfoUrl);
+  }
+
   signOut() {
     localStorage.removeItem('id_token');
     localStorage.removeItem('access_token');
@@ -136,4 +141,11 @@ export class AuthenticationService {
   get access_token(): string | null {
     return localStorage.getItem('access_token');  
   }
+}
+
+// src/app/interfaces/user-profile.interface.ts
+export interface UserProfile {
+  name: string;
+  email: string;
+  // Add other fields as needed
 }

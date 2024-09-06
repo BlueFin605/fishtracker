@@ -1,20 +1,30 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { AuthenticationService, UserProfile } from '../../services/authentication.service';
 
 @Component({
   selector: 'app-user-profile',
-  template: `
-    <ul>
-      <li>{{ udets?.name }}</li>
-      <li>{{ udets?.email }}</li>
-    </ul>`,
   standalone: true,
-  imports: [CommonModule]
+  imports: [CommonModule],
+  templateUrl: './user-profile.component.html',
+  styleUrl: './user-profile.component.css'
 })
 export class UserProfileComponent {
   // udets: User | null | undefined;
-    udets: any = {name:'name', email: 'email'};
+    udets: UserProfile = {name:'name', email: 'email'};
 
+    constructor(private authenticationService: AuthenticationService) {}
+
+    ngOnInit(): void {
+      this.authenticationService.getUserInfo().subscribe(
+        data => {
+          this.udets = data;
+        },
+        error => {
+          console.error('Error fetching profile:', error);
+        }
+      );
+    }    
   // constructor(public auth: AuthService) {
   //   this.udets = null;
   //   console.log('subscribe to users');
