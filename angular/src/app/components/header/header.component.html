@@ -13,7 +13,8 @@
             </button>
             <mat-menu #menu="matMenu">
               <button mat-menu-item (click)="onPreferences()">Preferences</button>
-              <app-auth-button></app-auth-button>
+              <button mat-menu-item (click)="onLogout()">Log out</button>
+              <!-- <app-auth-button></app-auth-button> -->
             </mat-menu>
           </div>    </header>
 </ng-container>

@@ -44,6 +44,7 @@ export class HeaderComponent {
 
   onLogout() {
     // Handle logout logic
+    this.authService.signOut();
     console.log('Logout clicked');
   }
 
