@@ -8,8 +8,8 @@
     </div>
 </div>
 
-<section *ngIf="isAdvancedMode">
-    <section *ngIf="!tripDetails.endTime"> <!-- End Trip Button -->
+<section *ngIf="showAdvancedMode">
+    <section *ngIf="tripIsOpen"> <!-- End Trip Button -->
         <button (click)="openEndTripModal()">End Trip</button>
     </section>
 
@@ -40,7 +40,7 @@
         </div>
     </div>
 
-    <section *ngIf="!tripDetails.endTime"> <!-- New Catch-->
+    <section *ngIf="tripIsOpen"> <!-- New Catch-->
         <h2>New Catch</h2>
         <form (ngSubmit)="postCatch()">
             <div>
@@ -158,7 +158,7 @@
     </section>
 </section>
 
-<section *ngIf="!isAdvancedMode">
+<section *ngIf="!showAdvancedMode">
     <!-- Basic Mode Content -->
     <div class="basic-mode">
       <!-- <h2>Basic Mode</h2> -->

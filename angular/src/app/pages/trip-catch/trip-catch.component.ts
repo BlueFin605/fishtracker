@@ -49,7 +49,7 @@ export class TripCatchComponent implements OnInit {
   ratingOptions = Object.values(TripRating);
   sizeOptions = Object.values(FishSize);
 
-  isAdvancedMode: boolean = false;
+  isAdvancedMode: boolean = true;
   fishSizes = Object.values(FishSize); // Use the FishSize enum
 
   constructor(private route: ActivatedRoute, 
@@ -79,6 +79,14 @@ export class TripCatchComponent implements OnInit {
     console.log(`ratingOptions: ${this.ratingOptions}`);
   }
 
+  get showAdvancedMode(): boolean {
+    return this.isAdvancedMode || !!this.tripDetails?.endTime;
+  }
+
+  get tripIsOpen(): boolean {
+    return this.tripDetails.tripId != undefined && !this.tripDetails.endTime
+  }
+
   toggleMode() {
     this.isAdvancedMode = !this.isAdvancedMode;
   }
@@ -90,6 +98,7 @@ export class TripCatchComponent implements OnInit {
   fetchTripDetails(tripid: string) {
     this.apiService.getTrip(tripid).subscribe(data => {
       this.tripDetails = data;
+      this.isAdvancedMode = false;
       console.log(`trip rating[${this.tripDetails.rating}]`);
     });
   }
