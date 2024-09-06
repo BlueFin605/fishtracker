@@ -53,3 +53,27 @@ header {
     height: 24px;
     border-radius: 50%;
 }
+
+/* Style for the avatar menu button */
+.avatar-button {
+    background-color: #ff5722;
+    /* Change to your desired color */
+    color: white;
+}
+
+.avatar-button:hover {
+    background-color: #e64a19;
+    /* Darker shade for hover effect */
+}
+
+/* Style for the avatar menu */
+.custom-menu {
+    background-color: #ffccbc;
+    /* Change to your desired color */
+    color: black;
+}
+
+/* Optional: Style for the menu items */
+.custom-menu .mat-menu-item {
+    color: black;
+}
