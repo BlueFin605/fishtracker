@@ -35,31 +35,9 @@ public static class CatchDbTable
         return DynamoDbHelper.GetDynamoDbRecords<DynamoDbCatch, string>(record.TripId, client, logger);
     }
 
-    internal static Task<HttpWrapper<IEnumerable<DynamoDbCatchOld>>> ReadEntireCatchFromOldDynamoDb(IAmazonDynamoDB client, ILogger logger)
-    {
-        return DynamoDbHelper.GetDynamoDbRecords<DynamoDbCatchOld>(client, logger);
-    }
-
     public static Task<HttpWrapper<DynamoDbCatch>> DeleteCatchInDynamodb(this DynamoDbCatch record, IAmazonDynamoDB client, ILogger logger)
     {
         return record.DeleteDynamoDbRecord(client, logger);
-    }
-
-    public static Task<HttpWrapper<DynamoDbCatch>> MigrateInDynamodb(this DynamoDbCatchOld record, IAmazonDynamoDB client, ILogger logger)
-    {
-        var newCatch = new DynamoDbCatch(IdGenerator.GenerateTripKey("google-oauth2|108727661728816284796", record.TripId),
-                                         Guid.Parse(record.CatchId),
-                                         record.TripId,
-                                         "google-oauth2|108727661728816284796",
-                                         record.SpeciesId,
-                                         record.CaughtLocation,
-                                         DateTimeOffset.Parse(record.CaughtWhen),
-                                         record.CaughtSize,
-                                         record.CaughtLength,
-                                         record.Weather,
-                                         null);
-
-        return DynamoDbHelper.SaveDynamoDbRecord(newCatch, client, logger);
     }
 
     internal static DynamoDbCatch PatchCatch(this DynamoDbCatch record, UpdateCatchDetails updateCatch)

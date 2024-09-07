@@ -6,49 +6,6 @@ using Newtonsoft.Json;
 
 namespace FishTrackerLambda.Models.Persistance
 {
-    [DynamoDBTable("FishTracker-CatchHistory-Prod")]
-    public class DynamoDbCatchOld
-    {
-        [DynamoDBHashKey]
-        public string TripId { get; set; }
-
-        [DynamoDBRangeKey]
-        public string CatchId { get; set; }
-
-        public string SpeciesId { get; set; }
-        public Location CaughtLocation { get; set; }
-        public string CaughtWhen { get; set; }
-        public FishSize CaughtSize { get; set; }
-        public double CaughtLength { get; set; }
-        public WeatherAttributes? Weather { get; set; }
-
-        [DynamoDBVersion]
-        public int? DynamoDbVersion { get; set; }
-
-        [JsonConstructor]
-        public DynamoDbCatchOld(string tripId, Guid catchId, string speciesId, Location caughtLocation, DateTimeOffset caughtWhen, FishSize caughtSize, double caughtLength, WeatherAttributes? weather, int? dynamoDbVersion)
-        {
-            TripId = tripId;
-            CatchId = catchId.ToString();
-            SpeciesId = speciesId;
-            CaughtLocation = caughtLocation;
-            CaughtWhen = caughtWhen.ToString("o");
-            CaughtSize = caughtSize;
-            CaughtLength = caughtLength;
-            Weather = weather;
-            DynamoDbVersion = dynamoDbVersion;
-        }
-
-        public DynamoDbCatchOld()
-        {
-            TripId = string.Empty;
-            CatchId = string.Empty;
-            SpeciesId = string.Empty;
-            CaughtWhen = string.Empty;
-            CaughtLocation = new Location();
-        }
-    }
-
     [DynamoDBTable("FishTracker-Catch-Prod")]
     public class DynamoDbCatch
     {

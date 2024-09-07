@@ -112,11 +112,6 @@ public static class MapHttpRoutes
             string subjectClaim = claimHandler.ExtractSubject(user.Claims);
             return await ExecuteService(app.Logger, $"PatchCatch tripId:[{tripId}] catchId:[${catchId}]", async () => await catchService.PatchCatch(subjectClaim, tripId, catchId, updateCatch));
         });
-
-        app.MapPatch("api/fix", async (IClaimHandler claimHandler, ITripService tripService, ClaimsPrincipal user) =>
-        {
-            return await ExecuteService(app.Logger, $"Fix", async () => await tripService.FixTrips());
-        });
     }
 
     private static async Task<IResult> ExecuteService<T>(ILogger logger, string logDesc, Func<Task<HttpWrapper<T>>> func)

@@ -90,15 +90,6 @@ namespace FishTrackerLambda.Services
                 .Map(c => c.Select(r => r.ToCatchDetails()));
         }
 
-        public Task<HttpWrapper<IEnumerable<CatchDetails>>> FixTrips()
-        {
-            return Function
-                .InitAsync(CatchDbTable.ReadEntireCatchFromOldDynamoDb(m_client, m_logger))
-                .MapEachAsync(c => c.MigrateInDynamodb(m_client, m_logger))
-                .Map(c => c.Select(r => r.ToCatchDetails()));
-
-        }
-
         public Task<HttpWrapper<TripDetails>> EndTrip(string subject, string tripId, EndTripDetails trip)
         {
             return CatchDbTable.ReadAllCatchFromDynamoDb(IdGenerator.GenerateTripKey(subject, tripId), m_client, m_logger)
