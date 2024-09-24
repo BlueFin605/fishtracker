@@ -13,6 +13,8 @@ public static class MapHttpRoutes
 
     public static void MapRoutes(this WebApplication app)
     {
+        app.UseMiddleware<RequestLoggingMiddleware>();
+                
         app.MapGet("/", () => "Welcome to running ASP.NET Core Minimal API on AWS Lambda");
 
         app.MapGet("api/profile", async (IClaimHandler claimHandler, IProfileService profileService, ClaimsPrincipal user) =>
