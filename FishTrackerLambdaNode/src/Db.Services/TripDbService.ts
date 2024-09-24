@@ -11,18 +11,7 @@ export class TripDbService extends DynamoDbService<DynamoDbTrip> {
     }
 
     async updateTripInDynamoDb(record: DynamoDbTrip): Promise<HttpWrapper<DynamoDbTrip>> {
-        const updateExpression = 'set #startTime = :startTime, #endTime = :endTime, #notes = :notes, #catchSize = :catchSize, #rating = :rating, #tags = :tags, #species = :species, #defaultSpecies = :defaultSpecies';
-        const expressionAttributeValues = {
-            ':startTime': record.startTime,
-            ':endTime': record.endTime,
-            ':notes': record.notes,
-            ':catchSize': record.catchSize,
-            ':rating': record.rating,
-            ':tags': record.tags,
-            ':species': record.species,
-            ':defaultSpecies': record.defaultSpecies
-        };
-        return this.updateRecord({ Subject: record.subject, TripId: record.tripId }, updateExpression, expressionAttributeValues);
+        return this.updateRecord('Subject', record.subject, 'TripId', record.tripId, record);
     }
 
     async readRelevantTripsFromDynamoDb(subject: string): Promise<HttpWrapper<DynamoDbTrip[]>> {

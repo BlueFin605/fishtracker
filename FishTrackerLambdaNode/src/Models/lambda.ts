@@ -24,6 +24,31 @@ interface NewCatch {
     caughtLength: number;
 }
 
+class NewCatchImpl implements NewCatch {
+    speciesId: string;
+    caughtLocation: Location;
+    caughtWhen?: Date;
+    timeZone?: string;
+    caughtSize: FishSize;
+    caughtLength: number;
+
+    constructor(
+        speciesId: string,
+        caughtLocation: Location,
+        caughtWhen: Date | undefined,
+        timeZone: string | undefined,
+        caughtSize: FishSize,
+        caughtLength: number
+    ) {
+        this.speciesId = speciesId;
+        this.caughtLocation = caughtLocation;
+        this.caughtWhen = caughtWhen;
+        this.timeZone = timeZone;
+        this.caughtSize = caughtSize;
+        this.caughtLength = caughtLength;
+    }
+}
+
 interface UpdateTripDetails {
     startTime?: Date;
     endTime?: Date;
@@ -150,6 +175,37 @@ interface CatchDetails {
     caughtSize: FishSize;
     caughtLength: number;
     weather?: WeatherAttributes;
+}
+
+class CatchDetailsImpl implements CatchDetails {
+    tripId: string;
+    catchId: string;
+    speciesId: string;
+    caughtLocation: Location;
+    caughtWhen: Date;
+    caughtSize: FishSize;
+    caughtLength: number;
+    weather?: WeatherAttributes;
+
+    constructor(
+        tripId: string,
+        catchId: string,
+        speciesId: string,
+        caughtLocation: Location,
+        caughtWhen: Date,
+        caughtSize: FishSize,
+        caughtLength: number,
+        weather?: WeatherAttributes
+    ) {
+        this.tripId = tripId;
+        this.catchId = catchId;
+        this.speciesId = speciesId;
+        this.caughtLocation = caughtLocation;
+        this.caughtWhen = caughtWhen;
+        this.caughtSize = caughtSize;
+        this.caughtLength = caughtLength;
+        this.weather = weather;
+    }
 }
 
 interface Wind {
@@ -381,6 +437,7 @@ class DynamoDbTripImpl implements DynamoDbTrip {
 export {
     WeatherAttributes,
     NewCatch,
+    NewCatchImpl,
     UpdateTripDetails,
     TripDetails,
     TripDetailsImpl,
@@ -390,6 +447,7 @@ export {
     NewTripImpl,
     Location,
     CatchDetails,
+    CatchDetailsImpl,
     Wind,
     FishSize,
     TripRating,

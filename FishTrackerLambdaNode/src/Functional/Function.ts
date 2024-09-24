@@ -1,14 +1,14 @@
 import { HttpWrapper } from './HttpWrapper';
 import { Results } from '../Http/Result';
 
-export class Function {
+export class FunctionOld {
     static async ValidateInput(result: () => Results | null): Promise<HttpWrapper<object>> {
         const res = result();
         return res === null ? HttpWrapper.Ok({}) : HttpWrapper.FromResult(res);
     }
 
     static async ValidateInputAsync(record: Promise<HttpWrapper<object>>, result: () => Results | null): Promise<HttpWrapper<object>> {
-        return Function.ValidateInput(result);
+        return FunctionOld.ValidateInput(result);
     }
 
     static async Init<T>(value: T): Promise<HttpWrapper<T>> {

@@ -9,11 +9,7 @@ export class SettingsDbService extends DynamoDbService<DynamoDbSettings> {
     }
 
     async updateSettingsInDynamoDb(record: DynamoDbSettings): Promise<HttpWrapper<DynamoDbSettings>> {
-        const updateExpression = 'set #species = :species';
-        const expressionAttributeValues = {
-            ':species': record.species
-        };
-        return this.updateRecord(record.settings, updateExpression, expressionAttributeValues);
+        return this.updateRecordWithoutSortKey('Settings', record.settings, record);
     }
 
     async readSettingsFromDynamoDb(): Promise<HttpWrapper<DynamoDbSettings>> {

@@ -48,16 +48,33 @@ export class HttpWrapper<T> {
     }
 
     //====================================================================================================
-    static async ValidateInput(result: () => Results | null): Promise<HttpWrapper<object>> {
-        const res = result();
-        return res === null ? HttpWrapper.Ok({}) : HttpWrapper.FromResult(res);
+    ValidateInput(validator: (value: T) => any): HttpWrapper<T> {
+        if (!this.continue) {
+            return this.cloneFailed<T>();
+        }
+
+        if (this.value === null) {
+            throw new Error("Validating null value");
+        }
+
+        const res = validator(this.value);
+        return res === null ? HttpWrapper.Ok(this.value) : HttpWrapper.FromResult(res);
     }
 
-    static async ValidateInputAsync(record: Promise<HttpWrapper<object>>, result: () => Results | null): Promise<HttpWrapper<object>> {
-        return HttpWrapper.ValidateInput(result);
+    async ValidateInputAsync(validator: (value: T) => Promise<any>): Promise<HttpWrapper<T>> {
+        if (!this.continue) {
+            return this.cloneFailed<T>();
+        }
+
+        if (this.value === null) {
+            throw new Error("Validating null value");
+        }
+
+        const res = await validator(this.value);
+        return res === null ? HttpWrapper.Ok(this.value) : HttpWrapper.FromResult(res);
     }
 
-    static async Init<T>(value: T): Promise<HttpWrapper<T>> {
+    static Init<T>(value: T): HttpWrapper<T> {
         return HttpWrapper.Ok(value);
     }
 
@@ -65,7 +82,11 @@ export class HttpWrapper<T> {
         return record;
     }
 
-    static async InitWithRecord<T, R>(value: R): Promise<HttpWrapper<R>> {
+    static async InitWithRecord<R>(value: R): Promise<HttpWrapper<R>> {
+        return HttpWrapper.Ok(value);
+    }
+
+    Set<R>(value: R): HttpWrapper<R> {
         return HttpWrapper.Ok(value);
     }
 
@@ -80,6 +101,19 @@ export class HttpWrapper<T> {
 
         const retval = await mapper(this.value);
         return retval;
+    }
+
+    Map<R>(mapper: (value: T) => R): HttpWrapper<R> {
+        if (!this.continue) {
+            return this.cloneFailed<R>();
+        }
+
+        if (this.value === null || this.value === undefined) {
+            throw new Error("Mapping null value");
+        }
+
+        const retval = mapper(this.value);
+        return HttpWrapper.Ok(retval);
     }
 
     async MapEachAsync<R>(mapper: (value: T) => Promise<HttpWrapper<R>>): Promise<HttpWrapper<R[]>> {
@@ -99,7 +133,7 @@ export class HttpWrapper<T> {
         return failed.length > 0 ? HttpWrapper.FromResult(failed[0]) : HttpWrapper.Ok(success);
     }
 
-    async OnResult<T>(result: number, mapper: () => T): Promise<HttpWrapper<T>> {
+    OnResult<T>(result: number, mapper: () => T): HttpWrapper<T> {
         if (this.continue || this.result.statusCode !== result) {
             return this as any as HttpWrapper<T>;
         }

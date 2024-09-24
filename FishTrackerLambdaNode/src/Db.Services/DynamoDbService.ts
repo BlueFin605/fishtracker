@@ -18,7 +18,7 @@ class DynamoDbService<T> {
         this.sortKeyName = sortKeyName;
     }
 
-    async createRecord(record: T): Promise<HttpWrapper<T>> {
+    public async createRecord(record: T): Promise<HttpWrapper<T>> {
         const params: DocumentClient.PutItemInput = {
             TableName: this.tableName,
             Item: DynamoDB.Converter.input(record)
@@ -128,14 +128,20 @@ class DynamoDbService<T> {
         }
     }
 
-    async updateRecord(partitionValue: any, updateExpression: string, expressionAttributeValues: DocumentClient.ExpressionAttributeValueMap): Promise<HttpWrapper<T>> {
+    async updateRecord(partitionKeyName: string, partitionValue: any, sortKeyName: string, sortValue: any, value: T): Promise<HttpWrapper<T>> {
         const params: DocumentClient.UpdateItemInput = {
             TableName: this.tableName,
             Key: {
-                [this.partitionKeyName]: partitionValue
+                [partitionKeyName]: partitionValue,
+                [sortKeyName]: sortValue
             },
-            UpdateExpression: updateExpression,
-            ExpressionAttributeValues: expressionAttributeValues,
+            UpdateExpression: 'set #value = :value',
+            ExpressionAttributeNames: {
+                '#value': 'value'
+            },
+            ExpressionAttributeValues: {
+                ':value': value
+            },
             ReturnValues: 'ALL_NEW'
         };
 
@@ -153,6 +159,41 @@ class DynamoDbService<T> {
                 return HttpWrapper.NotFound;
             } else {
                 this.logger.error('UpdateRecord Unknown Exception', { error });
+                return HttpWrapper.NotFound;
+            }
+        }
+    }
+
+    async updateRecordWithoutSortKey(partitionKeyName: string, partitionValue: any, value: T): Promise<HttpWrapper<T>> {
+        const params: DocumentClient.UpdateItemInput = {
+            TableName: this.tableName,
+            Key: {
+                [partitionKeyName]: partitionValue
+            },
+            UpdateExpression: 'set #value = :value',
+            ExpressionAttributeNames: {
+                '#value': 'value'
+            },
+            ExpressionAttributeValues: {
+                ':value': value
+            },
+            ReturnValues: 'ALL_NEW'
+        };
+
+        try {
+            const resp = await this.docClient.update(params).promise();
+            this.logger.info('UpdateRecordWithoutSortKey Response', { response: resp });
+            if (resp.Attributes) {
+                return HttpWrapper.Ok(resp.Attributes as T);
+            } else {
+                return HttpWrapper.NotFound;
+            }
+        } catch (error) {
+            if (error instanceof Error) {
+                this.logger.error('UpdateRecordWithoutSortKey Exception', { message: error.message, name: error.name });
+                return HttpWrapper.NotFound;
+            } else {
+                this.logger.error('UpdateRecordWithoutSortKey Unknown Exception', { error });
                 return HttpWrapper.NotFound;
             }
         }

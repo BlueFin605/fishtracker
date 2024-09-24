@@ -10,13 +10,7 @@ export class ProfileDbService extends DynamoDbService<DynamoDbProfile> {
     }
 
     async updateProfileInDynamoDb(record: DynamoDbProfile): Promise<HttpWrapper<DynamoDbProfile>> {
-        const updateExpression = 'set #timezone = :timezone, #species = :species, #defaultSpecies = :defaultSpecies';
-        const expressionAttributeValues = {
-            ':timezone': record.timezone,
-            ':species': record.species,
-            ':defaultSpecies': record.defaultSpecies
-        };
-        return this.updateRecord(record.subject, updateExpression, expressionAttributeValues);
+        return this.updateRecordWithoutSortKey('Subject', record.subject, record);
     }
 
     patchProfile(record: DynamoDbProfile, updateProfile: ProfileDetails): DynamoDbProfile {
