@@ -1,3 +1,4 @@
+import { injectable } from 'tsyringe';
 import { DocumentClient } from 'aws-sdk/clients/dynamodb';
 // import { CatchDbTable } from '../../DataAccess/CatchDbTable';
 import { HttpWrapper } from '../Functional/HttpWrapper';
@@ -8,6 +9,7 @@ import { CatchDbService } from '../Db.Services/CatchDbService';
 // import { ILogger } from '../Services/Http/ILogger';
 // import { Function } from '../Services/Http/Function';
 
+@injectable()
 export class CatchService {
     private client: DocumentClient;
     private catchService: CatchDbService;
