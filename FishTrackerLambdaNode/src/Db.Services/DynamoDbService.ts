@@ -1,10 +1,10 @@
-import { DynamoDB } from 'aws-sdk';
-import { DocumentClient } from 'aws-sdk/clients/dynamodb';
+import { DynamoDBClient, PutItemCommand, GetItemCommand, QueryCommand, UpdateItemCommand, DeleteItemCommand, PutItemCommandInput, GetItemCommandInput, QueryCommandInput, UpdateItemCommandInput, DeleteItemCommandInput } from '@aws-sdk/client-dynamodb';
+import { marshall, unmarshall } from '@aws-sdk/util-dynamodb';
 import { HttpWrapper } from '../Functional/HttpWrapper';
 import { Logger } from '@aws-lambda-powertools/logger';
 
 class DynamoDbService<T> {
-    private docClient: DocumentClient;
+    private docClient: DynamoDBClient;
     private tableName: string;
     private partitionKeyName: string;
     private sortKeyName?: string;
@@ -12,20 +12,21 @@ class DynamoDbService<T> {
     private logger = new Logger({ serviceName: 'FishTrackerLambda' });
 
     constructor(tableName: string, partitionKeyName: string, sortKeyName?: string) {
-        this.docClient = new DynamoDB.DocumentClient();
+        this.docClient = new DynamoDBClient({});
         this.tableName = tableName;
         this.partitionKeyName = partitionKeyName;
         this.sortKeyName = sortKeyName;
     }
 
     public async createRecord(record: T): Promise<HttpWrapper<T>> {
-        const params: DocumentClient.PutItemInput = {
+        const params: PutItemCommandInput = {
             TableName: this.tableName,
-            Item: DynamoDB.Converter.input(record)
+            Item: marshall(record)
         };
 
         try {
-            const resp = await this.docClient.put(params).promise();
+            const command = new PutItemCommand(params);
+            const resp = await this.docClient.send(command);
             this.logger.info('CreateRecord Response', { response: resp });
             return HttpWrapper.Ok(record);
         } catch (error) {
@@ -40,18 +41,19 @@ class DynamoDbService<T> {
     }
 
     async readRecord(partitionValue: any): Promise<HttpWrapper<T>> {
-        const params: DocumentClient.GetItemInput = {
+        const params: GetItemCommandInput = {
             TableName: this.tableName,
-            Key: {
+            Key: marshall({
                 [this.partitionKeyName]: partitionValue
-            }
+            })
         };
 
         try {
-            const resp = await this.docClient.get(params).promise();
+            const command = new GetItemCommand(params);
+            const resp = await this.docClient.send(command);
             this.logger.info('ReadRecord Response', { response: resp });
             if (resp.Item) {
-                return HttpWrapper.Ok(resp.Item as T);
+                return HttpWrapper.Ok(unmarshall(resp.Item) as T);
             } else {
                 return HttpWrapper.NotFound;
             }
@@ -70,19 +72,20 @@ class DynamoDbService<T> {
         if (!this.sortKeyName) {
             throw new Error('Sort key name is not defined');
         }
-        const params: DocumentClient.GetItemInput = {
+        const params: GetItemCommandInput = {
             TableName: this.tableName,
-            Key: {
+            Key: marshall({
                 [this.partitionKeyName]: partitionValue,
                 [this.sortKeyName]: sortValue
-            }
+            })
         };
 
         try {
-            const resp = await this.docClient.get(params).promise();
+            const command = new GetItemCommand(params);
+            const resp = await this.docClient.send(command);
             this.logger.info('ReadRecordWithSortKey Response', { response: resp });
             if (resp.Item) {
-                return HttpWrapper.Ok(resp.Item as T);
+                return HttpWrapper.Ok(unmarshall(resp.Item) as T);
             } else {
                 return HttpWrapper.NotFound;
             }
@@ -98,22 +101,23 @@ class DynamoDbService<T> {
     }
 
     async readAllRecordsForPartition(partitionValue: any): Promise<HttpWrapper<T[]>> {
-        const params: DocumentClient.QueryInput = {
+        const params: QueryCommandInput = {
             TableName: this.tableName,
             KeyConditionExpression: '#partitionKey = :partitionValue',
             ExpressionAttributeNames: {
                 '#partitionKey': this.partitionKeyName
             },
-            ExpressionAttributeValues: {
+            ExpressionAttributeValues: marshall({
                 ':partitionValue': partitionValue
-            }
+            })
         };
 
         try {
-            const resp = await this.docClient.query(params).promise();
+            const command = new QueryCommand(params);
+            const resp = await this.docClient.send(command);
             this.logger.info('ReadAllRecordsForPartition Response', { response: resp });
             if (resp.Items) {
-                return HttpWrapper.Ok(resp.Items as T[]);
+                return HttpWrapper.Ok(resp.Items.map(item => unmarshall(item) as T));
             } else {
                 return HttpWrapper.NotFound;
             }
@@ -129,27 +133,28 @@ class DynamoDbService<T> {
     }
 
     async updateRecord(partitionKeyName: string, partitionValue: any, sortKeyName: string, sortValue: any, value: T): Promise<HttpWrapper<T>> {
-        const params: DocumentClient.UpdateItemInput = {
+        const params: UpdateItemCommandInput = {
             TableName: this.tableName,
-            Key: {
+            Key: marshall({
                 [partitionKeyName]: partitionValue,
                 [sortKeyName]: sortValue
-            },
+            }),
             UpdateExpression: 'set #value = :value',
             ExpressionAttributeNames: {
                 '#value': 'value'
             },
-            ExpressionAttributeValues: {
+            ExpressionAttributeValues: marshall({
                 ':value': value
-            },
+            }),
             ReturnValues: 'ALL_NEW'
         };
 
         try {
-            const resp = await this.docClient.update(params).promise();
+            const command = new UpdateItemCommand(params);
+            const resp = await this.docClient.send(command);
             this.logger.info('UpdateRecord Response', { response: resp });
             if (resp.Attributes) {
-                return HttpWrapper.Ok(resp.Attributes as T);
+                return HttpWrapper.Ok(unmarshall(resp.Attributes) as T);
             } else {
                 return HttpWrapper.NotFound;
             }
@@ -165,26 +170,27 @@ class DynamoDbService<T> {
     }
 
     async updateRecordWithoutSortKey(partitionKeyName: string, partitionValue: any, value: T): Promise<HttpWrapper<T>> {
-        const params: DocumentClient.UpdateItemInput = {
+        const params: UpdateItemCommandInput = {
             TableName: this.tableName,
-            Key: {
+            Key: marshall({
                 [partitionKeyName]: partitionValue
-            },
+            }),
             UpdateExpression: 'set #value = :value',
             ExpressionAttributeNames: {
                 '#value': 'value'
             },
-            ExpressionAttributeValues: {
+            ExpressionAttributeValues: marshall({
                 ':value': value
-            },
+            }),
             ReturnValues: 'ALL_NEW'
         };
 
         try {
-            const resp = await this.docClient.update(params).promise();
+            const command = new UpdateItemCommand(params);
+            const resp = await this.docClient.send(command);
             this.logger.info('UpdateRecordWithoutSortKey Response', { response: resp });
             if (resp.Attributes) {
-                return HttpWrapper.Ok(resp.Attributes as T);
+                return HttpWrapper.Ok(unmarshall(resp.Attributes) as T);
             } else {
                 return HttpWrapper.NotFound;
             }
@@ -203,25 +209,26 @@ class DynamoDbService<T> {
         if (!this.sortKeyName) {
             throw new Error('Sort key name is not defined');
         }
-        const params: DocumentClient.QueryInput = {
+        const params: QueryCommandInput = {
             TableName: this.tableName,
             KeyConditionExpression: '#partitionKey = :partitionValue AND #sortKey BETWEEN :startSortValue AND :endSortValue',
             ExpressionAttributeNames: {
                 '#partitionKey': this.partitionKeyName,
                 '#sortKey': this.sortKeyName
             },
-            ExpressionAttributeValues: {
+            ExpressionAttributeValues: marshall({
                 ':partitionValue': partitionValue,
                 ':startSortValue': startSortValue,
                 ':endSortValue': endSortValue
-            }
+            })
         };
 
         try {
-            const resp = await this.docClient.query(params).promise();
+            const command = new QueryCommand(params);
+            const resp = await this.docClient.send(command);
             this.logger.info('ReadRecordsBetweenSortKeys Response', { response: resp });
             if (resp.Items) {
-                return HttpWrapper.Ok(resp.Items as T[]);
+                return HttpWrapper.Ok(resp.Items.map(item => unmarshall(item) as T));
             } else {
                 return HttpWrapper.NotFound;
             }
@@ -237,7 +244,7 @@ class DynamoDbService<T> {
     }
 
     async deleteRecord(partitionValue: any, sortValue?: any): Promise<HttpWrapper<T>> {
-        const key: DocumentClient.Key = {
+        const key: any = {
             [this.partitionKeyName]: partitionValue
         };
 
@@ -245,17 +252,18 @@ class DynamoDbService<T> {
             key[this.sortKeyName] = sortValue;
         }
 
-        const params: DocumentClient.DeleteItemInput = {
+        const params: DeleteItemCommandInput = {
             TableName: this.tableName,
-            Key: key,
+            Key: marshall(key),
             ReturnValues: 'ALL_OLD'
         };
 
         try {
-            const resp = await this.docClient.delete(params).promise();
+            const command = new DeleteItemCommand(params);
+            const resp = await this.docClient.send(command);
             this.logger.info('DeleteRecord Response', { response: resp });
             if (resp.Attributes) {
-                return HttpWrapper.Ok(resp.Attributes as T);
+                return HttpWrapper.Ok(unmarshall(resp.Attributes) as T);
             } else {
                 return HttpWrapper.NotFound;
             }

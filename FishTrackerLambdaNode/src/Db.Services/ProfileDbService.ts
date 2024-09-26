@@ -1,11 +1,10 @@
-import { DocumentClient } from 'aws-sdk/clients/dynamodb';
 import { ProfileDetails, ProfileDetailsImpl, DynamoDbProfile, DynamoDbProfileImpl } from '../Models/lambda';
 import { DynamoDbService } from './DynamoDbService';
 import { HttpWrapper } from '../Functional/HttpWrapper';
 
 
 export class ProfileDbService extends DynamoDbService<DynamoDbProfile> {
-    constructor(client: DocumentClient) {
+    constructor() {
         super('FishTracker-Profile-Prod', 'Subject');
     }
 

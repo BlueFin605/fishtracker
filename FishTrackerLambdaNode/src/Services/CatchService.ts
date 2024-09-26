@@ -1,21 +1,14 @@
 import { injectable } from 'tsyringe';
-import { DocumentClient } from 'aws-sdk/clients/dynamodb';
-// import { CatchDbTable } from '../../DataAccess/CatchDbTable';
 import { HttpWrapper } from '../Functional/HttpWrapper';
 import { IdGenerator } from '../Helpers/IdGenerator';
 import { CatchDetails, NewCatch, UpdateCatchDetails } from '../Models/lambda';
 import { CatchDbService } from '../Db.Services/CatchDbService';
-// import { CatchDetails, NewCatch, UpdateCatchDetails } from '../Models/Lambda';
-// import { ILogger } from '../Services/Http/ILogger';
-// import { Function } from '../Services/Http/Function';
 
 @injectable()
 export class CatchService {
-    private client: DocumentClient;
     private catchService: CatchDbService;
 
-    constructor(client: DocumentClient, catchService: CatchDbService) {
-        this.client = client;
+    constructor(catchService: CatchDbService) {
         this.catchService = catchService
     }
 

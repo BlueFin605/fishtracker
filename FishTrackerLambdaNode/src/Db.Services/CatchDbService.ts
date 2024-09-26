@@ -1,14 +1,15 @@
-import { DynamoDB } from 'aws-sdk';
-import { DocumentClient } from 'aws-sdk/clients/dynamodb';
+// const { DynamoDB, DocumentClient } = require('@aws-sdk/client-s3');
+// const documentClient = new DocumentClient();
 import { HttpWrapper } from '../Functional/HttpWrapper';
 import { UpdateCatchDetails, CatchDetails, DynamoDbCatch, DynamoDbCatchImpl, NewCatch, NewCatchImpl, CatchDetailsImpl } from '../Models/lambda';
 import { DynamoDbService } from './DynamoDbService';
 import { IdGenerator } from '../Helpers/IdGenerator';
 import { DateConverter } from '../Helpers/DateConverter';
+import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
+// import { DynamoDBDocumentClient } from '@aws-sdk/client-dynamodb';
 
 export class CatchDbService extends DynamoDbService<DynamoDbCatch> {
-
-    constructor(client: DocumentClient) {
+    constructor(client: DynamoDBClient) {
         super('FishTracker-Catch-Prod', 'TripKey', 'CatchId');
     }
 
