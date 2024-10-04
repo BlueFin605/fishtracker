@@ -6,12 +6,12 @@ import { IdGenerator } from '../Helpers/IdGenerator';
 import { DateConverter } from '../Helpers/DateConverter';
 import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
 import { DateTime } from 'luxon';
+import { DynamoDbHelper } from './AWSWrapper';
 
 @injectable()
 export class CatchDbService extends DynamoDbService<DynamoDbCatch> {
-    constructor(client: DynamoDBClient) {
+    constructor(client: DynamoDbHelper) {
         super(client, 'FishTracker-Catch-Prod', 'TripKey', 'CatchId');
-        console.log("CatchDbService constructor", client);
     }
 
     public async updateCatchDetails(updateCatch: DynamoDbCatch): Promise<HttpWrapper<DynamoDbCatch>> {

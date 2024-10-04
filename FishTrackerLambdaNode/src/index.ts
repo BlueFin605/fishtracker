@@ -12,43 +12,12 @@ import { CatchService } from './Services/CatchService';
 import { DynamoDBClient, DynamoDBClientConfig } from '@aws-sdk/client-dynamodb';
 import { Agent } from "http";
 import { NodeHttpHandler } from "@smithy/node-http-handler";
+import { DynamoDbHelper } from './Db.Services/AWSWrapper';
 
 const logger = new Logger({ serviceName: 'FishTrackerLambda' });
 container.registerSingleton(CatchService);
-
-// Configure the DynamoDBClient
-// const dynamoDbClient = new DynamoDBClient({
-//     region: 'us-west-2', // Replace with your desired region
-//     // endpoint: 'http://localhost:8000', // Replace with your DynamoDB service URL
-//     credentials: {
-//         accessKeyId: 'your-access-key-id', // Replace with your AWS access key ID
-//         secretAccessKey: 'your-secret-access-key' // Replace with your AWS secret access key
-//     },
-//     hostname: 'localhost',
-//     port: 8000,
-//     path: '',
-//     protocol: 'http:',    
-// });
-
-const dynamoDbClientConfig: DynamoDBClientConfig = {
-    region: 'us-west-2', // Replace with your desired region
-    requestHandler: new NodeHttpHandler({
-        httpAgent: new Agent({
-            /*params*/
-        }),
-    }),
-    endpoint: 'http://localhost:8000', // Replace with your DynamoDB service URL if using a local instance
-    credentials: {
-        accessKeyId: 'your-access-key-id', // Replace with your AWS access key ID
-        secretAccessKey: 'your-secret-access-key' // Replace with your AWS secret access key
-    }
-};
-
-const dynamoDbClient = new DynamoDBClient(dynamoDbClientConfig);
-
-console.log(dynamoDbClient);
-// Register DynamoDBClient as a singleton
-container.registerInstance(DynamoDBClient.toString(), dynamoDbClient);
+// container.registerInstance(DynamoDBClient.toString(), new DynamoDBClient());
+container.registerSingleton(DynamoDbHelper);
 
 const getClaimSubject = (event: APIGatewayProxyEvent): string => {
     // console.log('event.requestContext.authorizer', JSON.stringify(event.requestContext.authorizer));
@@ -93,19 +62,8 @@ const executeService = async <T>(logDesc: string, func: () => Promise<HttpWrappe
 };
 
 export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
-    // logger.info('Received event', { event });
-
     const { httpMethod, path } = event;
 
-    // const claims = getClaims(event);
-
-    // const user = 'wedtogetthisfromtheclaim';
-
-    // const user = new ClaimsPrincipal(event.requestContext.authorizer.claims); // Replace with actual claims extraction
-
-    // const claimHandler = container.resolve(ClaimHandler);
-    // const profileService = container.resolve(ProfileService);
-    console.log('container', container);
     const catchService = container.resolve(CatchService);
 
     try {
@@ -231,6 +189,10 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
 
 // Main function to run the handler locally as a REST server
 if (require.main === module) {
+    console.log('Running locally');
+    const awswrapper = container.resolve(DynamoDbHelper);
+    awswrapper.configureLocal();
+
     const app = express();
     app.use(bodyParser.json());
 

@@ -1,11 +1,10 @@
 import { ProfileDetails, ProfileDetailsImpl, DynamoDbProfile, DynamoDbProfileImpl } from '../Models/lambda';
 import { DynamoDbService } from './DynamoDbService';
 import { HttpWrapper } from '../Functional/HttpWrapper';
-import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
-
+import { DynamoDbHelper } from './AWSWrapper';
 
 export class ProfileDbService extends DynamoDbService<DynamoDbProfile> {
-    constructor(client: DynamoDBClient) {
+    constructor(client: DynamoDbHelper) {
         super(client, 'FishTracker-Profile-Prod', 'Subject');
     }
 

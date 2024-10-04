@@ -4,7 +4,7 @@ import { HttpWrapper } from '../Functional/HttpWrapper';
 import { Logger } from '@aws-lambda-powertools/logger';
 import { Agent } from "http";
 import { NodeHttpHandler } from "@smithy/node-http-handler";
-
+import { DynamoDbHelper } from './AWSWrapper';
 class DynamoDbService<T> {
     private docClient: DynamoDBClient;
     private tableName: string;
@@ -17,33 +17,8 @@ class DynamoDbService<T> {
         return marshall(input, { convertClassInstanceToMap: true, removeUndefinedValues: true });
     }
 
-    constructor(client: DynamoDBClient, tableName: string, partitionKeyName: string, sortKeyName?: string) {
-        // const dynamoDbClientConfig: DynamoDBClientConfig = {
-        //     region: 'us-west-2', // Replace with your desired region
-        //     requestHandler: new NodeHttpHandler({
-        //         httpAgent: new Agent({
-        //             /*params*/
-        //         }),
-        //     }),
-        //     endpoint: 'http://localhost:8000', // Replace with your DynamoDB service URL if using a local instance
-        //     credentials: {
-        //         accessKeyId: 'your-access-key-id', // Replace with your AWS access key ID
-        //         secretAccessKey: 'your-secret-access-key' // Replace with your AWS secret access key
-        //     }
-        // };
-        // const dynamoDbClient = new DynamoDBClient(dynamoDbClientConfig);
-
-        const dynamoDbClient = new DynamoDBClient({
-            region: 'us-west-2', // Replace with your desired region
-            endpoint: 'http://localhost:8000', // Replace with your DynamoDB service URL
-            credentials: {
-                accessKeyId: 'xxx', // Replace with your AWS access key ID
-                secretAccessKey: 'xxx' // Replace with your AWS secret access key
-            },
-        });
-        
-        this.docClient = dynamoDbClient;
-        console.log(this.docClient);        
+    constructor(client: DynamoDbHelper, tableName: string, partitionKeyName: string, sortKeyName?: string) {
+        this.docClient = client.docClient;
         this.tableName = tableName;
         this.partitionKeyName = partitionKeyName;
         this.sortKeyName = sortKeyName;

@@ -1,10 +1,10 @@
 import { SettingsDetails, SettingsDetailsImpl, DynamoDbSettings, DynamoDbSettingsImpl } from '../Models/lambda';
 import { DynamoDbService } from './DynamoDbService';
 import { HttpWrapper } from '../Functional/HttpWrapper';
-import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
+import { DynamoDbHelper } from './AWSWrapper';
 
 export class SettingsDbService extends DynamoDbService<DynamoDbSettings> {
-    constructor(client: DynamoDBClient) {
+    constructor(client: DynamoDbHelper) {
         super(client, 'FishTracker-Settings-Prod', 'Settings');
     }
 
