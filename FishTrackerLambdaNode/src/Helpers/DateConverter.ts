@@ -110,7 +110,7 @@ export class DateConverter {
             try {
                 const iana = this.getIanaTimeZone(timeZone);
                 const localNow = DateTime.now().setZone(iana);
-                console.log('Local now:', localNow.toString());
+                // console.log('Local now:', localNow.toString());
                 return localNow;
             } catch (error) {
                 console.error('Error converting time zone:', error);

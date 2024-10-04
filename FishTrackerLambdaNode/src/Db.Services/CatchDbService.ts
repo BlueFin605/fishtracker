@@ -50,9 +50,7 @@ export class CatchDbService extends DynamoDbService<DynamoDbCatch> {
         );
     }
     static fillInMissingData(newCatch: NewCatch): NewCatch {
-        console.log(newCatch.caughtWhen);
         const startTime = newCatch.caughtWhen ?? DateConverter.getLocalNow(newCatch.timeZone);
-        console.log(startTime);
         return new NewCatchImpl(
             newCatch.speciesId,
             newCatch.caughtLocation,
