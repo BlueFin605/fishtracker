@@ -5,6 +5,7 @@ import { DynamoDbService } from './DynamoDbService';
 import { IdGenerator } from '../Helpers/IdGenerator';
 import { DateConverter } from '../Helpers/DateConverter';
 import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
+import { DateTime } from 'luxon';
 
 @injectable()
 export class CatchDbService extends DynamoDbService<DynamoDbCatch> {
@@ -25,7 +26,7 @@ export class CatchDbService extends DynamoDbService<DynamoDbCatch> {
             record.Subject,
             updateCatch.speciesId ?? record.SpeciesId,
             updateCatch.caughtLocation ?? record.CaughtLocation,
-            updateCatch.caughtWhen ? updateCatch.caughtWhen : new Date(record.CaughtWhen),
+            updateCatch.caughtWhen ? updateCatch.caughtWhen : DateConverter.isoFromString(record.CaughtWhen),
             updateCatch.caughtSize ?? record.CaughtSize,
             updateCatch.caughtLength ?? record.CaughtLength,
             updateCatch.weather ?? record.Weather,
@@ -87,7 +88,7 @@ export class CatchDbService extends DynamoDbService<DynamoDbCatch> {
             c.CatchId,
             c.SpeciesId,
             c.CaughtLocation,
-            new Date(c.CaughtWhen),
+            DateConverter.isoFromString(c.CaughtWhen),
             c.CaughtSize,
             c.CaughtLength,
             c.Weather

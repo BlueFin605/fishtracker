@@ -1,14 +1,15 @@
 const crypto = require("crypto");
+import { DateTime } from 'luxon';
 
 export class IdGenerator {
-    static generateTripId(start: Date): string {
+    static generateTripId(start: DateTime): string {
         const pad = (num: number): string => num.toString().padStart(2, '0');
-        const month = pad(start.getMonth() + 1);
-        const day = pad(start.getDate());
-        const hours = pad(start.getHours());
-        const minutes = pad(start.getMinutes());
-        const seconds = pad(start.getSeconds());
-        const year = start.getFullYear().toString().slice(-2);
+        const month = pad(start.month);
+        const day = pad(start.day);
+        const hours = pad(start.hour);
+        const minutes = pad(start.minute);
+        const seconds = pad(start.second);
+        const year = start.year.toString().slice(-2);
         return `${month}${day}:${hours}${minutes}${seconds}-${year}`;
     }
     

@@ -1,16 +1,19 @@
+import { DateTime } from 'luxon';
+import { DateConverter } from '../Helpers/DateConverter';
+
 // CombinedInterfaces.ts
 
 interface WeatherAttributes {
     fromMajorBiteTime: string; // TimeSpan converted to string
     fromMinorBiteTime: string; // TimeSpan converted to string
-    majorBiteTime: Date;
-    minorBiteTime: Date;
-    sunSet: Date;
-    sunRise: Date;
-    moonSet: Date;
-    moonRise: Date;
-    lowTide: Date;
-    highTide: Date;
+    majorBiteTime: DateTime;
+    minorBiteTime: DateTime;
+    sunSet: DateTime;
+    sunRise: DateTime;
+    moonSet: DateTime;
+    moonRise: DateTime;
+    lowTide: DateTime;
+    highTide: DateTime;
     tideHeight: number;
     wind: Wind;
 }
@@ -18,7 +21,7 @@ interface WeatherAttributes {
 interface NewCatch {
     speciesId: string;
     caughtLocation: Location;
-    caughtWhen?: Date;
+    caughtWhen?: DateTime;
     timeZone?: string;
     caughtSize: FishSize;
     caughtLength: number;
@@ -27,7 +30,7 @@ interface NewCatch {
 class NewCatchImpl implements NewCatch {
     speciesId: string;
     caughtLocation: Location;
-    caughtWhen?: Date;
+    caughtWhen?: DateTime;
     timeZone?: string;
     caughtSize: FishSize;
     caughtLength: number;
@@ -35,7 +38,7 @@ class NewCatchImpl implements NewCatch {
     constructor(
         speciesId: string,
         caughtLocation: Location,
-        caughtWhen: Date | undefined,
+        caughtWhen: DateTime | undefined,
         timeZone: string | undefined,
         caughtSize: FishSize,
         caughtLength: number
@@ -50,8 +53,8 @@ class NewCatchImpl implements NewCatch {
 }
 
 interface UpdateTripDetails {
-    startTime?: Date;
-    endTime?: Date;
+    startTime?: DateTime;
+    endTime?: DateTime;
     notes?: string;
     catchSize?: number; // uint converted to number
     rating?: TripRating;
@@ -63,8 +66,8 @@ interface UpdateTripDetails {
 interface TripDetails {
     subject: string;
     tripId: string;
-    startTime: Date;
-    endTime?: Date;
+    startTime: DateTime;
+    endTime?: DateTime;
     notes: string;
     catchSize: number; // uint converted to number
     rating: TripRating;
@@ -76,8 +79,8 @@ interface TripDetails {
 class TripDetailsImpl implements TripDetails {
     subject: string;
     tripId: string;
-    startTime: Date;
-    endTime?: Date;
+    startTime: DateTime;
+    endTime?: DateTime;
     notes: string;
     catchSize: number;
     rating: TripRating;
@@ -88,8 +91,8 @@ class TripDetailsImpl implements TripDetails {
     constructor(
         subject: string,
         tripId: string,
-        startTime: Date,
-        endTime: Date | undefined,
+        startTime: DateTime,
+        endTime: DateTime | undefined,
         notes: string,
         catchSize: number,
         rating: TripRating,
@@ -112,7 +115,7 @@ class TripDetailsImpl implements TripDetails {
 
 interface EndTripDetails {
     timeZone?: string;
-    endTime?: Date;
+    endTime?: DateTime;
     notes?: string;
     rating?: TripRating;
     tags?: Set<TripTags>;
@@ -121,14 +124,14 @@ interface EndTripDetails {
 interface UpdateCatchDetails {
     speciesId?: string;
     caughtLocation?: Location;
-    caughtWhen?: Date;
+    caughtWhen?: DateTime;
     caughtSize?: FishSize;
     caughtLength?: number;
     weather?: WeatherAttributes;
 }
 
 interface NewTrip {
-    startTime?: Date;
+    startTime?: DateTime;
     timeZone?: string;
     notes: string;
     tags: Set<TripTags>;
@@ -137,7 +140,7 @@ interface NewTrip {
 }
 
 class NewTripImpl implements NewTrip {
-    startTime?: Date;
+    startTime?: DateTime;
     timeZone?: string;
     notes: string;
     tags: Set<TripTags>;
@@ -145,7 +148,7 @@ class NewTripImpl implements NewTrip {
     defaultSpecies: string;
 
     constructor(
-        startTime: Date | undefined,
+        startTime: DateTime | undefined,
         timeZone: string | undefined,
         notes: string,
         tags: Set<TripTags>,
@@ -171,7 +174,7 @@ interface CatchDetails {
     catchId: string; // Guid converted to string
     speciesId: string;
     caughtLocation: Location;
-    caughtWhen: Date;
+    caughtWhen: DateTime;
     caughtSize: FishSize;
     caughtLength: number;
     weather?: WeatherAttributes;
@@ -182,7 +185,7 @@ class CatchDetailsImpl implements CatchDetails {
     catchId: string;
     speciesId: string;
     caughtLocation: Location;
-    caughtWhen: Date;
+    caughtWhen: DateTime;
     caughtSize: FishSize;
     caughtLength: number;
     weather?: WeatherAttributes;
@@ -192,7 +195,7 @@ class CatchDetailsImpl implements CatchDetails {
         catchId: string,
         speciesId: string,
         caughtLocation: Location,
-        caughtWhen: Date,
+        caughtWhen: DateTime,
         caughtSize: FishSize,
         caughtLength: number,
         weather?: WeatherAttributes
@@ -344,7 +347,7 @@ class DynamoDbCatchImpl implements DynamoDbCatch {
         Subject: string,
         SpeciesId: string,
         CaughtLocation: Location,
-        CaughtWhen: Date,
+        CaughtWhen: DateTime,
         CaughtSize: FishSize,
         CaughtLength: number,
         Weather?: WeatherAttributes,
@@ -356,7 +359,7 @@ class DynamoDbCatchImpl implements DynamoDbCatch {
         this.Subject = Subject;
         this.SpeciesId = SpeciesId;
         this.CaughtLocation = CaughtLocation;
-        this.CaughtWhen = CaughtWhen.toISOString();
+        this.CaughtWhen = DateConverter.isoToString(CaughtWhen);
         this.CaughtSize = CaughtSize;
         this.CaughtLength = CaughtLength;
         this.Weather = Weather;
@@ -394,8 +397,8 @@ class DynamoDbTripImpl implements DynamoDbTrip {
     constructor(
         subject: string,
         tripId: string,
-        startTime: Date,
-        endTime: Date | undefined,
+        startTime: DateTime,
+        endTime: DateTime | undefined,
         notes: string,
         catchSize: number,
         rating: TripRating,
@@ -406,8 +409,8 @@ class DynamoDbTripImpl implements DynamoDbTrip {
     ) {
         this.subject = subject;
         this.tripId = tripId;
-        this.startTime = startTime.toISOString();
-        this.endTime = endTime?.toISOString();
+        this.startTime = startTime.toString();
+        this.endTime = endTime?.toString();
         this.notes = notes;
         this.catchSize = catchSize;
         this.rating = rating;
@@ -422,7 +425,7 @@ class DynamoDbTripImpl implements DynamoDbTrip {
         return new DynamoDbTripImpl(
             '',
             '',
-            new Date(),
+            DateTime.now(),
             undefined,
             '',
             0,
