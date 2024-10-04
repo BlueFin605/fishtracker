@@ -93,13 +93,13 @@ export class DateConverter {
 
     static isoToString(offset: DateTime): string {
         const conv = offset.toString();
-        console.log(`isoToString: [${offset}]-->[${conv}]`);
+        // console.log(`isoToString: [${offset}]-->[${conv}]`);
         return conv;
     }
 
     static isoFromString(offset: string): DateTime {
         const conv =DateTime.fromISO(offset, { setZone: true });
-        console.log(`isoFromString: [${offset}]-->[${conv}]`);
+        // console.log(`isoFromString: [${offset}]-->[${conv}]`);
         return conv;
     }
 
