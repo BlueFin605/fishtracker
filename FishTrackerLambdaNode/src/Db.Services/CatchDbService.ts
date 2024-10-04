@@ -1,16 +1,16 @@
-// const { DynamoDB, DocumentClient } = require('@aws-sdk/client-s3');
-// const documentClient = new DocumentClient();
+import { injectable } from 'tsyringe';
 import { HttpWrapper } from '../Functional/HttpWrapper';
 import { UpdateCatchDetails, CatchDetails, DynamoDbCatch, DynamoDbCatchImpl, NewCatch, NewCatchImpl, CatchDetailsImpl } from '../Models/lambda';
 import { DynamoDbService } from './DynamoDbService';
 import { IdGenerator } from '../Helpers/IdGenerator';
 import { DateConverter } from '../Helpers/DateConverter';
 import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
-// import { DynamoDBDocumentClient } from '@aws-sdk/client-dynamodb';
 
+@injectable()
 export class CatchDbService extends DynamoDbService<DynamoDbCatch> {
     constructor(client: DynamoDBClient) {
-        super('FishTracker-Catch-Prod', 'TripKey', 'CatchId');
+        super(client, 'FishTracker-Catch-Prod', 'TripKey', 'CatchId');
+        console.log("CatchDbService constructor", client);
     }
 
     public async updateCatchDetails(updateCatch: DynamoDbCatch): Promise<HttpWrapper<DynamoDbCatch>> {
@@ -25,7 +25,7 @@ export class CatchDbService extends DynamoDbService<DynamoDbCatch> {
             record.Subject,
             updateCatch.speciesId ?? record.SpeciesId,
             updateCatch.caughtLocation ?? record.CaughtLocation,
-            updateCatch.caughtWhen ?? record.CaughtWhen,
+            updateCatch.caughtWhen ? updateCatch.caughtWhen : new Date(record.CaughtWhen),
             updateCatch.caughtSize ?? record.CaughtSize,
             updateCatch.caughtLength ?? record.CaughtLength,
             updateCatch.weather ?? record.Weather,
@@ -49,7 +49,9 @@ export class CatchDbService extends DynamoDbService<DynamoDbCatch> {
         );
     }
     static fillInMissingData(newCatch: NewCatch): NewCatch {
+        console.log(newCatch.caughtWhen);
         const startTime = newCatch.caughtWhen ?? DateConverter.getLocalNow(newCatch.timeZone);
+        console.log(startTime);
         return new NewCatchImpl(
             newCatch.speciesId,
             newCatch.caughtLocation,

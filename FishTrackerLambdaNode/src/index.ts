@@ -2,18 +2,58 @@ import 'reflect-metadata';
 import { container } from 'tsyringe';
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
 import { Logger } from '@aws-lambda-powertools/logger';
+import express from 'express';
+import bodyParser from 'body-parser';
 // import { ClaimsPrincipal } from 'some-claims-library'; // Replace with actual claims library
 // import { IClaimHandler, IProfileService, ISettingsService, ITripService, ICatchService } from './services'; // Replace with actual service imports
 import { ProfileDetails, SettingsDetails, NewTrip, TripDetails, UpdateTripDetails, EndTripDetails, NewCatch, CatchDetails, UpdateCatchDetails } from './Models/lambda'; // Replace with actual model imports
 import { HttpWrapper } from './Functional/HttpWrapper';
 import { CatchService } from './Services/CatchService';
+import { DynamoDBClient, DynamoDBClientConfig } from '@aws-sdk/client-dynamodb';
+import { Agent } from "http";
+import { NodeHttpHandler } from "@smithy/node-http-handler";
 
 const logger = new Logger({ serviceName: 'FishTrackerLambda' });
+container.registerSingleton(CatchService);
+
+// Configure the DynamoDBClient
+// const dynamoDbClient = new DynamoDBClient({
+//     region: 'us-west-2', // Replace with your desired region
+//     // endpoint: 'http://localhost:8000', // Replace with your DynamoDB service URL
+//     credentials: {
+//         accessKeyId: 'your-access-key-id', // Replace with your AWS access key ID
+//         secretAccessKey: 'your-secret-access-key' // Replace with your AWS secret access key
+//     },
+//     hostname: 'localhost',
+//     port: 8000,
+//     path: '',
+//     protocol: 'http:',    
+// });
+
+const dynamoDbClientConfig: DynamoDBClientConfig = {
+    region: 'us-west-2', // Replace with your desired region
+    requestHandler: new NodeHttpHandler({
+        httpAgent: new Agent({
+            /*params*/
+        }),
+    }),
+    endpoint: 'http://localhost:8000', // Replace with your DynamoDB service URL if using a local instance
+    credentials: {
+        accessKeyId: 'your-access-key-id', // Replace with your AWS access key ID
+        secretAccessKey: 'your-secret-access-key' // Replace with your AWS secret access key
+    }
+};
+
+const dynamoDbClient = new DynamoDBClient(dynamoDbClientConfig);
+
+console.log(dynamoDbClient);
+// Register DynamoDBClient as a singleton
+container.registerInstance(DynamoDBClient.toString(), dynamoDbClient);
 
 const getClaimSubject = (event: APIGatewayProxyEvent): string => {
-    console.log('event.requestContext.authorizer', JSON.stringify(event.requestContext.authorizer));
-    console.log('event.requestContext.authorizer', JSON.stringify(event.requestContext));
-    console.log('event.requestContext.authorizer', JSON.stringify(event));
+    // console.log('event.requestContext.authorizer', JSON.stringify(event.requestContext.authorizer));
+    // console.log('event.requestContext.authorizer', JSON.stringify(event.requestContext));
+    // console.log('event.requestContext.authorizer', JSON.stringify(event));
     const claims = event.requestContext.authorizer?.claims;
     if (!claims) {
         throw new Error('No claims found in the request context');
@@ -21,7 +61,8 @@ const getClaimSubject = (event: APIGatewayProxyEvent): string => {
     const subjectClaim = claims.find((claim: any) => claim.Type === 'principalId')?.Value;
     if (!subjectClaim) {
         throw new Error('No Subject[principalId] in claim');
-    }    
+    }
+    console.log('subjectClaim', subjectClaim);
     return subjectClaim;
 };
 
@@ -52,18 +93,19 @@ const executeService = async <T>(logDesc: string, func: () => Promise<HttpWrappe
 };
 
 export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
-    logger.info('Received event', { event });
+    // logger.info('Received event', { event });
 
     const { httpMethod, path } = event;
 
     // const claims = getClaims(event);
 
-    // const user = 'weneedtogetthisfromtheclaim';
+    // const user = 'wedtogetthisfromtheclaim';
 
     // const user = new ClaimsPrincipal(event.requestContext.authorizer.claims); // Replace with actual claims extraction
 
     // const claimHandler = container.resolve(ClaimHandler);
     // const profileService = container.resolve(ProfileService);
+    console.log('container', container);
     const catchService = container.resolve(CatchService);
 
     try {
@@ -186,3 +228,67 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
         };
     }
 };
+
+// Main function to run the handler locally as a REST server
+if (require.main === module) {
+    const app = express();
+    app.use(bodyParser.json());
+
+    app.all('*', async (req, res) => {
+        const event: APIGatewayProxyEvent = {
+            httpMethod: req.method,
+            path: req.path,
+            headers: Object.fromEntries(Object.entries(req.headers).map(([key, value]) => [key, Array.isArray(value) ? value.join(',') : String(value)])),
+            multiValueHeaders: {},
+            queryStringParameters: Object.fromEntries(Object.entries(req.query).map(([key, value]) => [key, Array.isArray(value) ? value.join(',') : String(value)])),
+            multiValueQueryStringParameters: null,
+            pathParameters: null,
+            stageVariables: null,
+            requestContext: {
+                accountId: '',
+                apiId: '',
+                authorizer: {
+                    claims: [
+                        { Type: 'principalId', Value: 'user123' }
+                    ]
+                },
+                protocol: '',
+                httpMethod: req.method,
+                identity: {
+                    accessKey: null,
+                    accountId: null,
+                    apiKey: null,
+                    apiKeyId: null,
+                    caller: null,
+                    clientCert: null,
+                    cognitoAuthenticationProvider: null,
+                    cognitoAuthenticationType: null,
+                    cognitoIdentityId: null,
+                    cognitoIdentityPoolId: null,
+                    principalOrgId: null,
+                    sourceIp: req.ip || '',
+                    user: null,
+                    userAgent: req.get('User-Agent') || '',
+                    userArn: null
+                },
+                path: req.path,
+                requestId: '',
+                requestTimeEpoch: 0,
+                resourceId: '',
+                resourcePath: '',
+                stage: ''
+            },
+            resource: '',
+            body: req.body ? JSON.stringify(req.body) : null,
+            isBase64Encoded: false
+        };
+
+        const result = await handler(event);
+        res.status(result.statusCode).send(result.body);
+    });
+
+    const port = process.env.PORT || 3000;
+    app.listen(port, () => {
+        console.log(`Server is running on port ${port}`);
+    });
+}

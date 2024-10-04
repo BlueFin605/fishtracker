@@ -317,7 +317,7 @@ interface DynamoDbCatch {
     Subject: string;
     SpeciesId: string;
     CaughtLocation: Location;
-    CaughtWhen: Date;
+    CaughtWhen: string;
     CaughtSize: FishSize;
     CaughtLength: number;
     Weather?: WeatherAttributes;
@@ -331,7 +331,7 @@ class DynamoDbCatchImpl implements DynamoDbCatch {
     Subject: string;
     SpeciesId: string;
     CaughtLocation: Location;
-    CaughtWhen: Date;
+    CaughtWhen: string;
     CaughtSize: FishSize;
     CaughtLength: number;
     Weather?: WeatherAttributes;
@@ -356,7 +356,7 @@ class DynamoDbCatchImpl implements DynamoDbCatch {
         this.Subject = Subject;
         this.SpeciesId = SpeciesId;
         this.CaughtLocation = CaughtLocation;
-        this.CaughtWhen = CaughtWhen;
+        this.CaughtWhen = CaughtWhen.toISOString();
         this.CaughtSize = CaughtSize;
         this.CaughtLength = CaughtLength;
         this.Weather = Weather;

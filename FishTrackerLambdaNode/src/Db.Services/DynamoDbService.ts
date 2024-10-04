@@ -1,18 +1,49 @@
-import { DynamoDBClient, PutItemCommand, GetItemCommand, QueryCommand, UpdateItemCommand, DeleteItemCommand, PutItemCommandInput, GetItemCommandInput, QueryCommandInput, UpdateItemCommandInput, DeleteItemCommandInput } from '@aws-sdk/client-dynamodb';
+import { DynamoDBClient, DynamoDBClientConfig, PutItemCommand, GetItemCommand, QueryCommand, UpdateItemCommand, DeleteItemCommand, PutItemCommandInput, GetItemCommandInput, QueryCommandInput, UpdateItemCommandInput, DeleteItemCommandInput } from '@aws-sdk/client-dynamodb';
 import { marshall, unmarshall } from '@aws-sdk/util-dynamodb';
 import { HttpWrapper } from '../Functional/HttpWrapper';
 import { Logger } from '@aws-lambda-powertools/logger';
+import { Agent } from "http";
+import { NodeHttpHandler } from "@smithy/node-http-handler";
 
 class DynamoDbService<T> {
     private docClient: DynamoDBClient;
     private tableName: string;
     private partitionKeyName: string;
     private sortKeyName?: string;
-
+    
     private logger = new Logger({ serviceName: 'FishTrackerLambda' });
+    
+    static marshallWithOptions(input: any) {
+        return marshall(input, { convertClassInstanceToMap: true, removeUndefinedValues: true });
+    }
 
-    constructor(tableName: string, partitionKeyName: string, sortKeyName?: string) {
-        this.docClient = new DynamoDBClient({});
+    constructor(client: DynamoDBClient, tableName: string, partitionKeyName: string, sortKeyName?: string) {
+        // const dynamoDbClientConfig: DynamoDBClientConfig = {
+        //     region: 'us-west-2', // Replace with your desired region
+        //     requestHandler: new NodeHttpHandler({
+        //         httpAgent: new Agent({
+        //             /*params*/
+        //         }),
+        //     }),
+        //     endpoint: 'http://localhost:8000', // Replace with your DynamoDB service URL if using a local instance
+        //     credentials: {
+        //         accessKeyId: 'your-access-key-id', // Replace with your AWS access key ID
+        //         secretAccessKey: 'your-secret-access-key' // Replace with your AWS secret access key
+        //     }
+        // };
+        // const dynamoDbClient = new DynamoDBClient(dynamoDbClientConfig);
+
+        const dynamoDbClient = new DynamoDBClient({
+            region: 'us-west-2', // Replace with your desired region
+            endpoint: 'http://localhost:8000', // Replace with your DynamoDB service URL
+            credentials: {
+                accessKeyId: 'xxx', // Replace with your AWS access key ID
+                secretAccessKey: 'xxx' // Replace with your AWS secret access key
+            },
+        });
+        
+        this.docClient = dynamoDbClient;
+        console.log(this.docClient);        
         this.tableName = tableName;
         this.partitionKeyName = partitionKeyName;
         this.sortKeyName = sortKeyName;
@@ -21,7 +52,7 @@ class DynamoDbService<T> {
     public async createRecord(record: T): Promise<HttpWrapper<T>> {
         const params: PutItemCommandInput = {
             TableName: this.tableName,
-            Item: marshall(record)
+            Item: DynamoDbService.marshallWithOptions(record)
         };
 
         try {
@@ -43,7 +74,7 @@ class DynamoDbService<T> {
     async readRecord(partitionValue: any): Promise<HttpWrapper<T>> {
         const params: GetItemCommandInput = {
             TableName: this.tableName,
-            Key: marshall({
+            Key: DynamoDbService.marshallWithOptions({
                 [this.partitionKeyName]: partitionValue
             })
         };
@@ -74,7 +105,7 @@ class DynamoDbService<T> {
         }
         const params: GetItemCommandInput = {
             TableName: this.tableName,
-            Key: marshall({
+            Key: DynamoDbService.marshallWithOptions({
                 [this.partitionKeyName]: partitionValue,
                 [this.sortKeyName]: sortValue
             })
@@ -107,7 +138,7 @@ class DynamoDbService<T> {
             ExpressionAttributeNames: {
                 '#partitionKey': this.partitionKeyName
             },
-            ExpressionAttributeValues: marshall({
+            ExpressionAttributeValues: DynamoDbService.marshallWithOptions({
                 ':partitionValue': partitionValue
             })
         };
@@ -135,7 +166,7 @@ class DynamoDbService<T> {
     async updateRecord(partitionKeyName: string, partitionValue: any, sortKeyName: string, sortValue: any, value: T): Promise<HttpWrapper<T>> {
         const params: UpdateItemCommandInput = {
             TableName: this.tableName,
-            Key: marshall({
+            Key: DynamoDbService.marshallWithOptions({
                 [partitionKeyName]: partitionValue,
                 [sortKeyName]: sortValue
             }),
@@ -143,7 +174,7 @@ class DynamoDbService<T> {
             ExpressionAttributeNames: {
                 '#value': 'value'
             },
-            ExpressionAttributeValues: marshall({
+            ExpressionAttributeValues: DynamoDbService.marshallWithOptions({
                 ':value': value
             }),
             ReturnValues: 'ALL_NEW'
@@ -172,14 +203,14 @@ class DynamoDbService<T> {
     async updateRecordWithoutSortKey(partitionKeyName: string, partitionValue: any, value: T): Promise<HttpWrapper<T>> {
         const params: UpdateItemCommandInput = {
             TableName: this.tableName,
-            Key: marshall({
+            Key: DynamoDbService.marshallWithOptions({
                 [partitionKeyName]: partitionValue
             }),
             UpdateExpression: 'set #value = :value',
             ExpressionAttributeNames: {
                 '#value': 'value'
             },
-            ExpressionAttributeValues: marshall({
+            ExpressionAttributeValues: DynamoDbService.marshallWithOptions({
                 ':value': value
             }),
             ReturnValues: 'ALL_NEW'
@@ -216,7 +247,7 @@ class DynamoDbService<T> {
                 '#partitionKey': this.partitionKeyName,
                 '#sortKey': this.sortKeyName
             },
-            ExpressionAttributeValues: marshall({
+            ExpressionAttributeValues: DynamoDbService.marshallWithOptions({
                 ':partitionValue': partitionValue,
                 ':startSortValue': startSortValue,
                 ':endSortValue': endSortValue
@@ -254,7 +285,7 @@ class DynamoDbService<T> {
 
         const params: DeleteItemCommandInput = {
             TableName: this.tableName,
-            Key: marshall(key),
+            Key: DynamoDbService.marshallWithOptions(key),
             ReturnValues: 'ALL_OLD'
         };
 

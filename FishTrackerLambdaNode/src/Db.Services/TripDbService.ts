@@ -3,10 +3,11 @@ import { HttpWrapper } from '../Functional/HttpWrapper';
 import { DynamoDbTrip, DynamoDbTripImpl, UpdateTripDetails, TripDetails, TripDetailsImpl, EndTripDetails, NewTrip, NewTripImpl, TripRating, TripTags } from '../Models/lambda';
 import { IdGenerator } from '../Helpers/IdGenerator';
 import { DateConverter } from '../Helpers/DateConverter';
+import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
 
 export class TripDbService extends DynamoDbService<DynamoDbTrip> {
-    constructor() {
-        super('FishTracker-Trip-Prod', 'Subject', 'TripId');
+    constructor(client: DynamoDBClient) {
+        super(client, 'FishTracker-Trip-Prod', 'Subject', 'TripId');
     }
 
     async updateTripInDynamoDb(record: DynamoDbTrip): Promise<HttpWrapper<DynamoDbTrip>> {
