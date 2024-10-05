@@ -5,14 +5,16 @@ import { Logger } from '@aws-lambda-powertools/logger';
 import { Agent } from "http";
 import { NodeHttpHandler } from "@smithy/node-http-handler";
 import { DynamoDbHelper } from './AWSWrapper';
-class DynamoDbService<T> {
+import { VersionedRecord } from '../Models/lambda';
+
+class DynamoDbService<T extends VersionedRecord> {
     private docClient: DynamoDBClient;
     private tableName: string;
     private partitionKeyName: string;
     private sortKeyName?: string;
-    
+
     private logger = new Logger({ serviceName: 'FishTrackerLambda' });
-    
+
     static marshallWithOptions(input: any) {
         return marshall(input, { convertClassInstanceToMap: true, removeUndefinedValues: true });
     }
@@ -31,6 +33,9 @@ class DynamoDbService<T> {
         };
 
         try {
+            if (record.DynamoDbVersion === undefined)
+                record.DynamoDbVersion = 0;
+    
             const command = new PutItemCommand(params);
             const resp = await this.docClient.send(command);
             this.logger.info('CreateRecord Response', { response: resp });
@@ -138,25 +143,55 @@ class DynamoDbService<T> {
         }
     }
 
+    shouldSkipAttribute(attribute: string, attributeValue: any, attributesToSkip: string[]): boolean {
+        return attribute === 'DynamoDbVersion' || attributesToSkip.includes(attribute) || attributeValue === undefined;
+    }
+
     async updateRecord(partitionKeyName: string, partitionValue: any, sortKeyName: string, sortValue: any, value: T): Promise<HttpWrapper<T>> {
+        const updateExpressionParts: string[] = [];
+        const expressionAttributeNames: { [key: string]: string } = {};
+        const expressionAttributeValues: { [key: string]: any } = {};
+
+        for (const [attribute, attributeValue] of Object.entries(value)) {
+            if (this.shouldSkipAttribute(attribute, attributeValue, [partitionKeyName, sortKeyName])) continue;
+
+            const attributePlaceholder = `#${attribute}`;
+            const valuePlaceholder = `:${attribute}`;
+
+            updateExpressionParts.push(`${attributePlaceholder} = ${valuePlaceholder}`);
+            expressionAttributeNames[attributePlaceholder] = attribute;
+            expressionAttributeValues[valuePlaceholder] = attributeValue;
+        }
+
+        // Increment the version
+        updateExpressionParts.push('#DynamoDbVersion = :newVersion');
+        expressionAttributeNames['#DynamoDbVersion'] = 'DynamoDbVersion';
+        if (value.DynamoDbVersion === undefined)
+            value.DynamoDbVersion = 0;
+        expressionAttributeValues[':newVersion'] = value.DynamoDbVersion + 1;
+
+        const updateExpression = `SET ${updateExpressionParts.join(', ')}`;
+
         const params: UpdateItemCommandInput = {
             TableName: this.tableName,
             Key: DynamoDbService.marshallWithOptions({
                 [partitionKeyName]: partitionValue,
                 [sortKeyName]: sortValue
             }),
-            UpdateExpression: 'set #value = :value',
-            ExpressionAttributeNames: {
-                '#value': 'value'
-            },
+            UpdateExpression: updateExpression,
+            ConditionExpression: '#DynamoDbVersion = :currentVersion',
+            ExpressionAttributeNames: expressionAttributeNames,
             ExpressionAttributeValues: DynamoDbService.marshallWithOptions({
-                ':value': value
+                ...expressionAttributeValues,
+                ':currentVersion': value.DynamoDbVersion
             }),
             ReturnValues: 'ALL_NEW'
         };
 
         try {
             const command = new UpdateItemCommand(params);
+            console.log(JSON.stringify(command));
+
             const resp = await this.docClient.send(command);
             this.logger.info('UpdateRecord Response', { response: resp });
             if (resp.Attributes) {
@@ -176,23 +211,49 @@ class DynamoDbService<T> {
     }
 
     async updateRecordWithoutSortKey(partitionKeyName: string, partitionValue: any, value: T): Promise<HttpWrapper<T>> {
+        const updateExpressionParts: string[] = [];
+        const expressionAttributeNames: { [key: string]: string } = {};
+        const expressionAttributeValues: { [key: string]: any } = {};
+
+        for (const [attribute, attributeValue] of Object.entries(value)) {
+            if (this.shouldSkipAttribute(attribute, attributeValue, [partitionKeyName])) continue;
+
+            const attributePlaceholder = `#${attribute}`;
+            const valuePlaceholder = `:${attribute}`;
+
+            updateExpressionParts.push(`${attributePlaceholder} = ${valuePlaceholder}`);
+            expressionAttributeNames[attributePlaceholder] = attribute;
+            expressionAttributeValues[valuePlaceholder] = attributeValue;
+        }
+
+        // Increment the version
+        updateExpressionParts.push('#DynamoDbVersion = :newVersion');
+        expressionAttributeNames['#DynamoDbVersion'] = 'DynamoDbVersion';
+        if (value.DynamoDbVersion === undefined)
+            value.DynamoDbVersion = 0;
+        expressionAttributeValues[':newVersion'] = value.DynamoDbVersion + 1;
+
+        const updateExpression = `SET ${updateExpressionParts.join(', ')}`;
+
         const params: UpdateItemCommandInput = {
             TableName: this.tableName,
             Key: DynamoDbService.marshallWithOptions({
                 [partitionKeyName]: partitionValue
             }),
-            UpdateExpression: 'set #value = :value',
-            ExpressionAttributeNames: {
-                '#value': 'value'
-            },
+            UpdateExpression: updateExpression,
+            ConditionExpression: '#DynamoDbVersion = :currentVersion',
+            ExpressionAttributeNames: expressionAttributeNames,
             ExpressionAttributeValues: DynamoDbService.marshallWithOptions({
-                ':value': value
+                ...expressionAttributeValues,
+                ':currentVersion': value.DynamoDbVersion
             }),
             ReturnValues: 'ALL_NEW'
         };
 
         try {
             const command = new UpdateItemCommand(params);
+            console.log(JSON.stringify(command));
+
             const resp = await this.docClient.send(command);
             this.logger.info('UpdateRecordWithoutSortKey Response', { response: resp });
             if (resp.Attributes) {

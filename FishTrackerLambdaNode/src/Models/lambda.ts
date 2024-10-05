@@ -267,12 +267,16 @@ class SettingsDetailsImpl implements SettingsDetails {
 // persistence
 //--------------------------------------------
 
-interface DynamoDbProfile {
+
+interface VersionedRecord extends Record<string, any> {
+    DynamoDbVersion?: number;
+}
+
+interface DynamoDbProfile extends VersionedRecord {
     subject: string;
     timezone?: string;
     species: string[];
     defaultSpecies: string;
-    dynamoDbVersion?: number;
 }
 
 class DynamoDbProfileImpl implements DynamoDbProfile {
@@ -280,32 +284,31 @@ class DynamoDbProfileImpl implements DynamoDbProfile {
     timezone?: string;
     species: string[];
     defaultSpecies: string;
-    dynamoDbVersion?: number;
+    DynamoDbVersion?: number;
 
     constructor(subject: string, timezone: string | undefined, species: string[], defaultSpecies: string, dynamoDbVersion: number | undefined) {
         this.subject = subject;
         this.timezone = timezone;
         this.species = species;
         this.defaultSpecies = defaultSpecies;
-        this.dynamoDbVersion = dynamoDbVersion;
+        this.DynamoDbVersion = dynamoDbVersion;
     }
 }
 
-interface DynamoDbSettings {
+interface DynamoDbSettings extends VersionedRecord {
     settings: string;
     species: string[];
-    dynamoDbVersion?: number;
 }
 
 class DynamoDbSettingsImpl implements DynamoDbSettings {
     settings: string;
     species: string[];
-    dynamoDbVersion?: number;
+    DynamoDbVersion?: number;
 
     constructor(settings: string, species: string[], dynamoDbVersion: number | undefined) {
         this.settings = settings;
         this.species = species;
-        this.dynamoDbVersion = dynamoDbVersion;
+        this.DynamoDbVersion = dynamoDbVersion;
     }
 
     static createDefault(): DynamoDbSettingsImpl {
@@ -313,7 +316,7 @@ class DynamoDbSettingsImpl implements DynamoDbSettings {
     }
 }
 
-interface DynamoDbCatch {
+interface DynamoDbCatch extends VersionedRecord {
     TripKey: string;
     CatchId: string;
     TripId: string;
@@ -324,7 +327,6 @@ interface DynamoDbCatch {
     CaughtSize: FishSize;
     CaughtLength: number;
     Weather?: WeatherAttributes;
-    DynamoDbVersion?: number;
 }
 
 class DynamoDbCatchImpl implements DynamoDbCatch {
@@ -367,7 +369,7 @@ class DynamoDbCatchImpl implements DynamoDbCatch {
     }
 }
 
-interface DynamoDbTrip {
+interface DynamoDbTrip extends VersionedRecord {
     Subject: string;
     TripId: string;
     StartTime: string;
@@ -378,7 +380,6 @@ interface DynamoDbTrip {
     Tags: TripTags[];
     Species: string[];
     DefaultSpecies: string;
-    DynamoDbVersion?: number;
 }
 
 class DynamoDbTripImpl implements DynamoDbTrip {
@@ -459,6 +460,7 @@ export {
     ProfileDetailsImpl,
     SettingsDetails,
     SettingsDetailsImpl,
+    VersionedRecord,
     DynamoDbProfile,
     DynamoDbProfileImpl,
     DynamoDbSettings,
