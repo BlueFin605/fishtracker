@@ -4,6 +4,7 @@ import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
 import { CatchService } from './Services/CatchService';
 import { TripService } from './Services/TripService';
 import { SettingsService } from './Services/SettingsService';
+import { ProfileService } from './Services/ProfileService';
 import { HttpWrapper } from './Functional/HttpWrapper';
 import { ProfileDetails, SettingsDetails, NewTrip, TripDetails, UpdateTripDetails, EndTripDetails, NewCatch, CatchDetails, UpdateCatchDetails } from './Models/lambda';
 import { Logger } from '@aws-lambda-powertools/logger';
@@ -16,8 +17,8 @@ export class Routes {
         @inject(TripService) private tripService: TripService,
         @inject(CatchService) private catchService: CatchService,
         @inject(SettingsService) private settingsService: SettingsService,
-        @inject(Logger) private logger: Logger,
-        // @inject(ProfileService) private profileService: ProfileService,
+        @inject(ProfileService) private profileService: ProfileService,
+        @inject(Logger) private logger: Logger
     ) {
         this.router = Router();
         this.initializeRoutes();
@@ -88,13 +89,13 @@ export class Routes {
 
     private async getProfile(req: Request, res: Response) {
         const subjectClaim = this.getClaimSubjectFromHeader(req);
-        // await this.executeService(`GetProfile subject:[${subjectClaim}]`, () => this.profileService.getProfile(subjectClaim), res);
+        await this.executeService(`GetProfile subject:[${subjectClaim}]`, () => this.profileService.getProfile(subjectClaim), res);
     }
 
     private async updateProfile(req: Request, res: Response) {
         const profile = req.body as ProfileDetails;
         const subjectClaim = this.getClaimSubjectFromHeader(req);
-        // await this.executeService(`UpdateProfile subject:[${subjectClaim}]`, () => this.profileService.updateProfile(subjectClaim, profile), res);
+        await this.executeService(`UpdateProfile subject:[${subjectClaim}]`, () => this.profileService.updateProfile(subjectClaim, profile), res);
     }
 
     private async getSettings(req: Request, res: Response) {

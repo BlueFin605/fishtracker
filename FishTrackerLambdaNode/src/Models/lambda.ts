@@ -273,24 +273,24 @@ interface VersionedRecord extends Record<string, any> {
 }
 
 interface DynamoDbProfile extends VersionedRecord {
-    subject: string;
-    timezone?: string;
-    species: string[];
-    defaultSpecies: string;
+    Subject: string;
+    Timezone?: string;
+    Species: string[];
+    DefaultSpecies: string;
 }
 
 class DynamoDbProfileImpl implements DynamoDbProfile {
-    subject: string;
-    timezone?: string;
-    species: string[];
-    defaultSpecies: string;
+    Subject: string;
+    Timezone?: string;
+    Species: string[];
+    DefaultSpecies: string;
     DynamoDbVersion?: number;
 
     constructor(subject: string, timezone: string | undefined, species: string[], defaultSpecies: string, dynamoDbVersion: number | undefined) {
-        this.subject = subject;
-        this.timezone = timezone;
-        this.species = species;
-        this.defaultSpecies = defaultSpecies;
+        this.Subject = subject;
+        this.Timezone = timezone;
+        this.Species = species;
+        this.DefaultSpecies = defaultSpecies;
         this.DynamoDbVersion = dynamoDbVersion;
     }
 }
