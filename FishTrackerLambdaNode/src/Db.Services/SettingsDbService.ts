@@ -1,36 +1,38 @@
+import { injectable } from 'tsyringe';
 import { SettingsDetails, SettingsDetailsImpl, DynamoDbSettings, DynamoDbSettingsImpl } from '../Models/lambda';
 import { DynamoDbService } from './DynamoDbService';
 import { HttpWrapper } from '../Functional/HttpWrapper';
 import { DynamoDbHelper } from './AWSWrapper';
 
+@injectable()
 export class SettingsDbService extends DynamoDbService<DynamoDbSettings> {
     constructor(client: DynamoDbHelper) {
         super(client, 'FishTracker-Settings-Prod', 'Settings');
     }
 
     async updateSettingsInDynamoDb(record: DynamoDbSettings): Promise<HttpWrapper<DynamoDbSettings>> {
-        return this.updateRecordWithoutSortKey('Settings', record.settings, record);
+        return this.updateRecordWithoutSortKey('Settings', record.Settings, record);
     }
 
     async readSettingsFromDynamoDb(): Promise<HttpWrapper<DynamoDbSettings>> {
         return this.readRecord('global');
     }
 
-    patchSettings(record: DynamoDbSettings, updateSettings: SettingsDetails): DynamoDbSettings {
+    static patchSettings(record: DynamoDbSettings, updateSettings: SettingsDetails): DynamoDbSettings {
         return new DynamoDbSettingsImpl(
             'global',
-            updateSettings.species ?? record.species,
+            updateSettings.species ?? record.Species,
             record.dynamoDbVersion
         );
     }
 
-    toSettingsDetails(record: DynamoDbSettings): SettingsDetails {
+    static toSettingsDetails(record: DynamoDbSettings): SettingsDetails {
         return new SettingsDetailsImpl(
-            record.species
+            record.Species
         );
     }
 
-    buildDefault(): DynamoDbSettings {
+    static buildDefault(): DynamoDbSettings {
         return new DynamoDbSettingsImpl(
             'global',
             [],

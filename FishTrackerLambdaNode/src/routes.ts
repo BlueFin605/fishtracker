@@ -1,9 +1,9 @@
 import { injectable, inject } from 'tsyringe';
 import { Router, Request, Response } from 'express';
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
-import { container } from 'tsyringe';
 import { CatchService } from './Services/CatchService';
 import { TripService } from './Services/TripService';
+import { SettingsService } from './Services/SettingsService';
 import { HttpWrapper } from './Functional/HttpWrapper';
 import { ProfileDetails, SettingsDetails, NewTrip, TripDetails, UpdateTripDetails, EndTripDetails, NewCatch, CatchDetails, UpdateCatchDetails } from './Models/lambda';
 import { Logger } from '@aws-lambda-powertools/logger';
@@ -15,9 +15,9 @@ export class Routes {
     constructor(
         @inject(TripService) private tripService: TripService,
         @inject(CatchService) private catchService: CatchService,
-        @inject(Logger) private logger: Logger
+        @inject(SettingsService) private settingsService: SettingsService,
+        @inject(Logger) private logger: Logger,
         // @inject(ProfileService) private profileService: ProfileService,
-        // @inject(SettingsService) private settingsService: SettingsService,
     ) {
         this.router = Router();
         this.initializeRoutes();
@@ -99,13 +99,13 @@ export class Routes {
 
     private async getSettings(req: Request, res: Response) {
         const subjectClaim = this.getClaimSubjectFromHeader(req);
-        // await this.executeService(`GetSettings subject:[${subjectClaim}]`, () => this.settingsService.getSettings(), res);
+        await this.executeService(`GetSettings subject:[${subjectClaim}]`, () => this.settingsService.getSettings(), res);
     }
 
     private async updateSettings(req: Request, res: Response) {
         const settings = req.body as SettingsDetails;
         const subjectClaim = this.getClaimSubjectFromHeader(req);
-        // await this.executeService(`UpdateSettings subject:[${subjectClaim}]`, () => this.settingsService.updateSettings(settings), res);
+        await this.executeService(`UpdateSettings subject:[${subjectClaim}]`, () => this.settingsService.updateSettings(settings), res);
     }
 
     private async getAllTrips(req: Request, res: Response) {

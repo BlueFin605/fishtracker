@@ -296,18 +296,18 @@ class DynamoDbProfileImpl implements DynamoDbProfile {
 }
 
 interface DynamoDbSettings extends VersionedRecord {
-    settings: string;
-    species: string[];
+    Settings: string;
+    Species: string[];
 }
 
 class DynamoDbSettingsImpl implements DynamoDbSettings {
-    settings: string;
-    species: string[];
+    Settings: string;
+    Species: string[];
     DynamoDbVersion?: number;
 
     constructor(settings: string, species: string[], dynamoDbVersion: number | undefined) {
-        this.settings = settings;
-        this.species = species;
+        this.Settings = settings;
+        this.Species = species;
         this.DynamoDbVersion = dynamoDbVersion;
     }
 
