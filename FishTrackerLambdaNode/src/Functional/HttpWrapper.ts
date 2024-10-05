@@ -116,7 +116,7 @@ export class HttpWrapper<T> {
         return HttpWrapper.Ok(retval);
     }
 
-    async MapEachAsync<R>(mapper: (value: T) => Promise<HttpWrapper<R>>): Promise<HttpWrapper<R[]>> {
+    async MapEachAsync<I,R>(mapper: (value: I) => Promise<HttpWrapper<R>>): Promise<HttpWrapper<R[]>> {
         if (!this.continue) {
             return this.cloneFailed<R[]>();
         }

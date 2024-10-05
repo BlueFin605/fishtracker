@@ -12,12 +12,8 @@ export class DynamoDbHelper {
         return this._docClient;
     }
 
-    private set docClient(client: DynamoDBClient) {
-        this._docClient = client;
-    }
-
     public configureLocal(): void {
-        this.docClient = new DynamoDBClient({
+        this._docClient = new DynamoDBClient({
             region: 'us-west-2', // Replace with your desired region
             endpoint: 'http://localhost:8000', // Replace with your DynamoDB service URL
             credentials: {
