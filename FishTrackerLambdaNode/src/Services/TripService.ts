@@ -70,7 +70,7 @@ export class TripService {
         return await (await (await (await (await this.tripService.readRecordWithSortKey(subject, tripId))
             .Map(c => TripDbService.toTripDetails(c))
             .MapAsync(c => this.tripService.deleteRecord(c.tripId)))
-            .MapAsync(c => this.catchService.readAllRecordsForPartition(c.tripId)))
+            .MapAsync(c => this.catchService.readAllRecordsForPartition(c.TripId)))
             .MapEachAsync<DynamoDbCatch, DynamoDbCatch>(c => this.catchService.deleteRecord(c.TripId, c.CatchId)))
             .Map(c => c.map(r => CatchDbService.toCatchDetails(r)));
     }

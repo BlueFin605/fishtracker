@@ -3,7 +3,7 @@ import { container } from 'tsyringe';
 import { APIGatewayProxyEvent, Context } from 'aws-lambda';
 import { Logger } from '@aws-lambda-powertools/logger';
 import awsServerlessExpress from 'aws-serverless-express';
-import express, { NextFunction, Request, Response } from 'express';
+import express from 'express';
 import { Server } from 'http';
 import { CatchService } from './Services/CatchService';
 import { TripService } from './Services/TripService';

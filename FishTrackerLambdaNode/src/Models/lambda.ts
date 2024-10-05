@@ -368,31 +368,31 @@ class DynamoDbCatchImpl implements DynamoDbCatch {
 }
 
 interface DynamoDbTrip {
-    subject: string;
-    tripId: string;
-    startTime: string;
-    endTime?: string;
-    notes: string;
-    catchSize: number; // uint converted to number
-    rating: TripRating;
-    tags: TripTags[];
-    species: string[];
-    defaultSpecies: string;
-    dynamoDbVersion?: number;
+    Subject: string;
+    TripId: string;
+    StartTime: string;
+    EndTime?: string;
+    Notes: string;
+    CatchSize: number; // uint converted to number
+    Rating: TripRating;
+    Tags: TripTags[];
+    Species: string[];
+    DefaultSpecies: string;
+    DynamoDbVersion?: number;
 }
 
 class DynamoDbTripImpl implements DynamoDbTrip {
-    subject: string;
-    tripId: string;
-    startTime: string;
-    endTime?: string;
-    notes: string;
-    catchSize: number;
-    rating: TripRating;
-    tags: TripTags[];
-    species: string[];
-    defaultSpecies: string;
-    dynamoDbVersion?: number;
+    Subject: string;
+    TripId: string;
+    StartTime: string;
+    EndTime?: string;
+    Notes: string;
+    CatchSize: number;
+    Rating: TripRating;
+    Tags: TripTags[];
+    Species: string[];
+    DefaultSpecies: string;
+    DynamoDbVersion?: number;
 
     constructor(
         subject: string,
@@ -407,17 +407,17 @@ class DynamoDbTripImpl implements DynamoDbTrip {
         defaultSpecies: string,
         dynamoDbVersion?: number
     ) {
-        this.subject = subject;
-        this.tripId = tripId;
-        this.startTime = startTime.toString();
-        this.endTime = endTime?.toString();
-        this.notes = notes;
-        this.catchSize = catchSize;
-        this.rating = rating;
-        this.tags = tags;
-        this.species = species;
-        this.defaultSpecies = defaultSpecies;
-        this.dynamoDbVersion = dynamoDbVersion;
+        this.Subject = subject;
+        this.TripId = tripId;
+        this.StartTime = startTime.toString();
+        this.EndTime = endTime?.toString();
+        this.Notes = notes;
+        this.CatchSize = catchSize;
+        this.Rating = rating;
+        this.Tags = tags;
+        this.Species = species;
+        this.DefaultSpecies = defaultSpecies;
+        this.DynamoDbVersion = dynamoDbVersion;
     }
 
     // Default constructor
