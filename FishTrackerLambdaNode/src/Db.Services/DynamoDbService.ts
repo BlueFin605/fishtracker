@@ -27,15 +27,15 @@ class DynamoDbService<T extends VersionedRecord> {
     }
 
     public async createRecord(record: T): Promise<HttpWrapper<T>> {
+        if (record.DynamoDbVersion === undefined)
+            record.DynamoDbVersion = 0;
+
         const params: PutItemCommandInput = {
             TableName: this.tableName,
             Item: DynamoDbService.marshallWithOptions(record)
         };
 
-        try {
-            if (record.DynamoDbVersion === undefined)
-                record.DynamoDbVersion = 0;
-    
+        try {    
             const command = new PutItemCommand(params);
             const resp = await this.docClient.send(command);
             this.logger.info('CreateRecord Response', { response: resp });

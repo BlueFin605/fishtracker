@@ -53,7 +53,7 @@ export class TripService {
             .ValidateInput(c => {
                 return tripId === c.tripId ? null : { statusCode: 400, message: `Cannot change tripId from [${tripId}] to [${c.tripId}]` };
             })
-            .MapAsync(() => this.tripService.readRecordWithSortKey(IdGenerator.generateTripKey(subject, tripId), updateTrip.tripId)))
+            .MapAsync(() => this.tripService.readRecordWithSortKey(subject, updateTrip.tripId)))
             .Map(c => TripDbService.updateTrip(c, updateTrip))
             .MapAsync(c => this.tripService.updateTripInDynamoDb(c)))
             .Map(c => TripDbService.toTripDetails(c));
@@ -76,7 +76,7 @@ export class TripService {
     }
 
     public async endTrip(subject: string, tripId: string, trip: EndTripDetails): Promise<HttpWrapper<TripDetails>> {
-        return (await this.catchService.readAllRecordsForPartition(tripId))
+        return (await this.catchService.readAllRecordsForPartition(IdGenerator.generateTripKey(subject, tripId)))
             .MapAsync(async all => {
                 return (await (await this.tripService.readRecordWithSortKey(subject, tripId))
                     .Map(c => this.tripService.endTrip(c, trip, all.length))
