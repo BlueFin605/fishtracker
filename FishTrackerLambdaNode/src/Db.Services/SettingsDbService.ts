@@ -1,39 +1,39 @@
 import { injectable } from 'tsyringe';
-import { SettingsDetails, SettingsDetailsImpl, DynamoDbSettings, DynamoDbSettingsImpl } from '../Models/lambda';
+import { ISettingsDetails, SettingsDetails, IDynamoDbSettings, DynamoDbSettings } from '../Models/lambda';
 import { DynamoDbService } from './DynamoDbService';
 import { HttpWrapper } from '../Functional/HttpWrapper';
 import { DynamoDbHelper } from './AWSWrapper';
 
 @injectable()
-export class SettingsDbService extends DynamoDbService<DynamoDbSettings> {
+export class SettingsDbService extends DynamoDbService<IDynamoDbSettings> {
     constructor(client: DynamoDbHelper) {
         super(client, 'FishTracker-Settings-Prod', 'Settings');
     }
 
-    async updateSettingsInDynamoDb(record: DynamoDbSettings): Promise<HttpWrapper<DynamoDbSettings>> {
+    async updateSettingsInDynamoDb(record: IDynamoDbSettings): Promise<HttpWrapper<IDynamoDbSettings>> {
         return this.updateRecordWithoutSortKey('Settings', record.Settings, record);
     }
 
-    async readSettingsFromDynamoDb(): Promise<HttpWrapper<DynamoDbSettings>> {
+    async readSettingsFromDynamoDb(): Promise<HttpWrapper<IDynamoDbSettings>> {
         return this.readRecord('global');
     }
 
-    static patchSettings(record: DynamoDbSettings, updateSettings: SettingsDetails): DynamoDbSettings {
-        return new DynamoDbSettingsImpl(
+    static patchSettings(record: IDynamoDbSettings, updateSettings: ISettingsDetails): IDynamoDbSettings {
+        return new DynamoDbSettings(
             'global',
             updateSettings.species ?? record.Species,
             record.dynamoDbVersion
         );
     }
 
-    static toSettingsDetails(record: DynamoDbSettings): SettingsDetails {
-        return new SettingsDetailsImpl(
+    static toSettingsDetails(record: IDynamoDbSettings): ISettingsDetails {
+        return new SettingsDetails(
             record.Species
         );
     }
 
-    static buildDefault(): DynamoDbSettings {
-        return new DynamoDbSettingsImpl(
+    static buildDefault(): IDynamoDbSettings {
+        return new DynamoDbSettings(
             'global',
             [],
             undefined

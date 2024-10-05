@@ -1,30 +1,30 @@
 import { injectable } from 'tsyringe';
 import { DynamoDbService } from './DynamoDbService';
 import { HttpWrapper } from '../Functional/HttpWrapper';
-import { DynamoDbTrip, DynamoDbTripImpl, UpdateTripDetails, TripDetails, TripDetailsImpl, EndTripDetails, NewTrip, NewTripImpl, TripRating, TripTags } from '../Models/lambda';
+import { IDynamoDbTrip, DynamoDbTrip, IUpdateTripDetails, ITripDetails, TripDetails, IEndTripDetails, INewTrip, NewTrip, TripRating, ITripTags } from '../Models/lambda';
 import { IdGenerator } from '../Helpers/IdGenerator';
 import { DateConverter } from '../Helpers/DateConverter';
 import { DynamoDbHelper } from './AWSWrapper';
 
 @injectable()
-export class TripDbService extends DynamoDbService<DynamoDbTrip> {
+export class TripDbService extends DynamoDbService<IDynamoDbTrip> {
     constructor(client: DynamoDbHelper) {
         super(client, 'FishTracker-Trip-Prod', 'Subject', 'TripId');
     }
 
-    async updateTripInDynamoDb(record: DynamoDbTrip): Promise<HttpWrapper<DynamoDbTrip>> {
+    async updateTripInDynamoDb(record: IDynamoDbTrip): Promise<HttpWrapper<IDynamoDbTrip>> {
         return this.updateRecord('Subject', record.Subject, 'TripId', record.TripId, record);
     }
 
-    async readRelevantTripsFromDynamoDb(subject: string): Promise<HttpWrapper<DynamoDbTrip[]>> {
+    async readRelevantTripsFromDynamoDb(subject: string): Promise<HttpWrapper<IDynamoDbTrip[]>> {
         const month = new Date().getMonth();
         const startSortValue = IdGenerator.generateTripKey(subject, (month - 1).toString().padStart(2, '0'));
         const endSortValue = IdGenerator.generateTripKey(subject, (month + 2).toString().padStart(2, '0'));
         return this.readRecordsBetweenSortKeys(subject, startSortValue, endSortValue);
     }
 
-    static patchTrip(record: DynamoDbTrip, trip: UpdateTripDetails): DynamoDbTrip {
-        return new DynamoDbTripImpl(
+    static patchTrip(record: IDynamoDbTrip, trip: IUpdateTripDetails): IDynamoDbTrip {
+        return new DynamoDbTrip(
             record.Subject,
             record.TripId,
             trip.startTime ?? DateConverter.isoFromString(record.StartTime),
@@ -39,8 +39,8 @@ export class TripDbService extends DynamoDbService<DynamoDbTrip> {
         );
     }
 
-    static updateTrip(record: DynamoDbTrip, trip: TripDetails): DynamoDbTrip {
-        return new DynamoDbTripImpl(
+    static updateTrip(record: IDynamoDbTrip, trip: ITripDetails): IDynamoDbTrip {
+        return new DynamoDbTrip(
             record.Subject,
             record.TripId,
             trip.startTime,
@@ -55,9 +55,9 @@ export class TripDbService extends DynamoDbService<DynamoDbTrip> {
         );
     }
 
-    endTrip(record: DynamoDbTrip, trip: EndTripDetails, size: number): DynamoDbTrip {
+    endTrip(record: IDynamoDbTrip, trip: IEndTripDetails, size: number): IDynamoDbTrip {
         const endTime = trip.endTime ?? DateConverter.getLocalNow(trip.timeZone);
-        return new DynamoDbTripImpl(
+        return new DynamoDbTrip(
             record.Subject,
             record.TripId,
             DateConverter.isoFromString(record.StartTime),
@@ -72,17 +72,17 @@ export class TripDbService extends DynamoDbService<DynamoDbTrip> {
         );
     }
 
-    static fillInMissingData(newTrip: NewTrip): NewTrip {
+    static fillInMissingData(newTrip: INewTrip): INewTrip {
         const startTime = newTrip.startTime ?? DateConverter.getLocalNow(newTrip.timeZone);
-        return new NewTripImpl(startTime, newTrip.timeZone, newTrip.notes, newTrip.tags, newTrip.species, newTrip.defaultSpecies);
+        return new NewTrip(startTime, newTrip.timeZone, newTrip.notes, newTrip.tags, newTrip.species, newTrip.defaultSpecies);
     }
 
-    static createNewDynamoRecord(newTrip: NewTrip, subject: string): DynamoDbTrip {
+    static createNewDynamoRecord(newTrip: INewTrip, subject: string): IDynamoDbTrip {
         if (!newTrip.startTime) {
             throw new Error('Trip start time is required');
         }
         
-        return new DynamoDbTripImpl(
+        return new DynamoDbTrip(
             subject,
             IdGenerator.generateTripId(newTrip.startTime),
             newTrip.startTime,
@@ -97,8 +97,8 @@ export class TripDbService extends DynamoDbService<DynamoDbTrip> {
         );
     }
 
-    static toTripDetails(record: DynamoDbTrip): TripDetails {
-        return new TripDetailsImpl(
+    static toTripDetails(record: IDynamoDbTrip): ITripDetails {
+        return new TripDetails(
             record.Subject,
             record.TripId,
             DateConverter.isoFromString(record.StartTime),

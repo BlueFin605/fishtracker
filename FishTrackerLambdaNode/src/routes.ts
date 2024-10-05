@@ -6,7 +6,7 @@ import { TripService } from './Services/TripService';
 import { SettingsService } from './Services/SettingsService';
 import { ProfileService } from './Services/ProfileService';
 import { HttpWrapper } from './Functional/HttpWrapper';
-import { ProfileDetails, SettingsDetails, NewTrip, TripDetails, UpdateTripDetails, EndTripDetails, NewCatch, CatchDetails, UpdateCatchDetails } from './Models/lambda';
+import { IProfileDetails, ISettingsDetails, INewTrip, ITripDetails, IUpdateTripDetails, IEndTripDetails, INewCatch, ICatchDetails, IUpdateCatchDetails } from './Models/lambda';
 import { Logger } from '@aws-lambda-powertools/logger';
 
 @injectable()
@@ -93,7 +93,7 @@ export class Routes {
     }
 
     private async updateProfile(req: Request, res: Response) {
-        const profile = req.body as ProfileDetails;
+        const profile = req.body as IProfileDetails;
         const subjectClaim = this.getClaimSubjectFromHeader(req);
         await this.executeService(`UpdateProfile subject:[${subjectClaim}]`, () => this.profileService.updateProfile(subjectClaim, profile), res);
     }
@@ -104,7 +104,7 @@ export class Routes {
     }
 
     private async updateSettings(req: Request, res: Response) {
-        const settings = req.body as SettingsDetails;
+        const settings = req.body as ISettingsDetails;
         const subjectClaim = this.getClaimSubjectFromHeader(req);
         await this.executeService(`UpdateSettings subject:[${subjectClaim}]`, () => this.settingsService.updateSettings(settings), res);
     }
@@ -128,28 +128,28 @@ export class Routes {
     }
 
     private async newTrip(req: Request, res: Response) {
-        const newTrip = req.body as NewTrip;
+        const newTrip = req.body as INewTrip;
         const subjectClaim = this.getClaimSubjectFromHeader(req);
         await this.executeService(`NewTrip subject:[${subjectClaim}]`, () => this.tripService.newTrip(subjectClaim, newTrip), res);
     }
 
     private async updateTrip(req: Request, res: Response) {
         const { tripId } = req.params;
-        const trip = req.body as TripDetails;
+        const trip = req.body as ITripDetails;
         const subjectClaim = this.getClaimSubjectFromHeader(req);
         await this.executeService(`UpdateTrip subject:[${subjectClaim}] tripId:[${tripId}]`, () => this.tripService.updateTrip(subjectClaim, tripId, trip), res);
     }
 
     private async patchTrip(req: Request, res: Response) {
         const { tripId } = req.params;
-        const trip = req.body as UpdateTripDetails;
+        const trip = req.body as IUpdateTripDetails;
         const subjectClaim = this.getClaimSubjectFromHeader(req);
         await this.executeService(`PatchTrip subject:[${subjectClaim}] tripId:[${tripId}]`, () => this.tripService.patchTrip(subjectClaim, tripId, trip), res);
     }
 
     private async endTrip(req: Request, res: Response) {
         const { tripId } = req.params;
-        const trip = req.body as EndTripDetails;
+        const trip = req.body as IEndTripDetails;
         const subjectClaim = this.getClaimSubjectFromHeader(req);
         await this.executeService(`EndTrip subject:[${subjectClaim}] tripId:[${tripId}]`, () => this.tripService.endTrip(subjectClaim, tripId, trip), res);
     }
@@ -168,21 +168,21 @@ export class Routes {
 
     private async newCatch(req: Request, res: Response) {
         const { tripId } = req.params;
-        const newCatch = req.body as NewCatch;
+        const newCatch = req.body as INewCatch;
         const subjectClaim = this.getClaimSubjectFromHeader(req);
         await this.executeService(`NewCatch subject:[${subjectClaim}] tripId:[${tripId}]`, () => this.catchService.newCatch(subjectClaim, tripId, newCatch), res);
     }
 
     private async updateCatch(req: Request, res: Response) {
         const { tripId, catchId } = req.params;
-        const updateCatch = req.body as CatchDetails;
+        const updateCatch = req.body as ICatchDetails;
         const subjectClaim = this.getClaimSubjectFromHeader(req);
         await this.executeService(`UpdateCatch subject:[${subjectClaim}] tripId:[${tripId}] catchId:[${catchId}]`, () => this.catchService.updateCatch(subjectClaim, tripId, catchId, updateCatch), res);
     }
 
     private async patchCatch(req: Request, res: Response) {
         const { tripId, catchId } = req.params;
-        const updateCatch = req.body as UpdateCatchDetails;
+        const updateCatch = req.body as IUpdateCatchDetails;
         const subjectClaim = this.getClaimSubjectFromHeader(req);
         await this.executeService(`PatchCatch subject:[${subjectClaim}] tripId:[${tripId}] catchId:[${catchId}]`, () => this.catchService.patchCatch(subjectClaim, tripId, catchId, updateCatch), res);
     }

@@ -1,6 +1,6 @@
 import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
 import { container, inject, injectable } from 'tsyringe';
-import { TripDetails, NewTrip, UpdateTripDetails, EndTripDetails, DynamoDbCatch, CatchDetails } from '../Models/lambda';
+import { ITripDetails, INewTrip, IUpdateTripDetails, IEndTripDetails, IDynamoDbCatch, ICatchDetails } from '../Models/lambda';
 import { TripDbService } from '../Db.Services/TripDbService';
 import { CatchDbService } from '../Db.Services/CatchDbService';
 import { HttpWrapper } from '../Functional/HttpWrapper';
@@ -16,12 +16,12 @@ export class TripService {
         this.catchService = catchService
     }
 
-    public async getTrip(subject: string, tripId: string): Promise<HttpWrapper<TripDetails>> {
+    public async getTrip(subject: string, tripId: string): Promise<HttpWrapper<ITripDetails>> {
         const tripRecord = await this.tripService.readRecordWithSortKey(subject, tripId);
         return tripRecord.Map(c => TripDbService.toTripDetails(c));
     }
 
-    public async getTrips(subject: string, view?: string): Promise<HttpWrapper<TripDetails[]>> {
+    public async getTrips(subject: string, view?: string): Promise<HttpWrapper<ITripDetails[]>> {
         switch (view) {
             case null:
             case 'all':
@@ -37,7 +37,7 @@ export class TripService {
         }
     }
 
-    public async newTrip(subject: string, newTrip: NewTrip): Promise<HttpWrapper<TripDetails>> {
+    public async newTrip(subject: string, newTrip: INewTrip): Promise<HttpWrapper<ITripDetails>> {
         return (await (await HttpWrapper.Init(newTrip))
             .ValidateInput(c => {
                 return newTrip.startTime != null || newTrip.timeZone != null ? null : { statusCode: 400, message: 'Must supply either a datetime or timezone'};                
@@ -48,7 +48,7 @@ export class TripService {
             .Map(d => TripDbService.toTripDetails(d));
     }
 
-    public async updateTrip(subject: string, tripId: string, updateTrip: TripDetails): Promise<HttpWrapper<TripDetails>> {
+    public async updateTrip(subject: string, tripId: string, updateTrip: ITripDetails): Promise<HttpWrapper<ITripDetails>> {
         return (await (await HttpWrapper.Init(updateTrip)
             .ValidateInput(c => {
                 return tripId === c.tripId ? null : { statusCode: 400, message: `Cannot change tripId from [${tripId}] to [${c.tripId}]` };
@@ -59,23 +59,23 @@ export class TripService {
             .Map(c => TripDbService.toTripDetails(c));
     }
 
-    public async patchTrip(subject: string, tripId: string, updateTrip: UpdateTripDetails): Promise<HttpWrapper<TripDetails>> {
+    public async patchTrip(subject: string, tripId: string, updateTrip: IUpdateTripDetails): Promise<HttpWrapper<ITripDetails>> {
         return await (await (await (await this.tripService.readRecordWithSortKey(subject, tripId))
             .Map(c => TripDbService.patchTrip(c, updateTrip)))
             .MapAsync(c => this.tripService.updateTripInDynamoDb(c)))
             .Map(c => TripDbService.toTripDetails(c));
     }
 
-    public async deleteTrip(subject: string, tripId: string): Promise<HttpWrapper<CatchDetails[]>> {
+    public async deleteTrip(subject: string, tripId: string): Promise<HttpWrapper<ICatchDetails[]>> {
         return await (await (await (await (await this.tripService.readRecordWithSortKey(subject, tripId))
             .Map(c => TripDbService.toTripDetails(c))
             .MapAsync(c => this.tripService.deleteRecord(c.tripId)))
             .MapAsync(c => this.catchService.readAllRecordsForPartition(c.TripId)))
-            .MapEachAsync<DynamoDbCatch, DynamoDbCatch>(c => this.catchService.deleteRecord(c.TripId, c.CatchId)))
+            .MapEachAsync<IDynamoDbCatch, IDynamoDbCatch>(c => this.catchService.deleteRecord(c.TripId, c.CatchId)))
             .Map(c => c.map(r => CatchDbService.toCatchDetails(r)));
     }
 
-    public async endTrip(subject: string, tripId: string, trip: EndTripDetails): Promise<HttpWrapper<TripDetails>> {
+    public async endTrip(subject: string, tripId: string, trip: IEndTripDetails): Promise<HttpWrapper<ITripDetails>> {
         return (await this.catchService.readAllRecordsForPartition(IdGenerator.generateTripKey(subject, tripId)))
             .MapAsync(async all => {
                 return (await (await this.tripService.readRecordWithSortKey(subject, tripId))

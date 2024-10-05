@@ -5,9 +5,9 @@ import { Logger } from '@aws-lambda-powertools/logger';
 import { Agent } from "http";
 import { NodeHttpHandler } from "@smithy/node-http-handler";
 import { DynamoDbHelper } from './AWSWrapper';
-import { VersionedRecord } from '../Models/lambda';
+import { IVersionedRecord } from '../Models/lambda';
 
-class DynamoDbService<T extends VersionedRecord> {
+class DynamoDbService<T extends IVersionedRecord> {
     private docClient: DynamoDBClient;
     private tableName: string;
     private partitionKeyName: string;

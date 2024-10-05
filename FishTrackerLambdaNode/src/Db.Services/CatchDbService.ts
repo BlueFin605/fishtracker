@@ -1,6 +1,6 @@
 import { injectable } from 'tsyringe';
 import { HttpWrapper } from '../Functional/HttpWrapper';
-import { UpdateCatchDetails, CatchDetails, DynamoDbCatch, DynamoDbCatchImpl, NewCatch, NewCatchImpl, CatchDetailsImpl } from '../Models/lambda';
+import { IUpdateCatchDetails, ICatchDetails, IDynamoDbCatch, DynamoDbCatch, INewCatch, NewCatch, CatchDetails } from '../Models/lambda';
 import { DynamoDbService } from './DynamoDbService';
 import { IdGenerator } from '../Helpers/IdGenerator';
 import { DateConverter } from '../Helpers/DateConverter';
@@ -9,17 +9,17 @@ import { DateTime } from 'luxon';
 import { DynamoDbHelper } from './AWSWrapper';
 
 @injectable()
-export class CatchDbService extends DynamoDbService<DynamoDbCatch> {
+export class CatchDbService extends DynamoDbService<IDynamoDbCatch> {
     constructor(client: DynamoDbHelper) {
         super(client, 'FishTracker-Catch-Prod', 'TripKey', 'CatchId');
     }
 
-    public async updateCatchDetails(updateCatch: DynamoDbCatch): Promise<HttpWrapper<DynamoDbCatch>> {
+    public async updateCatchDetails(updateCatch: IDynamoDbCatch): Promise<HttpWrapper<IDynamoDbCatch>> {
         return this.updateRecord('TripKey', updateCatch.TripKey, 'CatchId', updateCatch.CatchId, updateCatch);
     }
 
-    static patchCatch(record: DynamoDbCatch, updateCatch: UpdateCatchDetails): DynamoDbCatch {
-        return new DynamoDbCatchImpl(
+    static patchCatch(record: IDynamoDbCatch, updateCatch: IUpdateCatchDetails): IDynamoDbCatch {
+        return new DynamoDbCatch(
             record.TripKey,
             record.CatchId,
             record.TripId,
@@ -34,8 +34,8 @@ export class CatchDbService extends DynamoDbService<DynamoDbCatch> {
         )
     }
 
-    static updateCatch(record: DynamoDbCatch, updateCatch: CatchDetails): DynamoDbCatch {
-        return new DynamoDbCatchImpl(
+    static updateCatch(record: IDynamoDbCatch, updateCatch: ICatchDetails): IDynamoDbCatch {
+        return new DynamoDbCatch(
             record.TripKey,
             record.CatchId,
             record.TripId,
@@ -49,9 +49,9 @@ export class CatchDbService extends DynamoDbService<DynamoDbCatch> {
             record.DynamoDbVersion
         );
     }
-    static fillInMissingData(newCatch: NewCatch): NewCatch {
+    static fillInMissingData(newCatch: INewCatch): INewCatch {
         const startTime = newCatch.caughtWhen ?? DateConverter.getLocalNow(newCatch.timeZone);
-        return new NewCatchImpl(
+        return new NewCatch(
             newCatch.speciesId,
             newCatch.caughtLocation,
             startTime,
@@ -61,11 +61,11 @@ export class CatchDbService extends DynamoDbService<DynamoDbCatch> {
         );
     }
 
-    static createNewDynamoRecord(newCatch: NewCatch, subject: string, tripId: string): DynamoDbCatchImpl {
+    static createNewDynamoRecord(newCatch: INewCatch, subject: string, tripId: string): DynamoDbCatch {
         if (!newCatch.caughtWhen)
               throw new Error("Date should not be null")
         
-        return new DynamoDbCatchImpl(
+        return new DynamoDbCatch(
             IdGenerator.generateTripKey(subject, tripId),
             IdGenerator.generateUUID(),
             tripId,
@@ -80,8 +80,8 @@ export class CatchDbService extends DynamoDbService<DynamoDbCatch> {
         );
     }
 
-    static toCatchDetails(c: DynamoDbCatch): CatchDetails {
-        return new CatchDetailsImpl(
+    static toCatchDetails(c: IDynamoDbCatch): ICatchDetails {
+        return new CatchDetails(
             c.TripId,
             c.CatchId,
             c.SpeciesId,

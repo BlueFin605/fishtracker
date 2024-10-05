@@ -1,21 +1,21 @@
 import { injectable } from 'tsyringe';
-import { ProfileDetails, ProfileDetailsImpl, DynamoDbProfile, DynamoDbProfileImpl } from '../Models/lambda';
+import { IProfileDetails, ProfileDetails, IDynamoDbProfile, DynamoDbProfile } from '../Models/lambda';
 import { DynamoDbService } from './DynamoDbService';
 import { HttpWrapper } from '../Functional/HttpWrapper';
 import { DynamoDbHelper } from './AWSWrapper';
 
 @injectable()
-export class ProfileDbService extends DynamoDbService<DynamoDbProfile> {
+export class ProfileDbService extends DynamoDbService<IDynamoDbProfile> {
     constructor(client: DynamoDbHelper) {
         super(client, 'FishTracker-Profile-Prod', 'Subject');
     }
 
-    async updateProfileInDynamoDb(record: DynamoDbProfile): Promise<HttpWrapper<DynamoDbProfile>> {
+    async updateProfileInDynamoDb(record: IDynamoDbProfile): Promise<HttpWrapper<IDynamoDbProfile>> {
         return this.updateRecordWithoutSortKey('Subject', record.Subject, record);
     }
 
-    static patchProfile(record: DynamoDbProfile, updateProfile: ProfileDetails): DynamoDbProfile {
-        return  new DynamoDbProfileImpl(
+    static patchProfile(record: IDynamoDbProfile, updateProfile: IProfileDetails): IDynamoDbProfile {
+        return  new DynamoDbProfile(
             record.Subject,
             updateProfile.timeZone ?? record.Timezone,
             updateProfile.species ?? record.Species,
@@ -24,16 +24,16 @@ export class ProfileDbService extends DynamoDbService<DynamoDbProfile> {
         );
     }
 
-    static toProfileDetails(record: DynamoDbProfile): ProfileDetails {
-        return new ProfileDetailsImpl(
+    static toProfileDetails(record: IDynamoDbProfile): IProfileDetails {
+        return new ProfileDetails(
             record.Timezone,
             record.Species,
             record.DefaultSpecies
         );
     }
 
-    static buildDefault(subject: string): DynamoDbProfile {
-        return new DynamoDbProfileImpl(
+    static buildDefault(subject: string): IDynamoDbProfile {
+        return new DynamoDbProfile(
             subject,
             undefined,
             [],

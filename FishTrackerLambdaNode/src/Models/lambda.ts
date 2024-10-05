@@ -1,9 +1,9 @@
 import { DateTime } from 'luxon';
 import { DateConverter } from '../Helpers/DateConverter';
 
-// CombinedInterfaces.ts
+// Combinedexport interfaces.ts
 
-interface WeatherAttributes {
+export interface IWeatherAttributes {
     fromMajorBiteTime: string; // TimeSpan converted to string
     fromMinorBiteTime: string; // TimeSpan converted to string
     majorBiteTime: DateTime;
@@ -15,32 +15,32 @@ interface WeatherAttributes {
     lowTide: DateTime;
     highTide: DateTime;
     tideHeight: number;
-    wind: Wind;
+    wind: IWind;
 }
 
-interface NewCatch {
+export interface INewCatch {
     speciesId: string;
-    caughtLocation: Location;
+    caughtLocation: ILocation;
     caughtWhen?: DateTime;
     timeZone?: string;
-    caughtSize: FishSize;
+    caughtSize: IFishSize;
     caughtLength: number;
 }
 
-class NewCatchImpl implements NewCatch {
+export class NewCatch implements INewCatch {
     speciesId: string;
-    caughtLocation: Location;
+    caughtLocation: ILocation;
     caughtWhen?: DateTime;
     timeZone?: string;
-    caughtSize: FishSize;
+    caughtSize: IFishSize;
     caughtLength: number;
 
     constructor(
         speciesId: string,
-        caughtLocation: Location,
+        caughtLocation: ILocation,
         caughtWhen: DateTime | undefined,
         timeZone: string | undefined,
-        caughtSize: FishSize,
+        caughtSize: IFishSize,
         caughtLength: number
     ) {
         this.speciesId = speciesId;
@@ -52,18 +52,18 @@ class NewCatchImpl implements NewCatch {
     }
 }
 
-interface UpdateTripDetails {
+export interface IUpdateTripDetails {
     startTime?: DateTime;
     endTime?: DateTime;
     notes?: string;
     catchSize?: number; // uint converted to number
     rating?: TripRating;
-    tags?: Set<TripTags>;
+    tags?: Set<ITripTags>;
     species?: string[];
     defaultSpecies?: string;
 }
 
-interface TripDetails {
+export interface ITripDetails {
     subject: string;
     tripId: string;
     startTime: DateTime;
@@ -71,12 +71,12 @@ interface TripDetails {
     notes: string;
     catchSize: number; // uint converted to number
     rating: TripRating;
-    tags: Set<TripTags>;
+    tags: Set<ITripTags>;
     species: string[];
     defaultSpecies: string;
 }
 
-class TripDetailsImpl implements TripDetails {
+export class TripDetails implements ITripDetails {
     subject: string;
     tripId: string;
     startTime: DateTime;
@@ -84,7 +84,7 @@ class TripDetailsImpl implements TripDetails {
     notes: string;
     catchSize: number;
     rating: TripRating;
-    tags: Set<TripTags>;
+    tags: Set<ITripTags>;
     species: string[];
     defaultSpecies: string;
 
@@ -96,7 +96,7 @@ class TripDetailsImpl implements TripDetails {
         notes: string,
         catchSize: number,
         rating: TripRating,
-        tags: Set<TripTags>,
+        tags: Set<ITripTags>,
         species: string[],
         defaultSpecies: string
     ) {
@@ -113,37 +113,37 @@ class TripDetailsImpl implements TripDetails {
     }
 }
 
-interface EndTripDetails {
+export interface IEndTripDetails {
     timeZone?: string;
     endTime?: DateTime;
     notes?: string;
     rating?: TripRating;
-    tags?: Set<TripTags>;
+    tags?: Set<ITripTags>;
 }
 
-interface UpdateCatchDetails {
+export interface IUpdateCatchDetails {
     speciesId?: string;
-    caughtLocation?: Location;
+    caughtLocation?: ILocation;
     caughtWhen?: DateTime;
-    caughtSize?: FishSize;
+    caughtSize?: IFishSize;
     caughtLength?: number;
-    weather?: WeatherAttributes;
+    weather?: IWeatherAttributes;
 }
 
-interface NewTrip {
+export interface INewTrip {
     startTime?: DateTime;
     timeZone?: string;
     notes: string;
-    tags: Set<TripTags>;
+    tags: Set<ITripTags>;
     species: string[];
     defaultSpecies: string;
 }
 
-class NewTripImpl implements NewTrip {
+export class NewTrip implements INewTrip {
     startTime?: DateTime;
     timeZone?: string;
     notes: string;
-    tags: Set<TripTags>;
+    tags: Set<ITripTags>;
     species: string[];
     defaultSpecies: string;
 
@@ -151,7 +151,7 @@ class NewTripImpl implements NewTrip {
         startTime: DateTime | undefined,
         timeZone: string | undefined,
         notes: string,
-        tags: Set<TripTags>,
+        tags: Set<ITripTags>,
         species: string[],
         defaultSpecies: string
     ) {
@@ -164,41 +164,41 @@ class NewTripImpl implements NewTrip {
     }
 }
 
-interface Location {
+export interface ILocation {
     longitude: number;
     latitude: number;
 }
 
-interface CatchDetails {
+export interface ICatchDetails {
     tripId: string;
     catchId: string; // Guid converted to string
     speciesId: string;
-    caughtLocation: Location;
+    caughtLocation: ILocation;
     caughtWhen: DateTime;
-    caughtSize: FishSize;
+    caughtSize: IFishSize;
     caughtLength: number;
-    weather?: WeatherAttributes;
+    weather?: IWeatherAttributes;
 }
 
-class CatchDetailsImpl implements CatchDetails {
+export class CatchDetails implements ICatchDetails {
     tripId: string;
     catchId: string;
     speciesId: string;
-    caughtLocation: Location;
+    caughtLocation: ILocation;
     caughtWhen: DateTime;
-    caughtSize: FishSize;
+    caughtSize: IFishSize;
     caughtLength: number;
-    weather?: WeatherAttributes;
+    weather?: IWeatherAttributes;
 
     constructor(
         tripId: string,
         catchId: string,
         speciesId: string,
-        caughtLocation: Location,
+        caughtLocation: ILocation,
         caughtWhen: DateTime,
-        caughtSize: FishSize,
+        caughtSize: IFishSize,
         caughtLength: number,
-        weather?: WeatherAttributes
+        weather?: IWeatherAttributes
     ) {
         this.tripId = tripId;
         this.catchId = catchId;
@@ -211,17 +211,17 @@ class CatchDetailsImpl implements CatchDetails {
     }
 }
 
-interface Wind {
+export interface IWind {
     speedKnots: number;
     direction: number;
 }
 
-interface FishSize {
+export interface IFishSize {
     length: number;
     weight: number;
 }
 
-enum TripRating {
+export enum TripRating {
     NonRated = 'NonRated',
     Bust = 'Bust',
     Okay = 'Okay',
@@ -230,17 +230,17 @@ enum TripRating {
     OutOfThisWorld = 'OutOfThisWorld'
 }
 
-interface TripTags {
+export interface ITripTags {
     // Define properties for TripTags
 }
 
-interface ProfileDetails {
+export interface IProfileDetails {
     timeZone?: string;
     species?: string[];
     defaultSpecies?: string;
 }
 
-class ProfileDetailsImpl implements ProfileDetails {
+export class ProfileDetails implements IProfileDetails {
     timeZone?: string;
     species?: string[];
     defaultSpecies?: string;
@@ -252,11 +252,11 @@ class ProfileDetailsImpl implements ProfileDetails {
     }
 }
 
-interface SettingsDetails {
+export interface ISettingsDetails {
     species?: string[];
 }
 
-class SettingsDetailsImpl implements SettingsDetails {
+export class SettingsDetails implements ISettingsDetails {
     species?: string[];
 
     constructor(species?: string[]) {
@@ -268,18 +268,18 @@ class SettingsDetailsImpl implements SettingsDetails {
 //--------------------------------------------
 
 
-interface VersionedRecord extends Record<string, any> {
+export interface IVersionedRecord extends Record<string, any> {
     DynamoDbVersion?: number;
 }
 
-interface DynamoDbProfile extends VersionedRecord {
+export interface IDynamoDbProfile extends IVersionedRecord {
     Subject: string;
     Timezone?: string;
     Species: string[];
     DefaultSpecies: string;
 }
 
-class DynamoDbProfileImpl implements DynamoDbProfile {
+export class DynamoDbProfile implements IDynamoDbProfile {
     Subject: string;
     Timezone?: string;
     Species: string[];
@@ -295,12 +295,12 @@ class DynamoDbProfileImpl implements DynamoDbProfile {
     }
 }
 
-interface DynamoDbSettings extends VersionedRecord {
+export interface IDynamoDbSettings extends IVersionedRecord {
     Settings: string;
     Species: string[];
 }
 
-class DynamoDbSettingsImpl implements DynamoDbSettings {
+export class DynamoDbSettings implements IDynamoDbSettings {
     Settings: string;
     Species: string[];
     DynamoDbVersion?: number;
@@ -311,35 +311,35 @@ class DynamoDbSettingsImpl implements DynamoDbSettings {
         this.DynamoDbVersion = dynamoDbVersion;
     }
 
-    static createDefault(): DynamoDbSettingsImpl {
-        return new DynamoDbSettingsImpl('', [], undefined);
+    static createDefault(): DynamoDbSettings {
+        return new DynamoDbSettings('', [], undefined);
     }
 }
 
-interface DynamoDbCatch extends VersionedRecord {
+export interface IDynamoDbCatch extends IVersionedRecord {
     TripKey: string;
     CatchId: string;
     TripId: string;
     Subject: string;
     SpeciesId: string;
-    CaughtLocation: Location;
+    CaughtLocation: ILocation;
     CaughtWhen: string;
-    CaughtSize: FishSize;
+    CaughtSize: IFishSize;
     CaughtLength: number;
-    Weather?: WeatherAttributes;
+    Weather?: IWeatherAttributes;
 }
 
-class DynamoDbCatchImpl implements DynamoDbCatch {
+export class DynamoDbCatch implements IDynamoDbCatch {
     TripKey: string;
     CatchId: string;
     TripId: string;
     Subject: string;
     SpeciesId: string;
-    CaughtLocation: Location;
+    CaughtLocation: ILocation;
     CaughtWhen: string;
-    CaughtSize: FishSize;
+    CaughtSize: IFishSize;
     CaughtLength: number;
-    Weather?: WeatherAttributes;
+    Weather?: IWeatherAttributes;
     DynamoDbVersion?: number;
 
     constructor(
@@ -348,11 +348,11 @@ class DynamoDbCatchImpl implements DynamoDbCatch {
         TripId: string,
         Subject: string,
         SpeciesId: string,
-        CaughtLocation: Location,
+        CaughtLocation: ILocation,
         CaughtWhen: DateTime,
-        CaughtSize: FishSize,
+        CaughtSize: IFishSize,
         CaughtLength: number,
-        Weather?: WeatherAttributes,
+        Weather?: IWeatherAttributes,
         DynamoDbVersion?: number
     ) {
         this.TripKey = TripKey;
@@ -369,7 +369,7 @@ class DynamoDbCatchImpl implements DynamoDbCatch {
     }
 }
 
-interface DynamoDbTrip extends VersionedRecord {
+export interface IDynamoDbTrip extends IVersionedRecord {
     Subject: string;
     TripId: string;
     StartTime: string;
@@ -377,12 +377,12 @@ interface DynamoDbTrip extends VersionedRecord {
     Notes: string;
     CatchSize: number; // uint converted to number
     Rating: TripRating;
-    Tags: TripTags[];
+    Tags: ITripTags[];
     Species: string[];
     DefaultSpecies: string;
 }
 
-class DynamoDbTripImpl implements DynamoDbTrip {
+export class DynamoDbTrip implements IDynamoDbTrip {
     Subject: string;
     TripId: string;
     StartTime: string;
@@ -390,7 +390,7 @@ class DynamoDbTripImpl implements DynamoDbTrip {
     Notes: string;
     CatchSize: number;
     Rating: TripRating;
-    Tags: TripTags[];
+    Tags: ITripTags[];
     Species: string[];
     DefaultSpecies: string;
     DynamoDbVersion?: number;
@@ -403,7 +403,7 @@ class DynamoDbTripImpl implements DynamoDbTrip {
         notes: string,
         catchSize: number,
         rating: TripRating,
-        tags: TripTags[],
+        tags: ITripTags[],
         species: string[],
         defaultSpecies: string,
         dynamoDbVersion?: number
@@ -422,8 +422,8 @@ class DynamoDbTripImpl implements DynamoDbTrip {
     }
 
     // Default constructor
-    static createDefault(): DynamoDbTripImpl {
-        return new DynamoDbTripImpl(
+    static createDefault(): DynamoDbTrip {
+        return new DynamoDbTrip(
             '',
             '',
             DateTime.now(),
@@ -437,36 +437,3 @@ class DynamoDbTripImpl implements DynamoDbTrip {
         );
     }
 }
-
-export {
-    WeatherAttributes,
-    NewCatch,
-    NewCatchImpl,
-    UpdateTripDetails,
-    TripDetails,
-    TripDetailsImpl,
-    EndTripDetails,
-    UpdateCatchDetails,
-    NewTrip,
-    NewTripImpl,
-    Location,
-    CatchDetails,
-    CatchDetailsImpl,
-    Wind,
-    FishSize,
-    TripRating,
-    TripTags,
-    ProfileDetails,
-    ProfileDetailsImpl,
-    SettingsDetails,
-    SettingsDetailsImpl,
-    VersionedRecord,
-    DynamoDbProfile,
-    DynamoDbProfileImpl,
-    DynamoDbSettings,
-    DynamoDbSettingsImpl,
-    DynamoDbCatch,
-    DynamoDbCatchImpl,
-    DynamoDbTrip,
-    DynamoDbTripImpl
-};
