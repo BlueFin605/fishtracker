@@ -18,8 +18,8 @@ export class SettingsService {
     }
 
     public async updateSettings(updateSettings: SettingsDetails): Promise<HttpWrapper<SettingsDetails>> {
-        return (await (await this.settingsService.readRecord("global"))
-            .OnResult(404, () => SettingsDbService.buildDefault())
+        return (await (await (await this.settingsService.readRecord("global"))
+            .OnResultAsync(404, () => this.settingsService.createRecord(SettingsDbService.buildDefault())))
             .Map(c => SettingsDbService.patchSettings(c, updateSettings))
             .MapAsync(c => this.settingsService.updateSettingsInDynamoDb(c)))
             .Map(c => SettingsDbService.toSettingsDetails(c));
