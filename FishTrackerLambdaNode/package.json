@@ -3,6 +3,9 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
+    "prebundle": "rm -rf dist",
+    "bundle": "esbuild src/index.ts --bundle --minify --sourcemap --platform=node --target=es2020 --outfile=dist/index.js",
+    "postbundle": "cd dist && zip -r index.zip index.js*",
     "build": "tsc",
     "start": "ts-node src/index.ts"
   },
@@ -23,6 +26,7 @@
     "aws-sdk": "^2.1691.0",
     "aws-serverless-express": "^3.4.0",
     "body-parser": "^1.20.3",
+    "esbuild": "^0.24.0",
     "express": "^4.21.0",
     "luxon": "^3.5.0",
     "reflect-metadata": "^0.2.2",
