@@ -5,7 +5,7 @@
   "scripts": {
     "prebundle": "rm -rf dist",
     "bundle": "esbuild src/index.ts --bundle --minify --sourcemap --platform=node --target=es2020 --outfile=dist/index.js",
-    "postbundle": "cd dist && zip -r index.zip index.js*",
+    "postbundle": "cd dist && zip -r lambda-nodejs-deploymentpackage.zip index.js*",
     "build": "tsc",
     "start": "ts-node src/index.ts"
   },
