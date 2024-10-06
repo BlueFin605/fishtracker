@@ -51,7 +51,7 @@ if (!process.env.IS_LAMBDA) {
     });
 }
 
-export const handler = (event: APIGatewayProxyEvent, context: Context) => {
+module.exports.handler = (event: APIGatewayProxyEvent, context: Context) => {
     if (!server) {
         server = awsServerlessExpress.createServer(app);
     }
