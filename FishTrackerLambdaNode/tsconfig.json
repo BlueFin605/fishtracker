@@ -1,15 +1,15 @@
 {
   "compilerOptions": {
-    "target": "ES6",
-    "lib": ["es2019"],    
+    "target": "ES2020",
     "module": "commonjs",
-    "outDir": "./dist",
-    "rootDir": "./src",
     "strict": true,
     "esModuleInterop": true,
     "skipLibCheck": true,
-    "emitDecoratorMetadata": true,
     "forceConsistentCasingInFileNames": true,
-    "experimentalDecorators": true    
-  }
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "outDir": "./dist"
+  },
+  "include": ["src/**/*.ts"],
+  "exclude": ["node_modules"]
 }

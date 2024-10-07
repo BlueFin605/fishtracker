@@ -3,10 +3,11 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "prebundle": "rm -rf dist",
-    "bundle": "esbuild src/index.ts --bundle --minify --sourcemap --platform=node --target=es2020 --outfile=dist/index.js",
-    "postbundle": "cd dist && zip -r lambda-nodejs-deploymentpackage.zip index.js*",
-    "build": "tsc",
+    "prebuild": "rm -rf dist",
+    "compile": "tsc",
+    "bundle": "esbuild dist/index.js --bundle --minify --sourcemap --platform=node --target=es2020 --outfile=dist/bundle.js --keep-names --format=cjs",
+    "postbundle": "cd dist && zip -r lambda-nodejs-deploymentpackage.zip bundle.js*",
+    "build": "npm run compile && npm run bundle",
     "start": "ts-node src/index.ts"
   },
   "devDependencies": {
@@ -17,7 +18,8 @@
     "@types/luxon": "^3.4.2",
     "@types/node": "^14.0.0",
     "ts-node": "^9.0.0",
-    "typescript": "^4.0.0"
+    "typescript": "^4.0.0",
+    "esbuild": "^0.14.0"
   },
   "dependencies": {
     "@aws-lambda-powertools/logger": "^2.7.0",
@@ -26,7 +28,6 @@
     "aws-sdk": "^2.1691.0",
     "aws-serverless-express": "^3.4.0",
     "body-parser": "^1.20.3",
-    "esbuild": "^0.24.0",
     "express": "^4.21.0",
     "luxon": "^3.5.0",
     "reflect-metadata": "^0.2.2",
