@@ -56,16 +56,6 @@ module.exports.handler = async (event: APIGatewayProxyEvent, context: Context) =
         server = awsServerlessExpress.createServer(app);
     }
 
-    if (event.headers === null) {
-        event.headers = {};
-    }
-
-    // console.log('event', JSON.stringify(event));
-
-    // event.headers['x-apigateway-event'] = JSON.stringify(event.requestContext);
-
-    console.log('headers[sent]', JSON.stringify(event.headers));
-
     const response = await awsServerlessExpress.proxy(server, event, context, 'PROMISE').promise;
 
     // Add CORS headers to the response
@@ -75,8 +65,6 @@ module.exports.handler = async (event: APIGatewayProxyEvent, context: Context) =
         'Access-Control-Allow-Headers': 'Content-Type,Authorization',
         'Access-Control-Allow-Methods': 'GET,POST,PATCH,PUT,DELETE,OPTIONS'
     };
-
-    console.log('response', JSON.stringify(response));
 
     return response;
 };

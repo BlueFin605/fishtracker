@@ -45,31 +45,26 @@ export class Routes {
 
     private getClaimSubject(authorizer: APIGatewayEventDefaultAuthorizerContext): string
     {
-        console.log('event.requestContext.authorizer', JSON.stringify(authorizer));
         if (authorizer?.claims) {
-            console.log('event.requestContext.authorizer', authorizer.claims);
             const subjectClaim = authorizer.claims.find((claim: any) => claim.Type === 'principalId')?.Value;
             if (!subjectClaim) {
                 throw new Error('No Subject[principalId] in claim');
             }
-            console.log('subjectClaim', subjectClaim);
+            console.log('subjectClaim[claims]', subjectClaim);
             return subjectClaim;
         }
 
-        console.log('subjectClaim', authorizer?.principalId);
+        console.log('subjectClaim[principalId]', authorizer?.principalId);
         return authorizer?.principalId;
     }
     
     private getClaimSubjectFromHeader(request: Request): string 
     {
-        console.log('headers[decoded]', JSON.stringify(request.headers));
-
         const contextHeader = request.headers['x-apigateway-event'];
         if (typeof contextHeader !== 'string') {
             throw new Error('Invalid x-apigateway-event header');
         }
         const decodedContextHeader = decodeURIComponent(contextHeader);        
-        console.log('contextHeader', decodedContextHeader);
         const event: APIGatewayProxyEvent = JSON.parse(decodedContextHeader);
         return this.getClaimSubject(event.requestContext?.authorizer);
     }    
