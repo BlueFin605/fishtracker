@@ -60,18 +60,18 @@ export class Routes {
         return authorizer?.principalId;
     }
     
-    private getClaimSubjectFromHeader(event: Request): string 
+    private getClaimSubjectFromHeader(request: Request): string 
     {
-        console.log('headers[decoded]', JSON.stringify(event.headers));
+        console.log('headers[decoded]', JSON.stringify(request.headers));
 
-        const contextHeader = event.headers['x-apigateway-event'];
+        const contextHeader = request.headers['x-apigateway-event'];
         if (typeof contextHeader !== 'string') {
             throw new Error('Invalid x-apigateway-event header');
         }
         const decodedContextHeader = decodeURIComponent(contextHeader);        
         console.log('contextHeader', decodedContextHeader);
-        const context: APIGatewayEventRequestContextWithAuthorizer<APIGatewayEventDefaultAuthorizerContext> = JSON.parse(decodedContextHeader);
-        return this.getClaimSubject(context.authorizer);
+        const event: APIGatewayProxyEvent = JSON.parse(decodedContextHeader);
+        return this.getClaimSubject(event.requestContext?.authorizer);
     }    
 
     private async executeService<T>(logDesc: string, func: () => Promise<HttpWrapper<T>>, res: Response) {

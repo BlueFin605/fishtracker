@@ -60,9 +60,9 @@ module.exports.handler = async (event: APIGatewayProxyEvent, context: Context) =
         event.headers = {};
     }
 
-    console.log('event', JSON.stringify(event));
+    // console.log('event', JSON.stringify(event));
 
-    event.headers['x-apigateway-event'] = JSON.stringify(event.requestContext);
+    // event.headers['x-apigateway-event'] = JSON.stringify(event.requestContext);
 
     console.log('headers[sent]', JSON.stringify(event.headers));
 
