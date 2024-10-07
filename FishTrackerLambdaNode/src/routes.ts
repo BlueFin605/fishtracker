@@ -1,6 +1,6 @@
 import { injectable, inject } from 'tsyringe';
 import { Router, Request, Response } from 'express';
-import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
+import { APIGatewayProxyEvent, APIGatewayProxyResult, APIGatewayEventRequestContextWithAuthorizer, APIGatewayEventDefaultAuthorizerContext } from 'aws-lambda';
 import { CatchService } from './Services/CatchService';
 import { TripService } from './Services/TripService';
 import { SettingsService } from './Services/SettingsService';
@@ -43,21 +43,21 @@ export class Routes {
         this.router.patch('/trip/:tripId/catch/:catchId', this.patchCatch.bind(this));
     }
 
-    private getClaimSubject(event: APIGatewayProxyEvent): string
+    private getClaimSubject(authorizer: APIGatewayEventDefaultAuthorizerContext): string
     {
-        console.log('event.requestContext.authorizer', JSON.stringify(event?.requestContext?.authorizer));
-        // console.log('event.requestContext.authorizer', JSON.stringify(event.requestContext));
-        // console.log('event.requestContext.authorizer', JSON.stringify(event));
-        const claims = event.requestContext.authorizer?.claims;
-        if (!claims) {
-            throw new Error('No claims found in the request context');
+        console.log('event.requestContext.authorizer', JSON.stringify(authorizer));
+        if (authorizer?.claims) {
+            console.log('event.requestContext.authorizer', authorizer.claims);
+            const subjectClaim = authorizer.claims.find((claim: any) => claim.Type === 'principalId')?.Value;
+            if (!subjectClaim) {
+                throw new Error('No Subject[principalId] in claim');
+            }
+            console.log('subjectClaim', subjectClaim);
+            return subjectClaim;
         }
-        const subjectClaim = claims.find((claim: any) => claim.Type === 'principalId')?.Value;
-        if (!subjectClaim) {
-            throw new Error('No Subject[principalId] in claim');
-        }
-        console.log('subjectClaim', subjectClaim);
-        return subjectClaim;
+
+        console.log('subjectClaim', authorizer?.principalId);
+        return authorizer?.principalId;
     }
     
     private getClaimSubjectFromHeader(event: Request): string 
@@ -66,9 +66,10 @@ export class Routes {
         if (typeof contextHeader !== 'string') {
             throw new Error('Invalid x-apigateway-event header');
         }
-        console.log('contextHeader', contextHeader);
-        const context: APIGatewayProxyEvent = JSON.parse(contextHeader);
-        return this.getClaimSubject(context);
+        const decodedContextHeader = decodeURIComponent(contextHeader);        
+        console.log('contextHeader', decodedContextHeader);
+        const context: APIGatewayEventRequestContextWithAuthorizer<APIGatewayEventDefaultAuthorizerContext> = JSON.parse(decodedContextHeader);
+        return this.getClaimSubject(context.authorizer);
     }    
 
     private async executeService<T>(logDesc: string, func: () => Promise<HttpWrapper<T>>, res: Response) {

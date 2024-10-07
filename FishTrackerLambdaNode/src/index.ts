@@ -62,7 +62,7 @@ module.exports.handler = async (event: APIGatewayProxyEvent, context: Context) =
 
     console.log('event', JSON.stringify(event));
 
-    event.headers['x-apigateway-event'] = JSON.stringify(event);
+    event.headers['x-apigateway-event'] = JSON.stringify(event.requestContext);
 
     const response = await awsServerlessExpress.proxy(server, event, context, 'PROMISE').promise;
 
@@ -75,6 +75,6 @@ module.exports.handler = async (event: APIGatewayProxyEvent, context: Context) =
     };
 
     console.log('response', JSON.stringify(response));
-    
+
     return response;
 };
