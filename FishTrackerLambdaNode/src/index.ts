@@ -56,6 +56,7 @@ module.exports.handler = (event: APIGatewayProxyEvent, context: Context) => {
         server = awsServerlessExpress.createServer(app);
     }
 
+    logger.error('event', JSON.stringify(event));
     event.headers['x-apigateway-event'] = JSON.stringify(event);
     awsServerlessExpress.proxy(server, event, context);
 };
