@@ -3,10 +3,10 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "prebuild": "rm -rf dist",
+    "prebuild": "rm -rf bundle",
     "compile": "tsc",
-    "bundle": "esbuild dist/index.js --bundle --minify --sourcemap --platform=node --target=es2020 --outfile=dist/bundle.js --keep-names --format=cjs",
-    "postbundle": "cd dist && zip -r lambda-nodejs-deploymentpackage.zip bundle.js*",
+    "bundle": "esbuild dist/index.js --bundle --minify --sourcemap --platform=node --target=es2020 --outfile=bundle/index.js --keep-names --format=cjs",
+    "postbundle": "cd bundle && zip -r lambda-nodejs-deploymentpackage.zip index.js*",
     "build": "npm run compile && npm run bundle",
     "start": "ts-node src/index.ts"
   },
