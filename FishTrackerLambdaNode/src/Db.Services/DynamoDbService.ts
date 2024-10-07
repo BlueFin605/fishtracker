@@ -64,8 +64,11 @@ class DynamoDbService<T extends IVersionedRecord> {
             const resp = await this.docClient.send(command);
             this.logger.info('ReadRecord Response', { response: resp });
             if (resp.Item) {
-                return HttpWrapper.Ok(unmarshall(resp.Item) as T);
+                const unmarshalled: T = unmarshall(resp.Item) as T;
+                this.logger.info('Unmarshalled', unmarshalled);
+                return HttpWrapper.Ok(unmarshalled);
             } else {
+                this.logger.info('HttpWrapper.NotFound');
                 return HttpWrapper.NotFound;
             }
         } catch (error) {
