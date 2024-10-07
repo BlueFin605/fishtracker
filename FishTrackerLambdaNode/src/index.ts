@@ -51,17 +51,26 @@ if (!process.env.IS_LAMBDA) {
     });
 }
 
-module.exports.handler = (event: APIGatewayProxyEvent, context: Context) => {
+module.exports.handler = async (event: APIGatewayProxyEvent, context: Context) => {
     if (!server) {
         server = awsServerlessExpress.createServer(app);
     }
 
-    // logger.error('event', JSON.stringify(event));
     if (event.headers === null) {
         event.headers = {};
     }
 
     event.headers['x-apigateway-event'] = JSON.stringify(event);
 
-    awsServerlessExpress.proxy(server, event, context);
+    const response = await awsServerlessExpress.proxy(server, event, context, 'PROMISE').promise;
+
+    // Add CORS headers to the response
+    response.headers = {
+        ...response.headers,
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Headers': 'Content-Type,Authorization',
+        'Access-Control-Allow-Methods': 'GET,POST,PATCH,PUT,DELETE,OPTIONS'
+    };
+
+    return response;
 };
