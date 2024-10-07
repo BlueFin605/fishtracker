@@ -45,7 +45,7 @@ export class Routes {
 
     private getClaimSubject(event: APIGatewayProxyEvent): string
     {
-        // console.log('event.requestContext.authorizer', JSON.stringify(event.requestContext.authorizer));
+        console.log('event.requestContext.authorizer', JSON.stringify(event?.requestContext?.authorizer));
         // console.log('event.requestContext.authorizer', JSON.stringify(event.requestContext));
         // console.log('event.requestContext.authorizer', JSON.stringify(event));
         const claims = event.requestContext.authorizer?.claims;
@@ -66,6 +66,7 @@ export class Routes {
         if (typeof contextHeader !== 'string') {
             throw new Error('Invalid x-apigateway-event header');
         }
+        console.log('contextHeader', contextHeader);
         const context: APIGatewayProxyEvent = JSON.parse(contextHeader);
         return this.getClaimSubject(context);
     }    
