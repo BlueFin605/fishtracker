@@ -64,6 +64,8 @@ module.exports.handler = async (event: APIGatewayProxyEvent, context: Context) =
 
     event.headers['x-apigateway-event'] = JSON.stringify(event.requestContext);
 
+    console.log('headers[sent]', JSON.stringify(event.headers));
+
     const response = await awsServerlessExpress.proxy(server, event, context, 'PROMISE').promise;
 
     // Add CORS headers to the response

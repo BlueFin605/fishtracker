@@ -62,6 +62,8 @@ export class Routes {
     
     private getClaimSubjectFromHeader(event: Request): string 
     {
+        console.log('headers[decoded]', JSON.stringify(event.headers));
+
         const contextHeader = event.headers['x-apigateway-event'];
         if (typeof contextHeader !== 'string') {
             throw new Error('Invalid x-apigateway-event header');
