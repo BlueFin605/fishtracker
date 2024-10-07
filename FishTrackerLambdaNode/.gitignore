@@ -10,6 +10,7 @@ yarn-error.log*
 # Build output
 dist/
 build/
+bundle/
 
 # Logs
 *.log
