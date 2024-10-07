@@ -96,7 +96,9 @@ class DynamoDbService<T extends IVersionedRecord> {
             const resp = await this.docClient.send(command);
             this.logger.info('ReadRecordWithSortKey Response', { response: resp });
             if (resp.Item) {
-                return HttpWrapper.Ok(unmarshall(resp.Item) as T);
+                const unmarshalled: T = unmarshall(resp.Item) as T;
+                console.log(JSON.stringify(unmarshalled));
+                return HttpWrapper.Ok(unmarshalled);
             } else {
                 return HttpWrapper.NotFound;
             }
