@@ -35,6 +35,7 @@ class DynamoDbService<T extends IVersionedRecord> {
         console.log('convertStringArraysToSets Converting', input);
         const output: any = {};
         for (const key in input) {
+            console.log('Key', key, 'Value', input[key], 'Type', typeof input[key]);
             if (Array.isArray(input[key]) && input[key].every((item: string) => typeof item === 'string')) {
                 output[key] = { SS: input[key] }; // Convert array of strings to String Set
             } else if (typeof input[key] === 'object' && input[key] !== null) {
@@ -51,6 +52,7 @@ class DynamoDbService<T extends IVersionedRecord> {
         console.log('convertSetsToStringArrays Converting', input);
         const output: any = {};
         for (const key in input) {
+            console.log('Key', key, 'Value', input[key], 'Type', typeof input[key]);
             if (input[key] && input[key].SS) {
                 output[key] = input[key].SS; // Convert String Set to array of strings
             } else if (typeof input[key] === 'object' && input[key] !== null) {
