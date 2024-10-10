@@ -16,6 +16,7 @@ class DynamoDbService<T extends IVersionedRecord> {
     private logger = new Logger({ serviceName: 'FishTrackerLambda' });
 
     static marshallWithOptions(input: any) {
+        console.log('Marshalling', input);
         const convertedInput = DynamoDbService.convertStringArraysToSets(input);
         const m = marshall(convertedInput, { convertClassInstanceToMap: true, removeUndefinedValues: true });
         console.log('Marshalled', m);
@@ -23,6 +24,7 @@ class DynamoDbService<T extends IVersionedRecord> {
     }
 
     static unmarshallWithOptions(input: any) {
+        console.log('Unmarshalling', input);
         const u = unmarshall(input);
         const convertedOutput = DynamoDbService.convertSetsToStringArrays(u);
         console.log('Unmarshalled', convertedOutput);
