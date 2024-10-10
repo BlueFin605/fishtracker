@@ -55,6 +55,8 @@ class DynamoDbService<T extends IVersionedRecord> {
             console.log('Key', key, 'Value', input[key], 'Type', typeof input[key]);
             if (input[key] && input[key].SS) {
                 output[key] = input[key].SS; // Convert String Set to array of strings
+            } else if (input[key] instanceof Set) {
+                output[key] = Array.from(input[key]); // Convert Set to array                
             } else if (typeof input[key] === 'object' && input[key] !== null) {
                 output[key] = DynamoDbService.convertSetsToStringArrays(input[key]); // Recursively handle nested objects
             } else {
