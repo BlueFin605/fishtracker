@@ -16,9 +16,46 @@ class DynamoDbService<T extends IVersionedRecord> {
     private logger = new Logger({ serviceName: 'FishTrackerLambda' });
 
     static marshallWithOptions(input: any) {
-        return marshall(input, { convertClassInstanceToMap: true, removeUndefinedValues: true });
+        const convertedInput = DynamoDbService.convertStringArraysToSets(input);
+        const m = marshall(convertedInput, { convertClassInstanceToMap: true, removeUndefinedValues: true });
+        // console.log('Marshalled', m);
+        return m;
     }
 
+    static unmarshallWithOptions(input: any) {
+        const u = unmarshall(input);
+        const convertedOutput = DynamoDbService.convertSetsToStringArrays(u);
+        // console.log('Unmarshalled', convertedOutput);
+        return convertedOutput;
+    }
+
+    private static convertStringArraysToSets(input: any): any {
+        const output: any = {};
+        for (const key in input) {
+            if (Array.isArray(input[key]) && input[key].every((item: string) => typeof item === 'string')) {
+                output[key] = { SS: input[key] }; // Convert array of strings to String Set
+            } else if (typeof input[key] === 'object' && input[key] !== null) {
+                output[key] = DynamoDbService.convertStringArraysToSets(input[key]); // Recursively handle nested objects
+            } else {
+                output[key] = input[key];
+            }
+        }
+        return output;
+    }
+    
+    private static convertSetsToStringArrays(input: any): any {
+        const output: any = {};
+        for (const key in input) {
+            if (input[key] && input[key].SS) {
+                output[key] = input[key].SS; // Convert String Set to array of strings
+            } else if (typeof input[key] === 'object' && input[key] !== null) {
+                output[key] = DynamoDbService.convertSetsToStringArrays(input[key]); // Recursively handle nested objects
+            } else {
+                output[key] = input[key];
+            }
+        }
+        return output;
+    }
     constructor(client: DynamoDbHelper, tableName: string, partitionKeyName: string, sortKeyName?: string) {
         this.docClient = client.docClient;
         this.tableName = tableName;
@@ -64,7 +101,7 @@ class DynamoDbService<T extends IVersionedRecord> {
             const resp = await this.docClient.send(command);
             this.logger.info('ReadRecord Response', { response: resp });
             if (resp.Item) {
-                const unmarshalled: T = unmarshall(resp.Item) as T;
+                const unmarshalled: T = DynamoDbService.unmarshallWithOptions(resp.Item) as T;
                 this.logger.info('Unmarshalled', unmarshalled);
                 return HttpWrapper.Ok(unmarshalled);
             } else {
@@ -99,7 +136,7 @@ class DynamoDbService<T extends IVersionedRecord> {
             const resp = await this.docClient.send(command);
             this.logger.info('ReadRecordWithSortKey Response', { response: resp });
             if (resp.Item) {
-                const unmarshalled: T = unmarshall(resp.Item) as T;
+                const unmarshalled: T = DynamoDbService.unmarshallWithOptions(resp.Item) as T;
                 this.logger.info('Unmarshalled', unmarshalled);
                 return HttpWrapper.Ok(unmarshalled);
             } else {
@@ -134,7 +171,7 @@ class DynamoDbService<T extends IVersionedRecord> {
             const resp = await this.docClient.send(command);
             this.logger.info('ReadAllRecordsForPartition Response', { response: resp });
             if (resp.Items) {
-                return HttpWrapper.Ok(resp.Items.map(item => unmarshall(item) as T));
+                return HttpWrapper.Ok(resp.Items.map(item => DynamoDbService.unmarshallWithOptions(item) as T));
             } else {
                 return HttpWrapper.NotFound;
             }
@@ -201,7 +238,7 @@ class DynamoDbService<T extends IVersionedRecord> {
             const resp = await this.docClient.send(command);
             this.logger.info('UpdateRecord Response', { response: resp });
             if (resp.Attributes) {
-                return HttpWrapper.Ok(unmarshall(resp.Attributes) as T);
+                return HttpWrapper.Ok(DynamoDbService.unmarshallWithOptions(resp.Attributes) as T);
             } else {
                 return HttpWrapper.NotFound;
             }
@@ -263,7 +300,7 @@ class DynamoDbService<T extends IVersionedRecord> {
             const resp = await this.docClient.send(command);
             this.logger.info('UpdateRecordWithoutSortKey Response', { response: resp });
             if (resp.Attributes) {
-                return HttpWrapper.Ok(unmarshall(resp.Attributes) as T);
+                return HttpWrapper.Ok(DynamoDbService.unmarshallWithOptions(resp.Attributes) as T);
             } else {
                 return HttpWrapper.NotFound;
             }
@@ -301,7 +338,7 @@ class DynamoDbService<T extends IVersionedRecord> {
             const resp = await this.docClient.send(command);
             this.logger.info('ReadRecordsBetweenSortKeys Response', { response: resp });
             if (resp.Items) {
-                return HttpWrapper.Ok(resp.Items.map(item => unmarshall(item) as T));
+                return HttpWrapper.Ok(resp.Items.map(item => DynamoDbService.unmarshallWithOptions(item) as T));
             } else {
                 return HttpWrapper.NotFound;
             }
@@ -336,7 +373,7 @@ class DynamoDbService<T extends IVersionedRecord> {
             const resp = await this.docClient.send(command);
             this.logger.info('DeleteRecord Response', { response: resp });
             if (resp.Attributes) {
-                return HttpWrapper.Ok(unmarshall(resp.Attributes) as T);
+                return HttpWrapper.Ok(DynamoDbService.unmarshallWithOptions(resp.Attributes) as T);
             } else {
                 return HttpWrapper.NotFound;
             }
