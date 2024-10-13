@@ -33,7 +33,8 @@ export class TripService {
                     .Map(c => {console.log(c); return c})
                     .Map(c => {console.log(JSON.stringify(c)); return c})
                     .Map(c => {this.logger.info(JSON.stringify(c)); return c})
-                    .Map(c => c.map(r => TripDbService.toTripDetails(r)));
+                    .Map(c => c.map(r => TripDbService.toTripDetails(r)))
+                    .Map(c => {this.logger.info(JSON.stringify(c)); return c})
             case 'relevant':
                 return (await this.tripService
                     .readRelevantTripsFromDynamoDb(subject))

@@ -17,8 +17,7 @@ class DynamoDbService<T extends IVersionedRecord> {
 
     static marshallWithOptions(input: any) {
         console.log('Marshalling', input);
-        const convertedInput = DynamoDbService.convertStringArraysToSets(input);
-        const m = marshall(convertedInput, { convertClassInstanceToMap: true, removeUndefinedValues: true });
+        const m = marshall(input, { convertClassInstanceToMap: true, removeUndefinedValues: true });
         console.log('Marshalled', m);
         return m;
     }
@@ -31,42 +30,18 @@ class DynamoDbService<T extends IVersionedRecord> {
         return convertedOutput;
     }
 
-    private static convertStringArraysToSets(input: any): any {
-        // console.log('convertStringArraysToSets Converting', input);
-        const output: any = {};
-        for (const key in input) {
-            // console.log('Key', key, 'Value', input[key], 'Type', typeof input[key]);
-            if (Array.isArray(input[key]) && input[key].every((item: string) => typeof item === 'string')) {
-                output[key] = { SS: input[key] }; // Convert array of strings to String Set
-            } else if (typeof input[key] === 'object' && input[key] !== null) {
-                output[key] = DynamoDbService.convertStringArraysToSets(input[key]); // Recursively handle nested objects
-            } else {
-                output[key] = input[key];
-            }
-        }
-        // console.log('convertStringArraysToSets Converted', output);
-        return output;
-    }
-    
     private static convertSetsToStringArrays(input: any): any {
-        // console.log('convertSetsToStringArrays Converting', input);
         const output: any = {};
         for (const key in input) {
-            // console.log('Key', key, 'Value', input[key], 'Type', typeof input[key]);
             if (input[key] && input[key].SS) {
                 output[key] = input[key].SS; // Convert String Set to array of strings
-            } else if (input[key] instanceof Set) {
-                output[key] = Array.from(input[key]); // Convert Set to array                
-            } else if (typeof input[key] === 'object' && input[key] !== null) {
-                output[key] = DynamoDbService.convertSetsToStringArrays(input[key]); // Recursively handle nested objects
             } else {
                 output[key] = input[key];
             }
         }
-        // console.log('convertSetsToStringArrays Converted', output);
         return output;
     }
-    
+
     constructor(client: DynamoDbHelper, tableName: string, partitionKeyName: string, sortKeyName?: string) {
         this.docClient = client.docClient;
         this.tableName = tableName;

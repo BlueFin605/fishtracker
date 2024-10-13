@@ -106,7 +106,7 @@ export class TripDbService extends DynamoDbService<IDynamoDbTrip> {
             record.Notes,
             record.CatchSize,
             record.Rating,
-            new Set(record.Tags),
+            record.Tags,
             record.Species,
             record.DefaultSpecies
         );
