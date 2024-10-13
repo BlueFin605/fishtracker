@@ -9,7 +9,7 @@ import { DynamoDbHelper } from './AWSWrapper';
 @injectable()
 export class TripDbService extends DynamoDbService<IDynamoDbTrip> {
     constructor(client: DynamoDbHelper) {
-        super(client, 'FishTracker-Trip-Prod', 'Subject', 'TripId');
+        super(client, 'FishTracker-Trips-Prod', 'Subject', 'TripId');
     }
 
     async updateTripInDynamoDb(record: IDynamoDbTrip): Promise<HttpWrapper<IDynamoDbTrip>> {
