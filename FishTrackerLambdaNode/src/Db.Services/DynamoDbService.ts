@@ -26,7 +26,7 @@ class DynamoDbService<T extends IVersionedRecord> {
         // console.log('Unmarshalling', input);
         const u = unmarshall(input);
         const convertedOutput = DynamoDbService.convertDataTypes(u);
-        // console.log('Unmarshalled', convertedOutput);
+        console.log('Unmarshalled', convertedOutput);
         return convertedOutput;
     }
 
@@ -92,7 +92,6 @@ class DynamoDbService<T extends IVersionedRecord> {
             this.logger.info('ReadRecord Response', { response: resp });
             if (resp.Item) {
                 const unmarshalled: T = DynamoDbService.unmarshallWithOptions(resp.Item) as T;
-                this.logger.info('Unmarshalled', unmarshalled);
                 return HttpWrapper.Ok(unmarshalled);
             } else {
                 this.logger.info('HttpWrapper.NotFound');
@@ -127,7 +126,6 @@ class DynamoDbService<T extends IVersionedRecord> {
             this.logger.info('ReadRecordWithSortKey Response', { response: resp });
             if (resp.Item) {
                 const unmarshalled: T = DynamoDbService.unmarshallWithOptions(resp.Item) as T;
-                this.logger.info('Unmarshalled', unmarshalled);
                 return HttpWrapper.Ok(unmarshalled);
             } else {
                 this.logger.info('HttpWrapper.NotFound');
