@@ -25,18 +25,21 @@ class DynamoDbService<T extends IVersionedRecord> {
     static unmarshallWithOptions(input: any) {
         console.log('Unmarshalling', input);
         const u = unmarshall(input);
-        const convertedOutput = DynamoDbService.convertSetsToStringArrays(u);
+        const convertedOutput = DynamoDbService.convertDataTypes(u);
         console.log('Unmarshalled', convertedOutput);
         return convertedOutput;
     }
 
-    private static convertSetsToStringArrays(input: any): any {
+    private static convertDataTypes(input: any): any {
         const output: any = {};
         for (const key in input) {
             console.log('Checking', key, typeof input[key], input[key]);
             if (input[key] && input[key].SS) {
                 output[key] = input[key].SS; // Convert String Set to array of strings
                 console.log('Converting', key, 'from', input[key].SS, 'to', output[key]);
+            } else if (input[key] instanceof Set) {
+                output[key] = Array.from(input[key]); // Convert Set to array
+                console.log('Converting', key, 'from Set to', output[key]);
             } else {
                 output[key] = input[key];
             }
@@ -60,7 +63,7 @@ class DynamoDbService<T extends IVersionedRecord> {
             Item: DynamoDbService.marshallWithOptions(record)
         };
 
-        try {    
+        try {
             const command = new PutItemCommand(params);
             const resp = await this.docClient.send(command);
             this.logger.info('CreateRecord Response', { response: resp });
