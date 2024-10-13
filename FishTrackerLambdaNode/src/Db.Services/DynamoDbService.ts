@@ -54,7 +54,6 @@ class DynamoDbService<T extends IVersionedRecord> {
     }
 
     public async createRecord(record: T): Promise<HttpWrapper<T>> {
-        console.log('Creating record', record);
         if (record.DynamoDbVersion === undefined)
             record.DynamoDbVersion = 0;
 
