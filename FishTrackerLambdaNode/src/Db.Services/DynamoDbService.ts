@@ -35,6 +35,7 @@ class DynamoDbService<T extends IVersionedRecord> {
         for (const key in input) {
             if (input[key] && input[key].SS) {
                 output[key] = input[key].SS; // Convert String Set to array of strings
+                console.log('Converting', key, 'from', input[key].SS, 'to', output[key]);
             } else {
                 output[key] = input[key];
             }
