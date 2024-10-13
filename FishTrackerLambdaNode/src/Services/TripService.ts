@@ -5,15 +5,18 @@ import { TripDbService } from '../Db.Services/TripDbService';
 import { CatchDbService } from '../Db.Services/CatchDbService';
 import { HttpWrapper } from '../Functional/HttpWrapper';
 import { IdGenerator } from '../Helpers/IdGenerator';
+import { Logger } from '@aws-lambda-powertools/logger';
 
 @injectable()
 export class TripService {
     private tripService: TripDbService;
     private catchService: CatchDbService;
+    private logger: Logger;
 
-    constructor(tripService: TripDbService, catchService: CatchDbService) {
+    constructor(tripService: TripDbService, catchService: CatchDbService, logger: Logger) {
         this.tripService = tripService
         this.catchService = catchService
+        this.logger = logger
     }
 
     public async getTrip(subject: string, tripId: string): Promise<HttpWrapper<ITripDetails>> {
@@ -29,6 +32,7 @@ export class TripService {
                     .readAllRecordsForPartition(subject))
                     .Map(c => {console.log(c); return c})
                     .Map(c => {console.log(JSON.stringify(c)); return c})
+                    .Map(c => {this.logger.info(JSON.stringify(c)); return c})
                     .Map(c => c.map(r => TripDbService.toTripDetails(r)));
             case 'relevant':
                 return (await this.tripService
