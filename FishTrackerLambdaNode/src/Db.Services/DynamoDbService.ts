@@ -32,10 +32,10 @@ class DynamoDbService<T extends IVersionedRecord> {
     }
 
     private static convertStringArraysToSets(input: any): any {
-        console.log('convertStringArraysToSets Converting', input);
+        // console.log('convertStringArraysToSets Converting', input);
         const output: any = {};
         for (const key in input) {
-            console.log('Key', key, 'Value', input[key], 'Type', typeof input[key]);
+            // console.log('Key', key, 'Value', input[key], 'Type', typeof input[key]);
             if (Array.isArray(input[key]) && input[key].every((item: string) => typeof item === 'string')) {
                 output[key] = { SS: input[key] }; // Convert array of strings to String Set
             } else if (typeof input[key] === 'object' && input[key] !== null) {
@@ -44,15 +44,15 @@ class DynamoDbService<T extends IVersionedRecord> {
                 output[key] = input[key];
             }
         }
-        console.log('convertStringArraysToSets Converted', output);
+        // console.log('convertStringArraysToSets Converted', output);
         return output;
     }
     
     private static convertSetsToStringArrays(input: any): any {
-        console.log('convertSetsToStringArrays Converting', input);
+        // console.log('convertSetsToStringArrays Converting', input);
         const output: any = {};
         for (const key in input) {
-            console.log('Key', key, 'Value', input[key], 'Type', typeof input[key]);
+            // console.log('Key', key, 'Value', input[key], 'Type', typeof input[key]);
             if (input[key] && input[key].SS) {
                 output[key] = input[key].SS; // Convert String Set to array of strings
             } else if (input[key] instanceof Set) {
@@ -63,9 +63,10 @@ class DynamoDbService<T extends IVersionedRecord> {
                 output[key] = input[key];
             }
         }
-        console.log('convertSetsToStringArrays Converted', output);
+        // console.log('convertSetsToStringArrays Converted', output);
         return output;
     }
+    
     constructor(client: DynamoDbHelper, tableName: string, partitionKeyName: string, sortKeyName?: string) {
         this.docClient = client.docClient;
         this.tableName = tableName;

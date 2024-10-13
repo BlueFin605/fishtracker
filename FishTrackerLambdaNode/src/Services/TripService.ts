@@ -27,6 +27,8 @@ export class TripService {
             case 'all':
                 return (await this.tripService
                     .readAllRecordsForPartition(subject))
+                    .Map(c => {console.log(c); return c})
+                    .Map(c => {console.log(JSON.stringify(c)); return c})
                     .Map(c => c.map(r => TripDbService.toTripDetails(r)));
             case 'relevant':
                 return (await this.tripService
