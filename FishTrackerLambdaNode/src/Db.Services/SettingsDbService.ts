@@ -11,6 +11,7 @@ export class SettingsDbService extends DynamoDbService<IDynamoDbSettings> {
     }
 
     async updateSettingsInDynamoDb(record: IDynamoDbSettings): Promise<HttpWrapper<IDynamoDbSettings>> {
+        console.log('updateSettingsInDynamoDb', record);
         return this.updateRecordWithoutSortKey('Settings', record.Settings, record);
     }
 
@@ -19,6 +20,7 @@ export class SettingsDbService extends DynamoDbService<IDynamoDbSettings> {
     }
 
     static patchSettings(record: IDynamoDbSettings, updateSettings: ISettingsDetails): IDynamoDbSettings {
+        console.log('patchSettings', record, updateSettings);
         return new DynamoDbSettings(
             'global',
             updateSettings.species ?? record.Species,

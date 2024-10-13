@@ -16,24 +16,23 @@ class DynamoDbService<T extends IVersionedRecord> {
     private logger = new Logger({ serviceName: 'FishTrackerLambda' });
 
     static marshallWithOptions(input: any) {
-        console.log('Marshalling', input);
+        // console.log('Marshalling', input);
         const m = marshall(input, { convertClassInstanceToMap: true, removeUndefinedValues: true });
-        console.log('Marshalled', m);
+        // console.log('Marshalled', m);
         return m;
     }
 
     static unmarshallWithOptions(input: any) {
-        console.log('Unmarshalling', input);
+        // console.log('Unmarshalling', input);
         const u = unmarshall(input);
         const convertedOutput = DynamoDbService.convertDataTypes(u);
-        console.log('Unmarshalled', convertedOutput);
+        // console.log('Unmarshalled', convertedOutput);
         return convertedOutput;
     }
 
     private static convertDataTypes(input: any): any {
         const output: any = {};
         for (const key in input) {
-            console.log('Checking', key, typeof input[key], input[key]);
             if (input[key] && input[key].SS) {
                 output[key] = input[key].SS; // Convert String Set to array of strings
                 console.log('Converting', key, 'from', input[key].SS, 'to', output[key]);
@@ -55,6 +54,7 @@ class DynamoDbService<T extends IVersionedRecord> {
     }
 
     public async createRecord(record: T): Promise<HttpWrapper<T>> {
+        console.log('Creating record', record);
         if (record.DynamoDbVersion === undefined)
             record.DynamoDbVersion = 0;
 
