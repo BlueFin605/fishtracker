@@ -8,6 +8,7 @@ import { ProfileService } from './Services/ProfileService';
 import { HttpWrapper } from './Functional/HttpWrapper';
 import { IProfileDetails, ISettingsDetails, INewTrip, ITripDetails, IUpdateTripDetails, IEndTripDetails, INewCatch, ICatchDetails, IUpdateCatchDetails } from './Models/lambda';
 import { Logger } from '@aws-lambda-powertools/logger';
+import { plainToClass, classToPlain } from 'class-transformer';
 
 @injectable()
 export class Routes {
@@ -75,7 +76,9 @@ export class Routes {
             const result = await func();
             const httpResult = result.result;
             if (httpResult.statusCode === 200) {
-                res.status(200).json(httpResult.object);
+                // const serializedData = classToPlain(httpResult.object);                
+                // res.status(200).json(serializedData);
+                res.status(200).json(httpResult.object);                
             } else {
                 res.status(httpResult.statusCode).send();
             }

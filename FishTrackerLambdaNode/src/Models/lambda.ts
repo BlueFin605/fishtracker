@@ -1,5 +1,6 @@
 import { DateTime } from 'luxon';
 import { DateConverter } from '../Helpers/DateConverter';
+import { EnumToString, StringToEnum } from '../Http/serialisation';
 
 // Combinedexport interfaces.ts
 
@@ -23,7 +24,7 @@ export interface INewCatch {
     caughtLocation: ILocation;
     caughtWhen?: DateTime;
     timeZone?: string;
-    caughtSize: IFishSize;
+    caughtSize: string;
     caughtLength: number;
 }
 
@@ -32,7 +33,7 @@ export class NewCatch implements INewCatch {
     caughtLocation: ILocation;
     caughtWhen?: DateTime;
     timeZone?: string;
-    caughtSize: IFishSize;
+    caughtSize: string;
     caughtLength: number;
 
     constructor(
@@ -40,7 +41,7 @@ export class NewCatch implements INewCatch {
         caughtLocation: ILocation,
         caughtWhen: DateTime | undefined,
         timeZone: string | undefined,
-        caughtSize: IFishSize,
+        caughtSize: string,
         caughtLength: number
     ) {
         this.speciesId = speciesId;
@@ -125,7 +126,7 @@ export interface IUpdateCatchDetails {
     speciesId?: string;
     caughtLocation?: ILocation;
     caughtWhen?: DateTime;
-    caughtSize?: IFishSize;
+    caughtSize?: string;
     caughtLength?: number;
     weather?: IWeatherAttributes;
 }
@@ -175,7 +176,7 @@ export interface ICatchDetails {
     speciesId: string;
     caughtLocation: ILocation;
     caughtWhen: DateTime;
-    caughtSize: IFishSize;
+    caughtSize: string | undefined;
     caughtLength: number;
     weather?: IWeatherAttributes;
 }
@@ -186,7 +187,7 @@ export class CatchDetails implements ICatchDetails {
     speciesId: string;
     caughtLocation: ILocation;
     caughtWhen: DateTime;
-    caughtSize: IFishSize;
+    caughtSize: string | undefined;
     caughtLength: number;
     weather?: IWeatherAttributes;
 
@@ -196,7 +197,7 @@ export class CatchDetails implements ICatchDetails {
         speciesId: string,
         caughtLocation: ILocation,
         caughtWhen: DateTime,
-        caughtSize: IFishSize,
+        caughtSize: string | undefined,
         caughtLength: number,
         weather?: IWeatherAttributes
     ) {
@@ -216,9 +217,13 @@ export interface IWind {
     direction: number;
 }
 
-export interface IFishSize {
-    length: number;
-    weight: number;
+export enum FishSize
+{
+    Undersize,
+    Small,
+    Medium,
+    Large,
+    VeryLarge
 }
 
 export enum TripRating {
@@ -324,7 +329,7 @@ export interface IDynamoDbCatch extends IVersionedRecord {
     SpeciesId: string;
     CaughtLocation: ILocation;
     CaughtWhen: string;
-    CaughtSize: IFishSize;
+    CaughtSize: FishSize | undefined;
     CaughtLength: number;
     Weather?: IWeatherAttributes;
 }
@@ -337,7 +342,7 @@ export class DynamoDbCatch implements IDynamoDbCatch {
     SpeciesId: string;
     CaughtLocation: ILocation;
     CaughtWhen: string;
-    CaughtSize: IFishSize;
+    CaughtSize: FishSize | undefined;
     CaughtLength: number;
     Weather?: IWeatherAttributes;
     DynamoDbVersion?: number;
@@ -350,7 +355,7 @@ export class DynamoDbCatch implements IDynamoDbCatch {
         SpeciesId: string,
         CaughtLocation: ILocation,
         CaughtWhen: DateTime,
-        CaughtSize: IFishSize,
+        CaughtSize: FishSize | undefined,
         CaughtLength: number,
         Weather?: IWeatherAttributes,
         DynamoDbVersion?: number

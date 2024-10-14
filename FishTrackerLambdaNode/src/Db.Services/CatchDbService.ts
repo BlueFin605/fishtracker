@@ -1,12 +1,13 @@
 import { injectable } from 'tsyringe';
 import { HttpWrapper } from '../Functional/HttpWrapper';
-import { IUpdateCatchDetails, ICatchDetails, IDynamoDbCatch, DynamoDbCatch, INewCatch, NewCatch, CatchDetails } from '../Models/lambda';
+import { FishSize, IUpdateCatchDetails, ICatchDetails, IDynamoDbCatch, DynamoDbCatch, INewCatch, NewCatch, CatchDetails } from '../Models/lambda';
 import { DynamoDbService } from './DynamoDbService';
 import { IdGenerator } from '../Helpers/IdGenerator';
 import { DateConverter } from '../Helpers/DateConverter';
 import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
 import { DateTime } from 'luxon';
 import { DynamoDbHelper } from './AWSWrapper';
+import { StringToEnum, EnumToString } from '../Http/serialisation';
 
 @injectable()
 export class CatchDbService extends DynamoDbService<IDynamoDbCatch> {
@@ -27,7 +28,7 @@ export class CatchDbService extends DynamoDbService<IDynamoDbCatch> {
             updateCatch.speciesId ?? record.SpeciesId,
             updateCatch.caughtLocation ?? record.CaughtLocation,
             updateCatch.caughtWhen ? updateCatch.caughtWhen : DateConverter.isoFromString(record.CaughtWhen),
-            updateCatch.caughtSize ?? record.CaughtSize,
+            StringToEnum(FishSize, updateCatch.caughtSize) ?? record.CaughtSize,
             updateCatch.caughtLength ?? record.CaughtLength,
             updateCatch.weather ?? record.Weather,
             record.DynamoDbVersion
@@ -43,7 +44,7 @@ export class CatchDbService extends DynamoDbService<IDynamoDbCatch> {
             updateCatch.speciesId,
             updateCatch.caughtLocation,
             updateCatch.caughtWhen,
-            updateCatch.caughtSize,
+            StringToEnum(FishSize, updateCatch.caughtSize),
             updateCatch.caughtLength,
             updateCatch.weather,
             record.DynamoDbVersion
@@ -73,7 +74,7 @@ export class CatchDbService extends DynamoDbService<IDynamoDbCatch> {
             newCatch.speciesId,
             newCatch.caughtLocation,
             newCatch.caughtWhen,
-            newCatch.caughtSize,
+            StringToEnum(FishSize, newCatch.caughtSize),
             newCatch.caughtLength,
             undefined,
             undefined
@@ -87,7 +88,7 @@ export class CatchDbService extends DynamoDbService<IDynamoDbCatch> {
             c.SpeciesId,
             c.CaughtLocation,
             DateConverter.isoFromString(c.CaughtWhen),
-            c.CaughtSize,
+            EnumToString(FishSize, c.CaughtSize),
             c.CaughtLength,
             c.Weather
         );
