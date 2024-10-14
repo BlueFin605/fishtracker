@@ -8,7 +8,6 @@ import { ProfileService } from './Services/ProfileService';
 import { HttpWrapper } from './Functional/HttpWrapper';
 import { IProfileDetails, ISettingsDetails, INewTrip, ITripDetails, IUpdateTripDetails, IEndTripDetails, INewCatch, ICatchDetails, IUpdateCatchDetails } from './Models/lambda';
 import { Logger } from '@aws-lambda-powertools/logger';
-import { plainToClass, classToPlain } from 'class-transformer';
 
 @injectable()
 export class Routes {
