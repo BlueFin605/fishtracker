@@ -23,7 +23,7 @@ export class TripCatchComponent implements OnInit {
   tripDetails: TripDetails = {} as TripDetails;
   tripCatch: CatchDetails[];
   tripId: string = '';
-  caughtWhen: Date | undefined = new Date();
+  caughtWhen: Date | undefined; // = new Date();
   // timeZones: string[] = [];
   showEndTripModal: boolean = false;
   endTripData: any = {
@@ -220,7 +220,7 @@ export class TripCatchComponent implements OnInit {
   onFishSizeSelected(size: FishSize) {
     this.getCurrentLocation().then((position) => {
       const mycatch: NewCatch = {
-       caughtWhen: this.dateFormatter.createLocalDate(this.caughtWhen, this.newCatch.timeZone),
+       caughtWhen: this.dateFormatter.createLocalDate(new Date(), this.newCatch.timeZone),
        speciesId: this.tripDetails.defaultSpecies,
        caughtSize: size,
        caughtLocation: { latitude: position.lat, longitude: position.lng },
