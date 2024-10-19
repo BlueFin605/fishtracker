@@ -27,8 +27,8 @@ export class TripDbService extends DynamoDbService<IDynamoDbTrip> {
         return new DynamoDbTrip(
             record.Subject,
             record.TripId,
-            trip.startTime ?? DateConverter.isoFromString(record.StartTime),
-            trip.endTime ?? (record.EndTime ? DateConverter.isoFromString(record.EndTime) : undefined),
+            trip.startTime ?? record.StartTime,
+            trip.endTime ?? (record.EndTime ? record.EndTime : undefined),
             TripDbService.appendNotes(record.Notes, trip.notes),
             trip.catchSize ?? record.CatchSize,
             trip.rating ?? record.Rating,
@@ -56,11 +56,11 @@ export class TripDbService extends DynamoDbService<IDynamoDbTrip> {
     }
 
     endTrip(record: IDynamoDbTrip, trip: IEndTripDetails, size: number): IDynamoDbTrip {
-        const endTime = trip.endTime ?? DateConverter.getLocalNow(trip.timeZone);
+        const endTime = trip.endTime ?? DateConverter.isoToString(DateConverter.getLocalNow(trip.timeZone));
         return new DynamoDbTrip(
             record.Subject,
             record.TripId,
-            DateConverter.isoFromString(record.StartTime),
+            record.StartTime,
             endTime,
             TripDbService.appendNotes(record.Notes, trip.notes),
             size,
@@ -73,7 +73,7 @@ export class TripDbService extends DynamoDbService<IDynamoDbTrip> {
     }
 
     static fillInMissingData(newTrip: INewTrip): INewTrip {
-        const startTime = newTrip.startTime ?? DateConverter.getLocalNow(newTrip.timeZone);
+        let startTime = newTrip.startTime ?? DateConverter.isoToString(DateConverter.getLocalNow(newTrip.timeZone));
         return new NewTrip(startTime, newTrip.timeZone, newTrip.notes, newTrip.tags, newTrip.species, newTrip.defaultSpecies);
     }
 
@@ -84,7 +84,7 @@ export class TripDbService extends DynamoDbService<IDynamoDbTrip> {
         
         return new DynamoDbTrip(
             subject,
-            IdGenerator.generateTripId(newTrip.startTime),
+            IdGenerator.generateTripId(DateConverter.isoFromString(newTrip.startTime)),
             newTrip.startTime,
             undefined,
             newTrip.notes,
@@ -101,8 +101,8 @@ export class TripDbService extends DynamoDbService<IDynamoDbTrip> {
         return new TripDetails(
             record.Subject,
             record.TripId,
-            DateConverter.isoFromString(record.StartTime),
-            record.EndTime ? DateConverter.isoFromString(record.EndTime) : undefined,
+            record.StartTime,
+            record.EndTime,
             record.Notes,
             record.CatchSize,
             record.Rating,

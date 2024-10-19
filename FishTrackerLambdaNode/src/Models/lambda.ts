@@ -7,14 +7,14 @@ import { EnumToString, StringToEnum } from '../Http/serialisation';
 export interface IWeatherAttributes {
     fromMajorBiteTime: string; // TimeSpan converted to string
     fromMinorBiteTime: string; // TimeSpan converted to string
-    majorBiteTime: DateTime;
-    minorBiteTime: DateTime;
-    sunSet: DateTime;
-    sunRise: DateTime;
-    moonSet: DateTime;
-    moonRise: DateTime;
-    lowTide: DateTime;
-    highTide: DateTime;
+    majorBiteTime: string;
+    minorBiteTime: string;
+    sunSet: string;
+    sunRise: string;
+    moonSet: string;
+    moonRise: string;
+    lowTide: string;
+    highTide: string;
     tideHeight: number;
     wind: IWind;
 }
@@ -22,7 +22,7 @@ export interface IWeatherAttributes {
 export interface INewCatch {
     speciesId: string;
     caughtLocation: ILocation;
-    caughtWhen?: DateTime;
+    caughtWhen?: string;
     timeZone?: string;
     caughtSize: string;
     caughtLength: number;
@@ -31,7 +31,7 @@ export interface INewCatch {
 export class NewCatch implements INewCatch {
     speciesId: string;
     caughtLocation: ILocation;
-    caughtWhen?: DateTime;
+    caughtWhen?: string;
     timeZone?: string;
     caughtSize: string;
     caughtLength: number;
@@ -39,7 +39,7 @@ export class NewCatch implements INewCatch {
     constructor(
         speciesId: string,
         caughtLocation: ILocation,
-        caughtWhen: DateTime | undefined,
+        caughtWhen: string | undefined,
         timeZone: string | undefined,
         caughtSize: string,
         caughtLength: number
@@ -54,8 +54,8 @@ export class NewCatch implements INewCatch {
 }
 
 export interface IUpdateTripDetails {
-    startTime?: DateTime;
-    endTime?: DateTime;
+    startTime?: string;
+    endTime?: string;
     notes?: string;
     catchSize?: number; // uint converted to number
     rating?: TripRating;
@@ -67,8 +67,8 @@ export interface IUpdateTripDetails {
 export interface ITripDetails {
     subject: string;
     tripId: string;
-    startTime: DateTime;
-    endTime?: DateTime;
+    startTime: string;
+    endTime?: string;
     notes: string;
     catchSize: number; // uint converted to number
     rating: TripRating;
@@ -80,8 +80,8 @@ export interface ITripDetails {
 export class TripDetails implements ITripDetails {
     subject: string;
     tripId: string;
-    startTime: DateTime;
-    endTime?: DateTime;
+    startTime: string;
+    endTime?: string;
     notes: string;
     catchSize: number;
     rating: TripRating;
@@ -92,8 +92,8 @@ export class TripDetails implements ITripDetails {
     constructor(
         subject: string,
         tripId: string,
-        startTime: DateTime,
-        endTime: DateTime | undefined,
+        startTime: string,
+        endTime: string | undefined,
         notes: string,
         catchSize: number,
         rating: TripRating,
@@ -104,7 +104,7 @@ export class TripDetails implements ITripDetails {
         this.subject = subject;
         this.tripId = tripId;
         this.startTime = startTime;
-        this.endTime = endTime;
+        this.endTime = endTime == undefined? undefined : endTime;
         this.notes = notes;
         this.catchSize = catchSize;
         this.rating = rating;
@@ -116,7 +116,7 @@ export class TripDetails implements ITripDetails {
 
 export interface IEndTripDetails {
     timeZone?: string;
-    endTime?: DateTime;
+    endTime?: string;
     notes?: string;
     rating?: TripRating;
     tags?: Set<ITripTags>;
@@ -125,14 +125,14 @@ export interface IEndTripDetails {
 export interface IUpdateCatchDetails {
     speciesId?: string;
     caughtLocation?: ILocation;
-    caughtWhen?: DateTime;
+    caughtWhen?: string;
     caughtSize?: string;
     caughtLength?: number;
     weather?: IWeatherAttributes;
 }
 
 export interface INewTrip {
-    startTime?: DateTime;
+    startTime?: string;
     timeZone?: string;
     notes: string;
     tags: Set<ITripTags>;
@@ -141,7 +141,7 @@ export interface INewTrip {
 }
 
 export class NewTrip implements INewTrip {
-    startTime?: DateTime;
+    startTime?: string;
     timeZone?: string;
     notes: string;
     tags: Set<ITripTags>;
@@ -149,7 +149,7 @@ export class NewTrip implements INewTrip {
     defaultSpecies: string;
 
     constructor(
-        startTime: DateTime | undefined,
+        startTime: string | undefined,
         timeZone: string | undefined,
         notes: string,
         tags: Set<ITripTags>,
@@ -175,7 +175,7 @@ export interface ICatchDetails {
     catchId: string; // Guid converted to string
     speciesId: string;
     caughtLocation: ILocation;
-    caughtWhen: DateTime;
+    caughtWhen: string;
     caughtSize: string | undefined;
     caughtLength: number;
     weather?: IWeatherAttributes;
@@ -186,7 +186,7 @@ export class CatchDetails implements ICatchDetails {
     catchId: string;
     speciesId: string;
     caughtLocation: ILocation;
-    caughtWhen: DateTime;
+    caughtWhen: string;
     caughtSize: string | undefined;
     caughtLength: number;
     weather?: IWeatherAttributes;
@@ -196,7 +196,7 @@ export class CatchDetails implements ICatchDetails {
         catchId: string,
         speciesId: string,
         caughtLocation: ILocation,
-        caughtWhen: DateTime,
+        caughtWhen: string,
         caughtSize: string | undefined,
         caughtLength: number,
         weather?: IWeatherAttributes
@@ -354,7 +354,7 @@ export class DynamoDbCatch implements IDynamoDbCatch {
         Subject: string,
         SpeciesId: string,
         CaughtLocation: ILocation,
-        CaughtWhen: DateTime,
+        CaughtWhen: string,
         CaughtSize: FishSize | undefined,
         CaughtLength: number,
         Weather?: IWeatherAttributes,
@@ -366,7 +366,7 @@ export class DynamoDbCatch implements IDynamoDbCatch {
         this.Subject = Subject;
         this.SpeciesId = SpeciesId;
         this.CaughtLocation = CaughtLocation;
-        this.CaughtWhen = DateConverter.isoToString(CaughtWhen);
+        this.CaughtWhen = CaughtWhen;
         this.CaughtSize = CaughtSize;
         this.CaughtLength = CaughtLength;
         this.Weather = Weather;
@@ -403,8 +403,8 @@ export class DynamoDbTrip implements IDynamoDbTrip {
     constructor(
         subject: string,
         tripId: string,
-        startTime: DateTime,
-        endTime: DateTime | undefined,
+        startTime: string,
+        endTime: string | undefined,
         notes: string,
         catchSize: number,
         rating: TripRating,
@@ -431,7 +431,7 @@ export class DynamoDbTrip implements IDynamoDbTrip {
         return new DynamoDbTrip(
             '',
             '',
-            DateTime.now(),
+            DateConverter.isoToString(DateTime.now()),
             undefined,
             '',
             0,

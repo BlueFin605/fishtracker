@@ -27,7 +27,7 @@ export class CatchDbService extends DynamoDbService<IDynamoDbCatch> {
             record.Subject,
             updateCatch.speciesId ?? record.SpeciesId,
             updateCatch.caughtLocation ?? record.CaughtLocation,
-            updateCatch.caughtWhen ? updateCatch.caughtWhen : DateConverter.isoFromString(record.CaughtWhen),
+            updateCatch.caughtWhen ? updateCatch.caughtWhen : record.CaughtWhen,
             StringToEnum(FishSize, updateCatch.caughtSize) ?? record.CaughtSize,
             updateCatch.caughtLength ?? record.CaughtLength,
             updateCatch.weather ?? record.Weather,
@@ -51,7 +51,7 @@ export class CatchDbService extends DynamoDbService<IDynamoDbCatch> {
         );
     }
     static fillInMissingData(newCatch: INewCatch): INewCatch {
-        const startTime = newCatch.caughtWhen ?? DateConverter.getLocalNow(newCatch.timeZone);
+        const startTime = newCatch.caughtWhen ?? DateConverter.isoToString(DateConverter.getLocalNow(newCatch.timeZone));
         return new NewCatch(
             newCatch.speciesId,
             newCatch.caughtLocation,
@@ -87,7 +87,7 @@ export class CatchDbService extends DynamoDbService<IDynamoDbCatch> {
             c.CatchId,
             c.SpeciesId,
             c.CaughtLocation,
-            DateConverter.isoFromString(c.CaughtWhen),
+            c.CaughtWhen,
             EnumToString(FishSize, c.CaughtSize),
             c.CaughtLength,
             c.Weather
