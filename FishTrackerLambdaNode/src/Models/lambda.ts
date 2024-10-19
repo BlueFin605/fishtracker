@@ -71,7 +71,7 @@ export interface ITripDetails {
     endTime?: string;
     notes: string;
     catchSize: number; // uint converted to number
-    rating: TripRating;
+    rating: string;
     tags: ITripTags[];
     species: string[];
     defaultSpecies: string;
@@ -84,7 +84,7 @@ export class TripDetails implements ITripDetails {
     endTime?: string;
     notes: string;
     catchSize: number;
-    rating: TripRating;
+    rating: string;
     tags: ITripTags[];
     species: string[];
     defaultSpecies: string;
@@ -96,7 +96,7 @@ export class TripDetails implements ITripDetails {
         endTime: string | undefined,
         notes: string,
         catchSize: number,
-        rating: TripRating,
+        rating: string,
         tags: ITripTags[],
         species: string[],
         defaultSpecies: string

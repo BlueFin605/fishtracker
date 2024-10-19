@@ -5,6 +5,7 @@ import { IDynamoDbTrip, DynamoDbTrip, IUpdateTripDetails, ITripDetails, TripDeta
 import { IdGenerator } from '../Helpers/IdGenerator';
 import { DateConverter } from '../Helpers/DateConverter';
 import { DynamoDbHelper } from './AWSWrapper';
+import { StringToEnum, EnumToString } from '../Http/serialisation';
 
 @injectable()
 export class TripDbService extends DynamoDbService<IDynamoDbTrip> {
@@ -47,7 +48,7 @@ export class TripDbService extends DynamoDbService<IDynamoDbTrip> {
             trip.endTime,
             trip.notes,
             trip.catchSize,
-            trip.rating,
+            StringToEnum(TripRating, trip.rating) ?? TripRating.NonRated,
             [...trip.tags],
             trip.species,
             trip.defaultSpecies,
@@ -105,7 +106,7 @@ export class TripDbService extends DynamoDbService<IDynamoDbTrip> {
             record.EndTime,
             record.Notes,
             record.CatchSize,
-            record.Rating,
+            EnumToString(TripRating, record.Rating) ?? "NonRated",
             record.Tags,
             record.Species,
             record.DefaultSpecies
