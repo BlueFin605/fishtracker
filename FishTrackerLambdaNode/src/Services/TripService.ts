@@ -76,9 +76,9 @@ export class TripService {
     public async deleteTrip(subject: string, tripId: string): Promise<HttpWrapper<ICatchDetails[]>> {
         return await (await (await (await (await this.tripService.readRecordWithSortKey(subject, tripId))
             .Map(c => TripDbService.toTripDetails(c))
-            .MapAsync(c => this.tripService.deleteRecord(c.tripId)))
-            .MapAsync(c => this.catchService.readAllRecordsForPartition(c.TripId)))
-            .MapEachAsync<IDynamoDbCatch, IDynamoDbCatch>(c => this.catchService.deleteRecord(c.TripId, c.CatchId)))
+            .MapAsync(c => this.tripService.deleteRecord(subject, c.tripId)))
+            .MapAsync(c => this.catchService.readAllRecordsForPartition(IdGenerator.generateTripKey(subject, c.TripId))))
+            .MapEachAsync<IDynamoDbCatch, IDynamoDbCatch>(c => this.catchService.deleteRecord(IdGenerator.generateTripKey(subject, c.TripId), c.CatchId)))
             .Map(c => c.map(r => CatchDbService.toCatchDetails(r)));
     }
 
