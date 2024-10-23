@@ -1,8 +1,10 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { tap, finalize } from 'rxjs/operators';
 import { AuthenticationService } from './authentication.service';
 import { environment } from '../../environments/environment';
+import { LoadingService } from './loading.service';
 
 @Injectable({
   providedIn: 'root',
@@ -10,60 +12,65 @@ import { environment } from '../../environments/environment';
  export class ApiService {
   private baseApiUrl = environment.apiUrl; // Use environment variable for base API URL
 
-  constructor(private http: HttpClient, private authService: AuthenticationService) {}
+  constructor(private http: HttpClient, private authService: AuthenticationService, private loadingService: LoadingService) {}
+
+  private withLoading<T>(observable: Observable<T>): Observable<T> {
+    this.loadingService.show();
+    return observable.pipe(finalize(() => this.loadingService.hide()));
+  }
 
   getProfile(): Observable<ProfileDetails> {
     const apiUrl = `${this.baseApiUrl}/profile`; // Construct full API URL
-    return this.http.get<ProfileDetails>(apiUrl);
+    return this.withLoading(this.http.get<ProfileDetails>(apiUrl));
   }
 
   postProfile(profile: ProfileDetails): Observable<ProfileDetails> {
-    const apiUrl = `${this.baseApiUrl}/profile`; // Construct full API URL
-    return this.http.patch<ProfileDetails>(apiUrl, profile);
+    const apiUrl = `${this.baseApiUrl}/profile`; // Construct full API URLreturn this.withLoading(
+    return this.withLoading(this.http.patch<ProfileDetails>(apiUrl, profile));
   }
 
   getSettings(): Observable<SettingsDetails> {
     const apiUrl = `${this.baseApiUrl}/settings`; // Construct full API URL
-    return this.http.get<SettingsDetails>(apiUrl);
+    return this.withLoading(this.http.get<SettingsDetails>(apiUrl));
   }
 
   getTripCatch(tripid: string): Observable<CatchDetails[]> {
     const apiUrl = `${this.baseApiUrl}/trip/${tripid}/catch`; // Construct full API URL
-    return this.http.get<CatchDetails[]>(apiUrl);
+    return this.withLoading(this.http.get<CatchDetails[]>(apiUrl));
   }
 
   getAllTrips(relevant: boolean): Observable<TripDetails[]> {
     const view = relevant ? 'relevant' : 'all';
     const apiUrl = `${this.baseApiUrl}/trip?view=${view}`; // Construct full API URL
-    return this.http.get<TripDetails[]>(apiUrl);
+    return this.withLoading(this.http.get<TripDetails[]>(apiUrl));
   }
 
   getTrip(tripid: string): Observable<TripDetails> {
     const apiUrl = `${this.baseApiUrl}/trip/${tripid}`; // Construct full API URL
     console.log(`tripid[${tripid}] url[${apiUrl}]`)
-    return this.http.get<TripDetails>(apiUrl);
+    return this.withLoading(this.http.get<TripDetails>(apiUrl));
   }
 
   deleteTrip(tripid: string): Observable<CatchDetails[]> {
     const apiUrl = `${this.baseApiUrl}/trip/${tripid}`; // Construct full API URL
     console.log(`tripid[${tripid}] url[${apiUrl}]`);
-    return this.http.delete<CatchDetails[]>(apiUrl);
+    return this.withLoading(this.http.delete<CatchDetails[]>(apiUrl));
   }
 
   postTrip(newTrip: NewTrip): Observable<TripDetails> {
     const apiUrl = `${this.baseApiUrl}/trip`; // Construct full API URL
-    return this.http.post<TripDetails>(apiUrl, newTrip);
+    return this.withLoading(this.http.post<TripDetails>(apiUrl, newTrip));
   }
 
   endTrip(tripid: string, patchTrip: EndTripDetails): Observable<TripDetails> {
     const apiUrl = `${this.baseApiUrl}/trip/${tripid}/endtrip`; // Construct full API URL
-    return this.http.post<TripDetails>(apiUrl, patchTrip);
+    return this.withLoading(this.http.post<TripDetails>(apiUrl, patchTrip));
   }
 
   postCatch(tripid: string, newCatch: NewCatch): Observable<CatchDetails> {
     const apiUrl = `${this.baseApiUrl}/trip/${tripid}/catch`; // Construct full API URL
     console.log(JSON.stringify(newCatch));
-    return this.http.post<CatchDetails>(apiUrl, newCatch);
+    return this.withLoading(this.http.post<CatchDetails>(apiUrl, newCatch));
   }
 }
 
