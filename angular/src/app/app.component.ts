@@ -1,5 +1,6 @@
-import { Component } from '@angular/core';
+import { Component, ChangeDetectorRef, NgZone, OnInit } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
+import { Router, NavigationStart, NavigationEnd, NavigationCancel, NavigationError } from '@angular/router';
 import { CommonModule } from '@angular/common'; // Import CommonModule
 import { Observable } from 'rxjs';
 import { GoogleMapsLoaderService } from './google-maps-loader.service';
@@ -19,14 +20,17 @@ import { LoadingSpinnerComponent } from './loading-spinner/loading-spinner.compo
   templateUrl: './app.component.html',
   styleUrl: './app.component.css'
 })
-export class AppComponent {
+export class AppComponent implements OnInit {
   title = 'fishtracker';
   loading$: Observable<boolean>;
 
   constructor(private googleMapsLoader: GoogleMapsLoaderService,
-              private loadingService: LoadingService) {
-                this.loading$ = this.loadingService.loading$;                
-              }
+    private router: Router,
+    private zone: NgZone,
+    private cdr: ChangeDetectorRef,
+    private loadingService: LoadingService) {
+    this.loading$ = this.loadingService.loading$;
+  }
 
   ngOnInit() {
     // this.googleMapsLoader.loadScript().then(() => {
@@ -35,7 +39,26 @@ export class AppComponent {
     // }).catch(error => {
     //   console.error('Error loading Google Maps:', error);
     // });
-  }  
-}
 
+    //   this.router.events.subscribe(event => {
+    //     if (event instanceof NavigationStart) {
+    //       this.loadingService.show();
+    //     } else if (event instanceof NavigationEnd || event instanceof NavigationCancel || event instanceof NavigationError) {
+    //       this.loadingService.hide();
+    //     }
+    //     this.cdr.detectChanges(); // Manually trigger change detection
+    //   });
+    // }
+
+    //   this.router.events.subscribe(event => {
+    //     this.zone.run(() => {
+    //       if (event instanceof NavigationStart) {
+    //         this.loadingService.show();
+    //       } else if (event instanceof NavigationEnd || event instanceof NavigationCancel || event instanceof NavigationError) {
+    //         this.loadingService.hide();
+    //       }
+    //     });
+    //   });
+  }
+}
 // Import RouterModule.forRoot(Routes) in the application bootstrap
