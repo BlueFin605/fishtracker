@@ -1,9 +1,11 @@
 import { Component } from '@angular/core';
-import {CommonModule} from '@angular/common';
+import { CommonModule } from '@angular/common';
 import { ApiService, TripDetails, CatchDetails } from '../../services/api.service';
 import { Router } from '@angular/router';
 import { FishTrackerSettingsService } from '../../services/fish-tracker-settings.service';
 import { DateFormatModule } from '../../components/date-format/date-format.module';
+import { LoadingService } from '../../services/loading.service';
+import { firstValueFrom } from 'rxjs';
 
 @Component({
   selector: 'app-trips',
@@ -16,22 +18,36 @@ export class TripsComponent {
   trips: TripDetails[];
   relevantTrips: boolean;
 
-  constructor(private router: Router, 
-              private apiService: ApiService,
-              private fishTrackerSettingsService: FishTrackerSettingsService) {
+  constructor(private router: Router,
+    private apiService: ApiService,
+    private fishTrackerSettingsService: FishTrackerSettingsService,
+    private loadingService: LoadingService
+  ) {
     this.trips = [];
     this.relevantTrips = this.fishTrackerSettingsService.relevantTrips;
   }
 
   ngOnInit() {
-    this.getAllTrips();
+    console.log('TripsComponent ngOnInit');
+    this.loadingService.show();
+    this.getAllTrips()
+      .then(() => {
+        // Additional API calls can be chained here
+      })
+      .finally(() => {
+        console.log('TripsComponent ngOnInit finally');
+        this.loadingService.hide();
+      });
   }
 
-  getAllTrips() {
-    this.apiService.getAllTrips(this.relevantTrips).subscribe((data: TripDetails[]) => {
+  async getAllTrips(): Promise<void> {
+    try {
+      const data = await firstValueFrom(this.apiService.getAllTrips(this.relevantTrips));
       this.trips = data;
       console.log(`trips data ${JSON.stringify(this.trips)}`);
-    });
+    } catch (error) {
+      console.error('Error fetching trips:', error);
+    }
   }
 
   confirmDeleteTrip(tripId: string, event: Event): void {
