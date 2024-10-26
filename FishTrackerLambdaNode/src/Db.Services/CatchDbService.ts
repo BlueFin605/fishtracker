@@ -8,6 +8,8 @@ import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
 import { DateTime } from 'luxon';
 import { DynamoDbHelper } from './AWSWrapper';
 import { StringToEnum, EnumToString } from '../Http/serialisation';
+import { biteTimes } from '../Services/BiteTimes';
+
 
 @injectable()
 export class CatchDbService extends DynamoDbService<IDynamoDbCatch> {
@@ -30,7 +32,7 @@ export class CatchDbService extends DynamoDbService<IDynamoDbCatch> {
             updateCatch.caughtWhen ? updateCatch.caughtWhen : record.CaughtWhen,
             StringToEnum(FishSize, updateCatch.caughtSize) ?? record.CaughtSize,
             updateCatch.caughtLength ?? record.CaughtLength,
-            updateCatch.weather ?? record.Weather,
+            updateCatch.biteInfo ?? record.BiteInfo,
             record.DynamoDbVersion
         )
     }
@@ -46,7 +48,7 @@ export class CatchDbService extends DynamoDbService<IDynamoDbCatch> {
             updateCatch.caughtWhen,
             StringToEnum(FishSize, updateCatch.caughtSize),
             updateCatch.caughtLength,
-            updateCatch.weather,
+            updateCatch.biteInfo,
             record.DynamoDbVersion
         );
     }
@@ -64,8 +66,8 @@ export class CatchDbService extends DynamoDbService<IDynamoDbCatch> {
 
     static createNewDynamoRecord(newCatch: INewCatch, subject: string, tripId: string): DynamoDbCatch {
         if (!newCatch.caughtWhen)
-              throw new Error("Date should not be null")
-        
+            throw new Error("Date should not be null")
+
         return new DynamoDbCatch(
             IdGenerator.generateTripKey(subject, tripId),
             IdGenerator.generateUUID(),
@@ -81,6 +83,39 @@ export class CatchDbService extends DynamoDbService<IDynamoDbCatch> {
         );
     }
 
+
+    static addBiteTimes(c: IDynamoDbCatch, timeZone?: string): IDynamoDbCatch {
+        const biteInfo = biteTimes(timeZone, DateConverter.isoFromString(c.CaughtWhen), c.CaughtLocation.latitude, c.CaughtLocation.longitude);
+        if (!biteInfo)
+            return c;
+        
+        if (!timeZone)
+            return {
+                ...c,
+                BiteInfo: {
+                    moonPhase: biteInfo.moonPhase,
+                    majorBiteTimes: biteInfo.majorBiteTimes,
+                    minorBiteTimes: biteInfo.minorBiteTimes,
+                    sunrise: biteInfo.sunrise,
+                    sunset: biteInfo.sunset,
+                    timeToSunrise: biteInfo.timeToSunrise,
+                    timeToSunset: biteInfo.timeToSunset
+                }
+            };
+        return {
+            ...c,
+            BiteInfo: {
+                moonPhase: biteInfo.moonPhase,
+                majorBiteTimes: biteInfo.majorBiteTimes,
+                minorBiteTimes: biteInfo.minorBiteTimes,
+                sunrise: DateConverter.convertUtcToLocal(biteInfo.sunrise,timeZone),
+                sunset: DateConverter.convertUtcToLocal(biteInfo.sunset,timeZone),
+                timeToSunrise: biteInfo.timeToSunrise,
+                timeToSunset: biteInfo.timeToSunset
+            }
+        };
+    }
+
     static toCatchDetails(c: IDynamoDbCatch): ICatchDetails {
         return new CatchDetails(
             c.TripId,
@@ -90,7 +125,7 @@ export class CatchDbService extends DynamoDbService<IDynamoDbCatch> {
             c.CaughtWhen,
             EnumToString(FishSize, c.CaughtSize),
             c.CaughtLength,
-            c.Weather
+            c.BiteInfo
         );
-    }    
+    }
 }

@@ -118,4 +118,28 @@ export class DateConverter {
             }
         }
     }
+    
+    static convertUtcToLocal(utcDateTime: DateTime, timeZone: string): DateTime {
+        try {
+            const iana = this.getIanaTimeZone(timeZone);
+            const localDateTime = utcDateTime.setZone(iana);
+            // console.log(`convertUtcToLocal: [${utcTime}] in [${timeZone}]-->[${localDateTime}]`);
+            return localDateTime;
+        } catch (error) {
+            console.error('Error converting UTC to local time:', error);
+            return utcDateTime;
+        }
+    }    
+    
+    static convertDateToLocal(utcDateTime: Date, timeZone: string): DateTime {
+        try {
+            const iana = this.getIanaTimeZone(timeZone);
+            const localDateTime = DateTime.fromJSDate(utcDateTime).setZone(iana);
+            // console.log(`convertUtcToLocal: [${utcTime}] in [${timeZone}]-->[${localDateTime}]`);
+            return localDateTime;
+        } catch (error) {
+            console.error('Error converting UTC to local time:', error);
+            return DateTime.fromJSDate(utcDateTime);
+        }
+    }    
 }

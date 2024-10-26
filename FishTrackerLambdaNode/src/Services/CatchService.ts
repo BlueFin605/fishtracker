@@ -34,6 +34,7 @@ export class CatchService {
             })
             .Set(CatchDbService.fillInMissingData(newCatch))
             .Map(c => CatchDbService.createNewDynamoRecord(c, subject, tripId))
+            .Map(c => CatchDbService.addBiteTimes(c, newCatch.timeZone))
             .MapAsync(c => this.catchService.createRecord(c)))
             .Map(d => CatchDbService.toCatchDetails(d));
     }

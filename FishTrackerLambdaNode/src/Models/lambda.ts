@@ -1,22 +1,21 @@
 import { DateTime } from 'luxon';
 import { DateConverter } from '../Helpers/DateConverter';
-import { EnumToString, StringToEnum } from '../Http/serialisation';
 
 // Combinedexport interfaces.ts
 
-export interface IWeatherAttributes {
-    fromMajorBiteTime: string; // TimeSpan converted to string
-    fromMinorBiteTime: string; // TimeSpan converted to string
-    majorBiteTime: string;
-    minorBiteTime: string;
-    sunSet: string;
-    sunRise: string;
-    moonSet: string;
-    moonRise: string;
-    lowTide: string;
-    highTide: string;
-    tideHeight: number;
-    wind: IWind;
+export interface IBiteTime {
+    start: DateTime;
+    end: DateTime;
+}
+
+export interface IBiteTimesDetails {
+    moonPhase: string;
+    majorBiteTimes: IBiteTime[];
+    minorBiteTimes: IBiteTime[];
+    sunrise: DateTime;
+    sunset: DateTime;
+    timeToSunrise: string;
+    timeToSunset: string;
 }
 
 export interface INewCatch {
@@ -128,7 +127,7 @@ export interface IUpdateCatchDetails {
     caughtWhen?: string;
     caughtSize?: string;
     caughtLength?: number;
-    weather?: IWeatherAttributes;
+    biteInfo?: IBiteTimesDetails;
 }
 
 export interface INewTrip {
@@ -178,7 +177,7 @@ export interface ICatchDetails {
     caughtWhen: string;
     caughtSize: string | undefined;
     caughtLength: number;
-    weather?: IWeatherAttributes;
+    biteInfo?: IBiteTimesDetails;
 }
 
 export class CatchDetails implements ICatchDetails {
@@ -189,7 +188,7 @@ export class CatchDetails implements ICatchDetails {
     caughtWhen: string;
     caughtSize: string | undefined;
     caughtLength: number;
-    weather?: IWeatherAttributes;
+    biteInfo?: IBiteTimesDetails;
 
     constructor(
         tripId: string,
@@ -199,7 +198,7 @@ export class CatchDetails implements ICatchDetails {
         caughtWhen: string,
         caughtSize: string | undefined,
         caughtLength: number,
-        weather?: IWeatherAttributes
+        biteInfo?: IBiteTimesDetails
     ) {
         this.tripId = tripId;
         this.catchId = catchId;
@@ -208,7 +207,7 @@ export class CatchDetails implements ICatchDetails {
         this.caughtWhen = caughtWhen;
         this.caughtSize = caughtSize;
         this.caughtLength = caughtLength;
-        this.weather = weather;
+        this.biteInfo = biteInfo;
     }
 }
 
@@ -331,7 +330,7 @@ export interface IDynamoDbCatch extends IVersionedRecord {
     CaughtWhen: string;
     CaughtSize: FishSize | undefined;
     CaughtLength: number;
-    Weather?: IWeatherAttributes;
+    BiteInfo?: IBiteTimesDetails;
 }
 
 export class DynamoDbCatch implements IDynamoDbCatch {
@@ -344,7 +343,7 @@ export class DynamoDbCatch implements IDynamoDbCatch {
     CaughtWhen: string;
     CaughtSize: FishSize | undefined;
     CaughtLength: number;
-    Weather?: IWeatherAttributes;
+    BiteInfo?: IBiteTimesDetails;
     DynamoDbVersion?: number;
 
     constructor(
@@ -357,7 +356,7 @@ export class DynamoDbCatch implements IDynamoDbCatch {
         CaughtWhen: string,
         CaughtSize: FishSize | undefined,
         CaughtLength: number,
-        Weather?: IWeatherAttributes,
+        BiteInfo?: IBiteTimesDetails,
         DynamoDbVersion?: number
     ) {
         this.TripKey = TripKey;
@@ -369,7 +368,7 @@ export class DynamoDbCatch implements IDynamoDbCatch {
         this.CaughtWhen = CaughtWhen;
         this.CaughtSize = CaughtSize;
         this.CaughtLength = CaughtLength;
-        this.Weather = Weather;
+        this.BiteInfo = BiteInfo;
         this.DynamoDbVersion = DynamoDbVersion;
     }
 }
