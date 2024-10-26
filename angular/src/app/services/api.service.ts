@@ -120,7 +120,7 @@ export interface TripDetails {
 
 export interface EndTripDetails {
   endTime?: string;
-  timeZone?: string;
+  timeZone: string;
   notes?: string;
   rating?: TripRating;
   tags?: TripTags[];
@@ -128,7 +128,7 @@ export interface EndTripDetails {
 
 export interface NewTrip {
   startTime?: string;
-  timeZone?: string;
+  timeZone: string;
   notes: string;
   tags: TripTags[];
   species: string[];
@@ -139,7 +139,7 @@ export interface NewCatch {
   speciesId: string;
   caughtLocation?: Location;
   caughtWhen?: string;
-  timeZone?: string;
+  timeZone: string;
   caughtSize: FishSize;
   caughtLength: number;
 }

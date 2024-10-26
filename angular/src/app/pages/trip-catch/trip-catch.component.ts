@@ -220,6 +220,7 @@ export class TripCatchComponent implements OnInit {
   onFishSizeSelected(size: FishSize) {
     this.getCurrentLocation().then((position) => {
       const mycatch: NewCatch = {
+       timeZone: this.newCatch.timeZone,
        caughtWhen: this.dateFormatter.createLocalDate(new Date(), this.newCatch.timeZone),
        speciesId: this.tripDetails.defaultSpecies,
        caughtSize: size,

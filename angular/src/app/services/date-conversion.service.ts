@@ -9,8 +9,8 @@ export class DateConversionService {
 
   constructor() { }
 
-  createLocalDate(date?: Date, timeZone?: string): string | undefined {
-    if (!date || !timeZone)
+  createLocalDate(date: Date | undefined, timeZone: string): string | undefined {
+    if (!date)
       return undefined;
 
     const zonedTime = toZonedTime(date, timeZone);
