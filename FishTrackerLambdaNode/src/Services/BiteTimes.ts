@@ -266,11 +266,6 @@ export async function biteTimes(timeZone: string, caughtWhen: DateTime, latitude
     
     // Calculate major bite times (moon overhead and underfoot)
     if (moonTimes.rise && moonTimes.set && moonrise && moonset) {        
-        const moonOver = moonrise.plus({ milliseconds: moonset.diff(moonrise).milliseconds / 2 });
-        console.log(`moonOver: ${moonOver}`);
-        majorBiteTimes.push({ start: moonOver.minus({ hours: 1 }), end: moonOver.plus({ hours: 1 }) });
-        majorBiteTimes.push({ start: moonOver.minus({ hours: 1 }).plus({hours: 12}), end: moonOver.plus({ hours: 1 }).plus({hours: 12}) });
-
         const posTimes = getMoonTransitTimes(latitude, longitude, today);
         console.log(`Moon Over: ${posTimes.over}`);
         console.log(`Moon Under: ${posTimes.under}`);
@@ -280,10 +275,10 @@ export async function biteTimes(timeZone: string, caughtWhen: DateTime, latitude
 
     // Calculate minor bite times (moonrise and moonset)
     if (moonrise) {
-        minorBiteTimes.push({ start: moonrise.minus({ minutes: 30 }), end: moonrise.plus({ minutes: 30 }) });
+        minorBiteTimes.push({ start: moonrise.minus({ hours: 1 }), end: moonrise.plus({ hours: 1 }) });
     }
     if (moonset) {
-        minorBiteTimes.push({ start: moonset.minus({ minutes: 30 }), end: moonset.plus({ minutes: 30 }) });
+        minorBiteTimes.push({ start: moonset.minus({ hours: 1 }), end: moonset.plus({ hours: 1 }) });
     }
 
     majorBiteTimes.forEach(time => {
