@@ -6,6 +6,7 @@ import { CatchDbService } from '../Db.Services/CatchDbService';
 import { HttpWrapper } from '../Functional/HttpWrapper';
 import { IdGenerator } from '../Helpers/IdGenerator';
 import { Logger } from '@aws-lambda-powertools/logger';
+import { Results } from '../Http/Result';
 
 @injectable()
 export class TripService {
@@ -47,7 +48,7 @@ export class TripService {
     public async newTrip(subject: string, newTrip: INewTrip): Promise<HttpWrapper<ITripDetails>> {
         return (await (await HttpWrapper.Init(newTrip))
             .ValidateInput(c => {
-                return newTrip.startTime != null || newTrip.timeZone != null ? null : { statusCode: 400, message: 'Must supply either a datetime or timezone'};                
+                return newTrip.timeZone != null ? null : Results.NotFound('Must supply timezone');
             })
             .Set(TripDbService.fillInMissingData(newTrip))
             .Map(c => TripDbService.createNewDynamoRecord(c, subject))
@@ -58,7 +59,7 @@ export class TripService {
     public async updateTrip(subject: string, tripId: string, updateTrip: ITripDetails): Promise<HttpWrapper<ITripDetails>> {
         return (await (await HttpWrapper.Init(updateTrip)
             .ValidateInput(c => {
-                return tripId === c.tripId ? null : { statusCode: 400, message: `Cannot change tripId from [${tripId}] to [${c.tripId}]` };
+                return tripId === c.tripId ? null : Results.NotFound(`Cannot change tripId from [${tripId}] to [${c.tripId}]`);
             })
             .MapAsync(() => this.tripService.readRecordWithSortKey(subject, updateTrip.tripId)))
             .Map(c => TripDbService.updateTrip(c, updateTrip))

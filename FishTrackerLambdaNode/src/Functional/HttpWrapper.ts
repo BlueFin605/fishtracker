@@ -8,6 +8,7 @@ export class HttpWrapper<T> {
     constructor(initial: T | null);
     constructor(result: Results);
     constructor(arg: T | Results | null) {
+        // console.log(arg);
         if (arg instanceof Results) {
             this.m_httpCode = arg;
             this.m_canContinue = false;
@@ -87,6 +88,10 @@ export class HttpWrapper<T> {
     }
 
     Set<R>(value: R): HttpWrapper<R> {
+        if (!this.continue) {
+            return this.cloneFailed<R>();
+        }
+
         return HttpWrapper.Ok(value);
     }
 

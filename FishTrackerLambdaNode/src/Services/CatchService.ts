@@ -3,6 +3,7 @@ import { HttpWrapper } from '../Functional/HttpWrapper';
 import { IdGenerator } from '../Helpers/IdGenerator';
 import { ICatchDetails, INewCatch, IUpdateCatchDetails } from '../Models/lambda';
 import { CatchDbService } from '../Db.Services/CatchDbService';
+import { Results } from '../Http/Result';
 
 @injectable()
 export class CatchService {
@@ -30,7 +31,7 @@ export class CatchService {
     async newCatch(subject: string, tripId: string, newCatch: INewCatch): Promise<HttpWrapper<ICatchDetails>> {
         return (await (await HttpWrapper.Init(newCatch))
             .ValidateInput(c => {
-                return c.caughtWhen || c.timeZone ? null : { statusCode: 400, message: "Must supply either a datetime or timezone" };
+                return c.timeZone ? null : Results.NotFound("Must supply timezone");
             })
             .Set(CatchDbService.fillInMissingData(newCatch))
             .Map(c => CatchDbService.createNewDynamoRecord(c, subject, tripId))
@@ -50,10 +51,10 @@ export class CatchService {
     async updateCatch(subject: string, tripId: string, catchId: string, updateCatch: ICatchDetails): Promise<HttpWrapper<ICatchDetails>> {
         return (await (await HttpWrapper.Init(updateCatch)
             .ValidateInput(c => {
-                return tripId === c.tripId ? null : { statusCode: 400, message: `Cannot change tripId from [${tripId}] to [${c.tripId}]` };
+                return tripId === c.tripId ? null : Results.NotFound(`Cannot change tripId from [${tripId}] to [${c.tripId}]`);
             })
             .ValidateInput(c => {
-                return catchId === c.catchId ? null : { statusCode: 400, message: `Cannot change catchId from [${catchId}] to [${c.catchId}]` };
+                return catchId === c.catchId ? null : Results.NotFound(`Cannot change catchId from [${catchId}] to [${c.catchId}]`);
             })
             .MapAsync(() => this.catchService.readRecordWithSortKey(IdGenerator.generateTripKey(subject, tripId), updateCatch.catchId)))
             .Map(c => CatchDbService.updateCatch(c, updateCatch))

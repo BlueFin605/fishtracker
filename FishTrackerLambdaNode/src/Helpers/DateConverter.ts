@@ -88,7 +88,7 @@ export class DateConverter {
             "Magadan Standard Time": "Asia/Magadan",
             "Samoa Standard Time": "Pacific/Apia"
         };
-        return timeZoneMap[dotNetTimeZone] || dotNetTimeZone;
+        return timeZoneMap[dotNetTimeZone] ?? dotNetTimeZone;
     }
 
     static isoToString(offset: DateTime): string {
@@ -103,19 +103,15 @@ export class DateConverter {
         return conv;
     }
 
-    static getLocalNow(timeZone?: string): DateTime {
-        if (!timeZone) {
+    static getLocalNow(timeZone: string): DateTime {
+        try {
+            const iana = this.getIanaTimeZone(timeZone);
+            const localNow = DateTime.now().setZone(iana);
+            // console.log('Local now:', localNow.toString());
+            return localNow;
+        } catch (error) {
+            console.error('Error converting time zone:', error);
             return DateTime.now();
-        } else {
-            try {
-                const iana = this.getIanaTimeZone(timeZone);
-                const localNow = DateTime.now().setZone(iana);
-                // console.log('Local now:', localNow.toString());
-                return localNow;
-            } catch (error) {
-                console.error('Error converting time zone:', error);
-                return DateTime.now();
-            }
         }
     }
     

@@ -1,4 +1,5 @@
 import { injectable } from 'tsyringe';
+import { DateTime } from 'luxon';
 import { DynamoDbService } from './DynamoDbService';
 import { HttpWrapper } from '../Functional/HttpWrapper';
 import { IDynamoDbTrip, DynamoDbTrip, IUpdateTripDetails, ITripDetails, TripDetails, IEndTripDetails, INewTrip, NewTrip, TripRating, ITripTags } from '../Models/lambda';
@@ -57,12 +58,13 @@ export class TripDbService extends DynamoDbService<IDynamoDbTrip> {
     }
 
     endTrip(record: IDynamoDbTrip, trip: IEndTripDetails, size: number): IDynamoDbTrip {
-        const endTime = trip.endTime ?? DateConverter.isoToString(DateConverter.getLocalNow(trip.timeZone));
+        const endTime:DateTime = trip.endTime ? DateConverter.convertUtcToLocal(DateConverter.isoFromString(trip.endTime), trip.timeZone) 
+                                     : DateConverter.getLocalNow(trip.timeZone);
         return new DynamoDbTrip(
             record.Subject,
             record.TripId,
             record.StartTime,
-            endTime,
+            DateConverter.isoToString(endTime),
             TripDbService.appendNotes(record.Notes, trip.notes),
             size,
             trip.rating ?? record.Rating,
@@ -74,8 +76,11 @@ export class TripDbService extends DynamoDbService<IDynamoDbTrip> {
     }
 
     static fillInMissingData(newTrip: INewTrip): INewTrip {
-        let startTime = newTrip.startTime ?? DateConverter.isoToString(DateConverter.getLocalNow(newTrip.timeZone));
-        return new NewTrip(startTime, newTrip.timeZone, newTrip.notes, newTrip.tags, newTrip.species, newTrip.defaultSpecies);
+        // let startTime = newTrip.startTime ?? DateConverter.isoToString(DateConverter.getLocalNow(newTrip.timeZone));
+        const startTime:DateTime = newTrip.startTime ? DateConverter.convertUtcToLocal(DateConverter.isoFromString(newTrip.startTime), newTrip.timeZone) 
+                                     : DateConverter.getLocalNow(newTrip.timeZone);
+
+        return new NewTrip(DateConverter.isoToString(startTime), newTrip.timeZone, newTrip.notes, newTrip.tags, newTrip.species, newTrip.defaultSpecies);
     }
 
     static createNewDynamoRecord(newTrip: INewTrip, subject: string): IDynamoDbTrip {

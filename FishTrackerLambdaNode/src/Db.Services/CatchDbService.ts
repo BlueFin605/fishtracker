@@ -53,11 +53,15 @@ export class CatchDbService extends DynamoDbService<IDynamoDbCatch> {
         );
     }
     static fillInMissingData(newCatch: INewCatch): INewCatch {
-        const startTime = newCatch.caughtWhen ?? DateConverter.isoToString(DateConverter.getLocalNow(newCatch.timeZone));
+        // const startTime = newCatch.caughtWhen ?? DateConverter.isoToString(DateConverter.getLocalNow(newCatch.timeZone));
+
+        const startTime:DateTime = newCatch.caughtWhen ? DateConverter.convertUtcToLocal(DateConverter.isoFromString(newCatch.caughtWhen), newCatch.timeZone) 
+                                                       : DateConverter.getLocalNow(newCatch.timeZone);
+
         return new NewCatch(
             newCatch.speciesId,
             newCatch.caughtLocation,
-            startTime,
+            DateConverter.isoToString(startTime),
             newCatch.timeZone,
             newCatch.caughtSize,
             newCatch.caughtLength
@@ -84,7 +88,7 @@ export class CatchDbService extends DynamoDbService<IDynamoDbCatch> {
     }
 
 
-    static addBiteTimes(c: IDynamoDbCatch, timeZone?: string): IDynamoDbCatch {
+    static addBiteTimes(c: IDynamoDbCatch, timeZone: string): IDynamoDbCatch {
         const biteInfo = biteTimes(timeZone, DateConverter.isoFromString(c.CaughtWhen), c.CaughtLocation.latitude, c.CaughtLocation.longitude);
         if (!biteInfo)
             return c;

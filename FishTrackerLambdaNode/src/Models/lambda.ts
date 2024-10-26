@@ -22,7 +22,7 @@ export interface INewCatch {
     speciesId: string;
     caughtLocation: ILocation;
     caughtWhen?: string;
-    timeZone?: string;
+    timeZone: string;
     caughtSize: string;
     caughtLength: number;
 }
@@ -31,7 +31,7 @@ export class NewCatch implements INewCatch {
     speciesId: string;
     caughtLocation: ILocation;
     caughtWhen?: string;
-    timeZone?: string;
+    timeZone: string;
     caughtSize: string;
     caughtLength: number;
 
@@ -39,7 +39,7 @@ export class NewCatch implements INewCatch {
         speciesId: string,
         caughtLocation: ILocation,
         caughtWhen: string | undefined,
-        timeZone: string | undefined,
+        timeZone: string,
         caughtSize: string,
         caughtLength: number
     ) {
@@ -114,7 +114,7 @@ export class TripDetails implements ITripDetails {
 }
 
 export interface IEndTripDetails {
-    timeZone?: string;
+    timeZone: string;
     endTime?: string;
     notes?: string;
     rating?: TripRating;
@@ -132,7 +132,7 @@ export interface IUpdateCatchDetails {
 
 export interface INewTrip {
     startTime?: string;
-    timeZone?: string;
+    timeZone: string;
     notes: string;
     tags: Set<ITripTags>;
     species: string[];
@@ -141,7 +141,7 @@ export interface INewTrip {
 
 export class NewTrip implements INewTrip {
     startTime?: string;
-    timeZone?: string;
+    timeZone: string;
     notes: string;
     tags: Set<ITripTags>;
     species: string[];
@@ -149,7 +149,7 @@ export class NewTrip implements INewTrip {
 
     constructor(
         startTime: string | undefined,
-        timeZone: string | undefined,
+        timeZone: string,
         notes: string,
         tags: Set<ITripTags>,
         species: string[],

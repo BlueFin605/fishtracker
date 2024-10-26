@@ -20,26 +20,7 @@ export interface GetLocalTimesResult {
     sunsetStart: DateTime;
 }
 
-function convertTimsResultToTimeZone(times: GetTimesResult, timeZone?: string): GetLocalTimesResult {
-    if (!timeZone) {
-        return {
-            dawn: DateTime.fromJSDate(times.dawn),
-            dusk: DateTime.fromJSDate(times.dusk),
-            goldenHour: DateTime.fromJSDate(times.goldenHour),
-            goldenHourEnd: DateTime.fromJSDate(times.goldenHourEnd),
-            nadir: DateTime.fromJSDate(times.nadir),
-            nauticalDawn: DateTime.fromJSDate(times.nauticalDawn),
-            nauticalDusk: DateTime.fromJSDate(times.nauticalDusk),
-            night: DateTime.fromJSDate(times.night),
-            nightEnd: DateTime.fromJSDate(times.nightEnd),
-            solarNoon: DateTime.fromJSDate(times.solarNoon),
-            sunrise: DateTime.fromJSDate(times.sunrise),
-            sunriseEnd: DateTime.fromJSDate(times.sunriseEnd),
-            sunset: DateTime.fromJSDate(times.sunset),
-            sunsetStart: DateTime.fromJSDate(times.sunsetStart)
-        };
-    }
-
+function convertTimsResultToTimeZone(times: GetTimesResult, timeZone: string): GetLocalTimesResult {
     return {
         dawn: DateConverter.convertDateToLocal(times.dawn, timeZone),
         dusk: DateConverter.convertDateToLocal(times.dusk, timeZone),
@@ -81,7 +62,7 @@ function formatTimeDifference(diff: number): string {
     return `${hours}h ${minutes}m`;
 }
 
-export function biteTimes(timeZone: string | undefined, caughtWhen: DateTime, latitude: number, longitude: number): IBiteTimesDetails {
+export function biteTimes(timeZone: string, caughtWhen: DateTime, latitude: number, longitude: number): IBiteTimesDetails {
     const today = caughtWhen.toJSDate();
     const times = convertTimsResultToTimeZone(SunCalc.getTimes(today, latitude, longitude), timeZone);
     // const localTime = {}
@@ -115,7 +96,7 @@ export function biteTimes(timeZone: string | undefined, caughtWhen: DateTime, la
     minorBiteTimes.forEach(time => {
         console.log(`Minor Bite Time: ${time.start} - ${time.end}`);
     });
-        
+
     const timeToSunrise = formatTimeDifference(sunrise.toMillis() - today.getTime());
     const timeToSunset = formatTimeDifference(sunset.toMillis() - today.getTime());
 
