@@ -175,7 +175,7 @@ function getMoonTransitTimes(latitude: number, longitude: number, date: Date): I
 //16:32 - 04:12 = 12:20
 
 export async function biteTimes(timeZone: string, caughtWhen: DateTime, latitude: number, longitude: number): Promise<IBiteDetails> {
-    const today = caughtWhen.minus({ hours: 2 }).toJSDate();
+    const today = caughtWhen.startOf('day').toJSDate(); // Set today to the start of the day
     console.log(`Today: ${today}`);
 
     const moon = calcMoonPhase(today);    
