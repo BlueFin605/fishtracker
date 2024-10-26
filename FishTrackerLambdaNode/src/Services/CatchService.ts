@@ -29,13 +29,13 @@ export class CatchService {
     }
 
     async newCatch(subject: string, tripId: string, newCatch: INewCatch): Promise<HttpWrapper<ICatchDetails>> {
-        return (await (await HttpWrapper.Init(newCatch))
+        return (await (await (await HttpWrapper.Init(newCatch))
             .ValidateInput(c => {
                 return c.timeZone ? null : Results.NotFound("Must supply timezone");
             })
             .Set(CatchDbService.fillInMissingData(newCatch))
             .Map(c => CatchDbService.createNewDynamoRecord(c, subject, tripId))
-            .Map(c => CatchDbService.addBiteTimes(c, newCatch.timeZone))
+            .MapAsync(c => CatchDbService.addBiteTimes(c, newCatch.timeZone)))
             .MapAsync(c => this.catchService.createRecord(c)))
             .Map(d => CatchDbService.toCatchDetails(d));
     }

@@ -88,25 +88,12 @@ export class CatchDbService extends DynamoDbService<IDynamoDbCatch> {
     }
 
 
-    static addBiteTimes(c: IDynamoDbCatch, timeZone: string): IDynamoDbCatch {
-        const biteInfo = biteTimes(timeZone, DateConverter.isoFromString(c.CaughtWhen), c.CaughtLocation.latitude, c.CaughtLocation.longitude);
+    static async addBiteTimes(c: IDynamoDbCatch, timeZone: string): Promise<HttpWrapper<IDynamoDbCatch>> {
+        const biteInfo = await biteTimes(timeZone, DateConverter.isoFromString(c.CaughtWhen), c.CaughtLocation.latitude, c.CaughtLocation.longitude);
         if (!biteInfo)
-            return c;
+            return HttpWrapper.Ok(c);
         
-        if (!timeZone)
-            return {
-                ...c,
-                BiteInfo: {
-                    moonPhase: biteInfo.moonPhase,
-                    majorBiteTimes: biteInfo.majorBiteTimes,
-                    minorBiteTimes: biteInfo.minorBiteTimes,
-                    sunrise: biteInfo.sunrise,
-                    sunset: biteInfo.sunset,
-                    timeToSunrise: biteInfo.timeToSunrise,
-                    timeToSunset: biteInfo.timeToSunset
-                }
-            };
-        return {
+        return HttpWrapper.Ok({
             ...c,
             BiteInfo: {
                 moonPhase: biteInfo.moonPhase,
@@ -117,7 +104,7 @@ export class CatchDbService extends DynamoDbService<IDynamoDbCatch> {
                 timeToSunrise: biteInfo.timeToSunrise,
                 timeToSunset: biteInfo.timeToSunset
             }
-        };
+        });
     }
 
     static toCatchDetails(c: IDynamoDbCatch): ICatchDetails {
