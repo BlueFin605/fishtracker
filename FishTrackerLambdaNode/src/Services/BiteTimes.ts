@@ -7,6 +7,7 @@ export interface IBite {
 }
 
 export interface IBiteDetails {
+    when: DateTime;
     moonPhase: string;
     majorBiteTimes: IBite[];
     minorBiteTimes: IBite[];
@@ -209,6 +210,7 @@ export async function biteTimes(timeZone: string, caughtWhen: DateTime, latitude
     const timeToSunset = sunTimes.set ? formatTimeDifference(sunTimes.set.toMillis() - DateTime.now().toMillis()) : undefined;
 
     const ret =  { 
+             when: caughtWhen,
              moonPhase: moon, 
              majorBiteTimes: majorBiteTimes, 
              minorBiteTimes: minorBiteTimes, 

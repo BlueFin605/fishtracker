@@ -8,7 +8,7 @@ import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
 import { DateTime } from 'luxon';
 import { DynamoDbHelper } from './AWSWrapper';
 import { StringToEnum, EnumToString } from '../Http/serialisation';
-import { biteTimes } from '../Services/BiteTimes';
+import { biteTimes, IBiteDetails } from '../Services/BiteTimes';
 
 
 @injectable()
@@ -112,9 +112,26 @@ export class CatchDbService extends DynamoDbService<IDynamoDbCatch> {
                 moonover: biteInfo.moonover ? DateConverter.isoToString(DateConverter.convertUtcToLocal(biteInfo.moonover,timeZone)) : undefined,
                 moonunder: biteInfo.moonunder ? DateConverter.isoToString(DateConverter.convertUtcToLocal(biteInfo.moonunder,timeZone)) : undefined,
                 timeToSunrise: biteInfo.timeToSunrise,
-                timeToSunset: biteInfo.timeToSunset
+                timeToSunset: biteInfo.timeToSunset,
+                biteTimeState: CatchDbService.checkBiteTimes(biteInfo)
             }
         });
+    }
+
+    static checkBiteTimes(info: IBiteDetails): string {
+        for (const biteTime of info.majorBiteTimes) {
+            if (info.when >= biteTime.start && info.when <= biteTime.end) {
+                return "Major";
+            }
+        }
+
+        for (const biteTime of info.minorBiteTimes) {
+            if (info.when >= biteTime.start && info.when <= biteTime.end) {
+                return "Minor";
+            }
+        }
+
+        return "Outside";
     }
 
     static toCatchDetails(c: IDynamoDbCatch): ICatchDetails {

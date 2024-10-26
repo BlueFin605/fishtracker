@@ -20,6 +20,7 @@ export interface IBiteTimesDetails {
     moonunder?: string;
     timeToSunrise?: string;
     timeToSunset?: string;
+    biteTimeState: string;
 }
 
 export interface INewCatch {
