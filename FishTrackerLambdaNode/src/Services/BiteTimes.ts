@@ -45,6 +45,20 @@ function formatTimeDifference(diff: number): string {
     return `${hours}h ${minutes}m`;
 }
 
+function calcMoonTimes(lat: number, lon: number, date: Date) {
+    const times = SunCalc.getMoonTimes(date, lat, lon);
+    const moonPosition = SunCalc.getMoonPosition(date, lat, lon);
+    const transit = SunCalc.getMoonPosition(new Date(date.getTime() + (12 * 60 * 60 * 1000)), lat, lon);
+    const antiTransit = SunCalc.getMoonPosition(new Date(date.getTime() + (24 * 60 * 60 * 1000)), lat, lon);
+
+    return {
+        moonrise: times.rise,
+        moonset: times.set,
+        moonOverhead: transit.altitude > 0 ? new Date(date.getTime() + (12 * 60 * 60 * 1000)) : null,
+        moonUnderfoot: antiTransit.altitude < 0 ? new Date(date.getTime() + (24 * 60 * 60 * 1000)) : null
+    };
+}
+
 function calcMoonPhase(date: Date): string {
     const diff = date.getTime() - new Date('2001-01-01').getTime();
     const days = diff / (1000 * 60 * 60 * 24);
@@ -118,6 +132,25 @@ function calcMoonPhase(date: Date): string {
 //and intrigue associated with saltwater fishing that keeps us coming back for more. But do keep bite times in mind, and if you notice some 
 //patterns at your regular haunts you can add them to your list of factors that increase your chances of having a great day.
 
+
+//some good bite times
+//https://www.bitetimes.fishing/bite-times/auckland
+//https://www.fishingreminder.com/NZ/charts/fishing_times/Auckland
+
+
+//over: 12:43
+//rise:5:46
+//set:19:40
+
+//subtr:6:27
+//half: (13:56) 6:28
+
+
+//19:19 - 06:69 = 12:20
+//18:27 - 06:02 = 12:25
+//17:31 - 05:00 = 12:31
+//16:32 - 04:12 = 12:20
+
 export async function biteTimes(timeZone: string, caughtWhen: DateTime, latitude: number, longitude: number): Promise<IBiteTimesDetails> {
     const today = caughtWhen.toJSDate();
     const times = convertTimsResultToTimeZone(SunCalc.getTimes(today, latitude, longitude), timeZone);
@@ -130,6 +163,13 @@ export async function biteTimes(timeZone: string, caughtWhen: DateTime, latitude
     const moonrise = moonTimes.rise ? DateTime.fromJSDate(moonTimes.rise) : null;
     const moonset = moonTimes.set ? DateTime.fromJSDate(moonTimes.set) : null;
 
+    const moonInfo = calcMoonTimes(latitude, longitude, today);
+
+    console.log(`Moonrise: ${moonInfo.moonrise}`);
+    console.log(`Moonset: ${moonInfo.moonset}`);
+    console.log(`Moon Overhead: ${moonInfo.moonOverhead}`);
+    console.log(`Moon Underfoot: ${moonInfo.moonUnderfoot}`);
+
     console.log(`Sunrise: ${sunrise}`);
     console.log(`Sunset: ${sunset}`);
     console.log(`Moon Phase: ${moonPhase}`);
@@ -141,14 +181,10 @@ export async function biteTimes(timeZone: string, caughtWhen: DateTime, latitude
     
     // Calculate major bite times (moon overhead and underfoot)
     if (moonTimes.rise && moonTimes.set && moonrise && moonset) {
-        const moonTransit = SunCalc.getMoonPosition(moonrise.toJSDate(), latitude, longitude).altitude === 0 ? moonrise : moonrise.plus({ hours: 12 });
-        const moonOppositeTransit = moonTransit.plus({ hours: 12 });
-        
-        console.log(`Moontransit: ${moonTransit}`);
-        console.log(`moonOppositeTransit: ${moonOppositeTransit}`);
-
-        majorBiteTimes.push({ start: moonTransit.minus({ hours: 1 }), end: moonTransit.plus({ hours: 1 }) });
-        majorBiteTimes.push({ start: moonOppositeTransit.minus({ hours: 1 }), end: moonOppositeTransit.plus({ hours: 1 }) });
+        const moonOver = moonrise.plus({ milliseconds: moonset.diff(moonrise).milliseconds / 2 });
+        console.log(`moonOver: ${moonOver}`);
+        majorBiteTimes.push({ start: moonOver.minus({ hours: 1 }), end: moonOver.plus({ hours: 1 }) });
+        majorBiteTimes.push({ start: moonOver.minus({ hours: 1 }).plus({hours: 12}), end: moonOver.plus({ hours: 1 }).plus({hours: 12}) });
     }
 
     // Calculate minor bite times (moonrise and moonset)
