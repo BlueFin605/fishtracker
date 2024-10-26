@@ -1,4 +1,4 @@
-import SunCalc, { GetTimesResult } from 'suncalc';
+// import SunCalc, { GetTimesResult } from 'suncalc';
 import { IBiteTime, IBiteTimesDetails } from '../Models/lambda';
 import { DateTime } from 'luxon';
 import { DateConverter } from '../Helpers/DateConverter';
@@ -26,23 +26,9 @@ interface IMoonTimes {
     over: DateTime;
 }
 
-function convertTimsResultToTimeZone(times: GetTimesResult, timeZone: string): GetLocalTimesResult {
-    return {
-        dawn: DateConverter.convertDateToLocal(times.dawn, timeZone),
-        dusk: DateConverter.convertDateToLocal(times.dusk, timeZone),
-        goldenHour: DateConverter.convertDateToLocal(times.goldenHour, timeZone),
-        goldenHourEnd: DateConverter.convertDateToLocal(times.goldenHourEnd, timeZone),
-        nadir: DateConverter.convertDateToLocal(times.nadir, timeZone),
-        nauticalDawn: DateConverter.convertDateToLocal(times.nauticalDawn, timeZone),
-        nauticalDusk: DateConverter.convertDateToLocal(times.nauticalDusk, timeZone),
-        night: DateConverter.convertDateToLocal(times.night, timeZone),
-        nightEnd: DateConverter.convertDateToLocal(times.nightEnd, timeZone),
-        solarNoon: DateConverter.convertDateToLocal(times.solarNoon, timeZone),
-        sunrise: DateConverter.convertDateToLocal(times.sunrise, timeZone),
-        sunriseEnd: DateConverter.convertDateToLocal(times.sunriseEnd, timeZone),
-        sunset: DateConverter.convertDateToLocal(times.sunset, timeZone),
-        sunsetStart: DateConverter.convertDateToLocal(times.sunsetStart, timeZone)
-    };
+interface IRiseSetTimes {
+    rise: DateTime | undefined;
+    set: DateTime | undefined;
 }
 
 function formatTimeDifference(diff: number): string {
@@ -51,18 +37,31 @@ function formatTimeDifference(diff: number): string {
     return `${hours}h ${minutes}m`;
 }
 
-function calcMoonTimes(lat: number, lon: number, date: Date) {
-    const times = SunCalc.getMoonTimes(date, lat, lon);
-    const moonPosition = SunCalc.getMoonPosition(date, lat, lon);
-    const transit = SunCalc.getMoonPosition(new Date(date.getTime() + (12 * 60 * 60 * 1000)), lat, lon);
-    const antiTransit = SunCalc.getMoonPosition(new Date(date.getTime() + (24 * 60 * 60 * 1000)), lat, lon);
+function calcMTimes(body: Astronomy.Body, lat: number, lon: number, date: Date) : IRiseSetTimes{
+    const observer = new Astronomy.Observer(lat, lon, 0);
+    const time = new Astronomy.AstroTime(date);
+
+    // Search for moonrise time
+    const moonrise = Astronomy.SearchRiseSet(Astronomy.Body.Moon, observer, +1, time, 300);
+    const moonriseTime = moonrise ? DateTime.fromJSDate(moonrise.date) : undefined;
+
+    // Search for moonset time
+    const moonset = Astronomy.SearchRiseSet(Astronomy.Body.Moon, observer, -1, time, 300);
+    const moonsetTime = moonset ? DateTime.fromJSDate(moonset.date) : undefined;
 
     return {
-        moonrise: times.rise,
-        moonset: times.set,
-        moonOverhead: transit.altitude > 0 ? new Date(date.getTime() + (12 * 60 * 60 * 1000)) : null,
-        moonUnderfoot: antiTransit.altitude < 0 ? new Date(date.getTime() + (24 * 60 * 60 * 1000)) : null
-    };
+        rise: moonriseTime,
+        set: moonsetTime,
+    };    
+}
+
+
+function calcMoonTimes(lat: number, lon: number, date: Date) : IRiseSetTimes{
+    return calcMTimes(Astronomy.Body.Moon, lat, lon, date);
+}
+
+function calcSunTimes(lat: number, lon: number, date: Date) : IRiseSetTimes {
+    return calcMTimes(Astronomy.Body.Sun, lat, lon, date);
 }
 
 function calcMoonPhase(date: Date): string {
@@ -87,20 +86,15 @@ function getMoonTransitTimes(latitude: number, longitude: number, date: Date): I
 
     // Search for moon overhead (transit) time
     const moonOverhead = Astronomy.SearchHourAngle(Astronomy.Body.Moon, observer, 0, time);
-    // const moonOverheadTime = moonOverhead ? DateTime.fromJSDate(moonOverhead.date) : DateTime.invalid("Invalid date");
+    const moonOverheadTime = moonOverhead ? DateTime.fromJSDate(moonOverhead.time.date) : DateTime.invalid("Invalid date");
 
     // Search for moon underfoot (opposite transit) time
     const moonUnderfoot = Astronomy.SearchHourAngle(Astronomy.Body.Moon, observer, 12, time);
-    // const moonUnderfootTime = moonUnderfoot ? DateTime.fromJSDate(moonUnderfoot.date) : DateTime.invalid("Invalid date");
-
-    console.log(`===Moon Overhead: ${JSON.stringify(moonOverhead)}`);
-    console.log(`===Moon Underfoot: ${JSON.stringify(moonUnderfoot)}`);
+    const moonUnderfootTime = moonUnderfoot ? DateTime.fromJSDate(moonUnderfoot.time.date) : DateTime.invalid("Invalid date");
 
     return {
-        // over: DateTime.invalid("Invalid date"),
-        // under: DateTime.invalid("Invalid date")        
-        over: moonOverhead ? DateTime.fromJSDate(moonOverhead.time.date) : DateTime.invalid("Invalid date"),
-        under: moonUnderfoot ? DateTime.fromJSDate(moonUnderfoot.time.date) : DateTime.invalid("Invalid date")
+        over: moonOverheadTime,
+        under: moonUnderfootTime
     };
 }
 
@@ -182,49 +176,53 @@ function getMoonTransitTimes(latitude: number, longitude: number, date: Date): I
 //16:32 - 04:12 = 12:20
 
 export async function biteTimes(timeZone: string, caughtWhen: DateTime, latitude: number, longitude: number): Promise<IBiteTimesDetails> {
-    const today = caughtWhen.toJSDate();
-    const times = convertTimsResultToTimeZone(SunCalc.getTimes(today, latitude, longitude), timeZone);
-    const sunrise = times.sunrise;
-    const sunset = times.sunset;
+    const today = caughtWhen.minus({ hours: 2 }).toJSDate();
+    console.log(`Today: ${today}`);
+
     const moon = calcMoonPhase(today);    
-
-    const moonTimes = SunCalc.getMoonTimes(today, latitude, longitude);
-    const moonrise = moonTimes.rise ? DateTime.fromJSDate(moonTimes.rise) : null;
-    const moonset = moonTimes.set ? DateTime.fromJSDate(moonTimes.set) : null;
-
-    console.log(`Moonrise: ${moonrise}`);
-    console.log(`Moonset: ${moonset}`);
+    const moonTimes = calcMoonTimes(latitude, longitude, today);
+    const sunTimes = calcSunTimes(latitude, longitude, today);
+    console.log(`Moon Times: ${moonTimes.rise} - ${moonTimes.set}`);
     
     const majorBiteTimes: IBiteTime[] = [];
     const minorBiteTimes: IBiteTime[] = [];
     
-    // Calculate major bite times (moon overhead and underfoot)
-    if (moonTimes.rise && moonTimes.set && moonrise && moonset) {        
-        const posTimes = getMoonTransitTimes(latitude, longitude, today);
-        console.log(`Moon Over: ${posTimes.over}`);
-        console.log(`Moon Under: ${posTimes.under}`);
-        majorBiteTimes.push({ start: posTimes.over.minus({ hours: 1 }), end: posTimes.over.plus({ hours: 1 }) });
-        majorBiteTimes.push({ start: posTimes.under.minus({ hours: 1 }), end: posTimes.under.plus({ hours: 1 }) });
-    }
+    const posTimes = getMoonTransitTimes(latitude, longitude, today);
+    majorBiteTimes.push({ start: posTimes.over.minus({ hours: 1 }), end: posTimes.over.plus({ hours: 1 }) });
+    majorBiteTimes.push({ start: posTimes.under.minus({ hours: 1 }), end: posTimes.under.plus({ hours: 1 }) });
 
     // Calculate minor bite times (moonrise and moonset)
-    if (moonrise) {
-        minorBiteTimes.push({ start: moonrise.minus({ hours: 1 }), end: moonrise.plus({ hours: 1 }) });
+    if (moonTimes.rise) {
+        minorBiteTimes.push({ start: moonTimes.rise.minus({ hours: 1 }), end: moonTimes.rise.plus({ hours: 1 }) });
     }
-    if (moonset) {
-        minorBiteTimes.push({ start: moonset.minus({ hours: 1 }), end: moonset.plus({ hours: 1 }) });
+    if (moonTimes.set) {
+        minorBiteTimes.push({ start: moonTimes.set.minus({ hours: 1 }), end: moonTimes.set.plus({ hours: 1 }) });
     }
 
-    majorBiteTimes.forEach(time => {
-        console.log(`Major Bite Time: ${time.start} - ${time.end}`);
-    });
+    // majorBiteTimes.forEach(time => {
+    //     console.log(`Major Bite Time: ${time.start} - ${time.end}`);
+    // });
 
-    minorBiteTimes.forEach(time => {
-        console.log(`Minor Bite Time: ${time.start} - ${time.end}`);
-    });
+    // minorBiteTimes.forEach(time => {
+    //     console.log(`Minor Bite Time: ${time.start} - ${time.end}`);
+    // });
 
-    const timeToSunrise = formatTimeDifference(sunrise.toMillis() - DateTime.now().toMillis());
-    const timeToSunset = formatTimeDifference(sunset.toMillis() - DateTime.now().toMillis());
+    const timeToSunrise = sunTimes.rise ? formatTimeDifference(sunTimes.rise.toMillis() - DateTime.now().toMillis()) : undefined;
+    const timeToSunset = sunTimes.set ? formatTimeDifference(sunTimes.set.toMillis() - DateTime.now().toMillis()) : undefined;
 
-    return { moonPhase: moon, majorBiteTimes, minorBiteTimes, sunrise, sunset, timeToSunrise, timeToSunset };
+    const ret =  { 
+             moonPhase: moon, 
+             majorBiteTimes: majorBiteTimes, 
+             minorBiteTimes: minorBiteTimes, 
+             sunrise: sunTimes.rise ?? DateTime.invalid("Invalid date"), 
+             sunset: sunTimes.set ?? DateTime.invalid("Invalid date"), 
+             moonrise: moonTimes?.rise, 
+             moonset: moonTimes?.set, 
+             moonover: posTimes.over,
+             moonunder: posTimes.under,
+             timeToSunrise: timeToSunrise, 
+             timeToSunset: timeToSunset
+    };
+
+    return ret;
 }

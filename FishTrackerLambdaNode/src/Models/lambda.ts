@@ -14,8 +14,12 @@ export interface IBiteTimesDetails {
     minorBiteTimes: IBiteTime[];
     sunrise: DateTime;
     sunset: DateTime;
-    timeToSunrise: string;
-    timeToSunset: string;
+    moonrise?: DateTime;
+    moonset?: DateTime;
+    moonover?: DateTime;
+    moonunder?: DateTime;
+    timeToSunrise?: string;
+    timeToSunset?: string;
 }
 
 export interface INewCatch {

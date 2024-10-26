@@ -101,6 +101,10 @@ export class CatchDbService extends DynamoDbService<IDynamoDbCatch> {
                 minorBiteTimes: biteInfo.minorBiteTimes,
                 sunrise: DateConverter.convertUtcToLocal(biteInfo.sunrise,timeZone),
                 sunset: DateConverter.convertUtcToLocal(biteInfo.sunset,timeZone),
+                moonrise: biteInfo.moonrise != undefined ? DateConverter.convertUtcToLocal(biteInfo.moonrise,timeZone) : undefined, 
+                moonset: biteInfo.moonset ? DateConverter.convertUtcToLocal(biteInfo.moonset,timeZone) : undefined, 
+                moonover: biteInfo.moonover ? DateConverter.convertUtcToLocal(biteInfo.moonover,timeZone) : undefined,
+                moonunder: biteInfo.moonunder ? DateConverter.convertUtcToLocal(biteInfo.moonunder,timeZone) : undefined,
                 timeToSunrise: biteInfo.timeToSunrise,
                 timeToSunset: biteInfo.timeToSunset
             }
