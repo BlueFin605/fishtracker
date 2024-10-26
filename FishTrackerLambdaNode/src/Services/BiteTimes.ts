@@ -104,61 +104,6 @@ function getMoonTransitTimes(latitude: number, longitude: number, date: Date): I
     };
 }
 
-// function getMoonTransitTimes(latitude: number, longitude: number, date: Date): IMoonTimes {
-//     const observer = new Astronomy.Observer(latitude, longitude, 0);
-//     const time = new Astronomy.AstroTime(date);
-
-//     //https://github.com/cosinekitty/astronomy/tree/master/source/js#SearchAltitude
-//     // const moonOverhead = Astronomy.SearchAltitude(Astronomy.Body.Moon, observer, 1, time, 0, 90);
-//     // const moonUnderfoot = Astronomy.SearchAltitude(Astronomy.Body.Moon, observer, -1, time, 0, -90);
-
-//     const moonOverhead = Astronomy.SearchAltitude(Astronomy.Body.Moon, observer, 1, time, 0, 90);
-//     const moonUnderfoot = Astronomy.SearchAltitude(Astronomy.Body.Moon, observer, -1, time, 0, -90);
-
-
-//     console.log(`===Moon Overhead: ${moonOverhead}`);
-//     console.log(`===Moon Underfoot: ${moonUnderfoot}`);
-//     return {
-//         over: moonOverhead ? DateTime.fromJSDate(moonOverhead.date) : DateTime.invalid("Invalid date"),
-//         under: moonUnderfoot ? DateTime.fromJSDate(moonUnderfoot.date) : DateTime.invalid("Invalid date")
-//     };
-// }
-
-// function getMoonCulmination(latitude: number, longitude: number, date: Date): Date {
-//     const observer = new Astronomy.Observer(latitude, longitude, 0);
-//     let time = new Astronomy.AstroTime(date);
-//     let maxAltitude = -Infinity;
-//     let culminationTime: Astronomy.AstroTime | null = null;
-
-//     for (let i = 0; i < 24; i++) {
-//         const altitude = Astronomy.MoonPosition(time).altitude;
-//         if (altitude > maxAltitude) {
-//             maxAltitude = altitude;
-//             culminationTime = time;
-//         }
-//         time = time.AddHours(1);
-//     }
-
-//     return culminationTime ? culminationTime.date : new Date();
-// }
-
-// function calculateMoonUnderfoot(lat: number, lon: number, moonrise: DateTime, moonset: DateTime): { under: DateTime, over: DateTime } {
-//     const observer = new Observer(lat, lon, 0);
-
-//     // Calculate approximate overhead time
-//     const overheadTime = moonrise.plus({ milliseconds: moonset.diff(moonrise).milliseconds / 2 });
-
-//     // Calculate moon position at overhead time
-//     const moonOverhead = Astronomy.MoonPosition(observer, overheadTime.toJSDate());
-
-//     // Calculate underfoot time as 12 hours after the overhead time
-//     const underfootTime = overheadTime.plus({ hours: 12 });
-
-//     // Calculate moon position at underfoot time
-//     const moonUnderfoot = Astronomy.MoonPosition(observer, underfootTime.toJSDate());
-
-//     return { under: DateTime.fromJSDate(moonUnderfoot.time), over: DateTime.fromJSDate(moonOverhead.time) };
-// }
 
 // https://www.fishing.net.nz/fishing-advice/general-articles/understanding-bite-times/#:~:text=He%20concluded%20that%20the%20major,normal)%20at%20moonrise%20and%20moonset.
 
@@ -241,23 +186,12 @@ export async function biteTimes(timeZone: string, caughtWhen: DateTime, latitude
     const times = convertTimsResultToTimeZone(SunCalc.getTimes(today, latitude, longitude), timeZone);
     const sunrise = times.sunrise;
     const sunset = times.sunset;
-    const moonIllumination = SunCalc.getMoonIllumination(today);
     const moon = calcMoonPhase(today);    
-    const moonPhase = moonIllumination.phase;
+
     const moonTimes = SunCalc.getMoonTimes(today, latitude, longitude);
     const moonrise = moonTimes.rise ? DateTime.fromJSDate(moonTimes.rise) : null;
     const moonset = moonTimes.set ? DateTime.fromJSDate(moonTimes.set) : null;
 
-    const moonInfo = calcMoonTimes(latitude, longitude, today);
-
-    console.log(`Moonrise: ${moonInfo.moonrise}`);
-    console.log(`Moonset: ${moonInfo.moonset}`);
-    console.log(`Moon Overhead: ${moonInfo.moonOverhead}`);
-    console.log(`Moon Underfoot: ${moonInfo.moonUnderfoot}`);
-
-    console.log(`Sunrise: ${sunrise}`);
-    console.log(`Sunset: ${sunset}`);
-    console.log(`Moon Phase: ${moonPhase}`);
     console.log(`Moonrise: ${moonrise}`);
     console.log(`Moonset: ${moonset}`);
     
