@@ -74,6 +74,28 @@ import { LoadingService } from './loading.service';
   }
 }
 
+export interface IBiteTime {
+  start: string;
+  end: string;
+}
+
+export interface IBiteTimesDetails {
+  moonPhase: string;
+  majorBiteTimes: IBiteTime[];
+  minorBiteTimes: IBiteTime[];
+  sunrise: string;
+  sunset: string;
+  moonrise?: string;
+  moonset?: string;
+  moonover?: string;
+  moonunder?: string;
+  timeToSunrise?: string;
+  timeToSunset?: string;
+  timeToMoonOver?: string;
+  timeToMoonUnder?: string;
+  biteTimeState: string;
+}
+
 export interface CatchDetails {
   tripId: string;
   catchId: string; // Assuming Guid translates to string in TypeScript for UUIDs
@@ -83,6 +105,7 @@ export interface CatchDetails {
   caughtSize: FishSize;
   caughtLength: number;
   weather?: WeatherAttributes; // Assuming WeatherAttributes is defined elsewhere
+  biteInfo?: IBiteTimesDetails;
 }
 
 export interface WeatherAttributes {

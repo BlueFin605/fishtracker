@@ -113,6 +113,8 @@ export class CatchDbService extends DynamoDbService<IDynamoDbCatch> {
                 moonunder: biteInfo.moonunder ? DateConverter.isoToString(DateConverter.convertUtcToLocal(biteInfo.moonunder,timeZone)) : undefined,
                 timeToSunrise: biteInfo.timeToSunrise,
                 timeToSunset: biteInfo.timeToSunset,
+                timeToMoonOver: biteInfo.timeToMoonOver,
+                timeToMoonUnder: biteInfo.timeToMoonUnder,
                 biteTimeState: CatchDbService.checkBiteTimes(biteInfo)
             }
         });

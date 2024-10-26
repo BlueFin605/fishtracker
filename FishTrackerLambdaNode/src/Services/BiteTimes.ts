@@ -19,6 +19,8 @@ export interface IBiteDetails {
     moonunder?: DateTime;
     timeToSunrise?: string;
     timeToSunset?: string;
+    timeToMoonOver?: string;
+    timeToMoonUnder?: string;
 }
 interface IMoonTimes {
     under: DateTime;
@@ -206,8 +208,10 @@ export async function biteTimes(timeZone: string, caughtWhen: DateTime, latitude
     //     console.log(`Minor Bite Time: ${time.start} - ${time.end}`);
     // });
 
-    const timeToSunrise = sunTimes.rise ? formatTimeDifference(sunTimes.rise.toMillis() - DateTime.now().toMillis()) : undefined;
-    const timeToSunset = sunTimes.set ? formatTimeDifference(sunTimes.set.toMillis() - DateTime.now().toMillis()) : undefined;
+    const timeToSunrise = sunTimes.rise ? formatTimeDifference(sunTimes.rise.toMillis() - caughtWhen.toMillis()) : undefined;
+    const timeToSunset = sunTimes.set ? formatTimeDifference(sunTimes.set.toMillis() - caughtWhen.toMillis()) : undefined;
+    const timeToMoonOver = posTimes.over ? formatTimeDifference(posTimes.over.toMillis() - caughtWhen.toMillis()) : undefined;
+    const timeToMoonUnder = sunTimes.set ? formatTimeDifference(sunTimes.set.toMillis() - caughtWhen.toMillis()) : undefined;
 
     const ret =  { 
              when: caughtWhen,
@@ -221,7 +225,9 @@ export async function biteTimes(timeZone: string, caughtWhen: DateTime, latitude
              moonover: posTimes.over,
              moonunder: posTimes.under,
              timeToSunrise: timeToSunrise, 
-             timeToSunset: timeToSunset
+             timeToSunset: timeToSunset,
+             timeToMoonOver: timeToMoonOver, 
+             timeToMoonUnder: timeToMoonUnder
     };
 
     return ret;

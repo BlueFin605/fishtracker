@@ -105,6 +105,11 @@
                         <th>Species</th>
                         <th>Size</th>
                         <th>Length</th>
+                        <th>Bite Time</th>
+                        <th>Time to Sunrise</th>
+                        <th>Time to Sunset</th>
+                        <th>Time to Moon Over</th>
+                        <th>Time to Moon Under</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -113,6 +118,11 @@
                         <td>{{ item.speciesId }}</td>
                         <td>{{ item.caughtSize }}</td>
                         <td>{{ item.caughtLength }}</td>
+                        <td>{{ item.biteInfo?.biteTimeState }}</td>
+                        <td>{{ item.biteInfo?.timeToSunrise }}</td>
+                        <td>{{ item.biteInfo?.timeToSunset }}</td>
+                        <td>{{ item.biteInfo?.timeToMoonOver }}</td>
+                        <td>{{ item.biteInfo?.timeToMoonUnder }}</td>
                     </tr>
                 </tbody>
             </table>
