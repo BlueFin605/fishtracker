@@ -26,6 +26,7 @@
     "@aws-lambda-powertools/logger": "^2.7.0",
     "@aws-sdk/client-dynamodb": "^3.658.1",
     "@aws-sdk/util-dynamodb": "^3.658.1",
+    "astronomy-engine": "^2.1.19",
     "aws-sdk": "^2.1691.0",
     "aws-serverless-express": "^3.4.0",
     "body-parser": "^1.20.3",

@@ -2,6 +2,7 @@ import SunCalc, { GetTimesResult } from 'suncalc';
 import { IBiteTime, IBiteTimesDetails } from '../Models/lambda';
 import { DateTime } from 'luxon';
 import { DateConverter } from '../Helpers/DateConverter';
+import * as Astronomy from 'astronomy-engine';
 
 export interface GetLocalTimesResult {
     dawn: DateTime;
@@ -18,6 +19,11 @@ export interface GetLocalTimesResult {
     sunriseEnd: DateTime;
     sunset: DateTime;
     sunsetStart: DateTime;
+}
+
+interface IMoonTimes {
+    under: DateTime;
+    over: DateTime;
 }
 
 function convertTimsResultToTimeZone(times: GetTimesResult, timeZone: string): GetLocalTimesResult {
@@ -74,6 +80,85 @@ function calcMoonPhase(date: Date): string {
         return "Last Quarter";
     }
 }
+
+function getMoonTransitTimes(latitude: number, longitude: number, date: Date): IMoonTimes {
+    const observer = new Astronomy.Observer(latitude, longitude, 0);
+    const time = new Astronomy.AstroTime(date);
+
+    // Search for moon overhead (transit) time
+    const moonOverhead = Astronomy.SearchHourAngle(Astronomy.Body.Moon, observer, 0, time);
+    // const moonOverheadTime = moonOverhead ? DateTime.fromJSDate(moonOverhead.date) : DateTime.invalid("Invalid date");
+
+    // Search for moon underfoot (opposite transit) time
+    const moonUnderfoot = Astronomy.SearchHourAngle(Astronomy.Body.Moon, observer, 12, time);
+    // const moonUnderfootTime = moonUnderfoot ? DateTime.fromJSDate(moonUnderfoot.date) : DateTime.invalid("Invalid date");
+
+    console.log(`===Moon Overhead: ${JSON.stringify(moonOverhead)}`);
+    console.log(`===Moon Underfoot: ${JSON.stringify(moonUnderfoot)}`);
+
+    return {
+        // over: DateTime.invalid("Invalid date"),
+        // under: DateTime.invalid("Invalid date")        
+        over: moonOverhead ? DateTime.fromJSDate(moonOverhead.time.date) : DateTime.invalid("Invalid date"),
+        under: moonUnderfoot ? DateTime.fromJSDate(moonUnderfoot.time.date) : DateTime.invalid("Invalid date")
+    };
+}
+
+// function getMoonTransitTimes(latitude: number, longitude: number, date: Date): IMoonTimes {
+//     const observer = new Astronomy.Observer(latitude, longitude, 0);
+//     const time = new Astronomy.AstroTime(date);
+
+//     //https://github.com/cosinekitty/astronomy/tree/master/source/js#SearchAltitude
+//     // const moonOverhead = Astronomy.SearchAltitude(Astronomy.Body.Moon, observer, 1, time, 0, 90);
+//     // const moonUnderfoot = Astronomy.SearchAltitude(Astronomy.Body.Moon, observer, -1, time, 0, -90);
+
+//     const moonOverhead = Astronomy.SearchAltitude(Astronomy.Body.Moon, observer, 1, time, 0, 90);
+//     const moonUnderfoot = Astronomy.SearchAltitude(Astronomy.Body.Moon, observer, -1, time, 0, -90);
+
+
+//     console.log(`===Moon Overhead: ${moonOverhead}`);
+//     console.log(`===Moon Underfoot: ${moonUnderfoot}`);
+//     return {
+//         over: moonOverhead ? DateTime.fromJSDate(moonOverhead.date) : DateTime.invalid("Invalid date"),
+//         under: moonUnderfoot ? DateTime.fromJSDate(moonUnderfoot.date) : DateTime.invalid("Invalid date")
+//     };
+// }
+
+// function getMoonCulmination(latitude: number, longitude: number, date: Date): Date {
+//     const observer = new Astronomy.Observer(latitude, longitude, 0);
+//     let time = new Astronomy.AstroTime(date);
+//     let maxAltitude = -Infinity;
+//     let culminationTime: Astronomy.AstroTime | null = null;
+
+//     for (let i = 0; i < 24; i++) {
+//         const altitude = Astronomy.MoonPosition(time).altitude;
+//         if (altitude > maxAltitude) {
+//             maxAltitude = altitude;
+//             culminationTime = time;
+//         }
+//         time = time.AddHours(1);
+//     }
+
+//     return culminationTime ? culminationTime.date : new Date();
+// }
+
+// function calculateMoonUnderfoot(lat: number, lon: number, moonrise: DateTime, moonset: DateTime): { under: DateTime, over: DateTime } {
+//     const observer = new Observer(lat, lon, 0);
+
+//     // Calculate approximate overhead time
+//     const overheadTime = moonrise.plus({ milliseconds: moonset.diff(moonrise).milliseconds / 2 });
+
+//     // Calculate moon position at overhead time
+//     const moonOverhead = Astronomy.MoonPosition(observer, overheadTime.toJSDate());
+
+//     // Calculate underfoot time as 12 hours after the overhead time
+//     const underfootTime = overheadTime.plus({ hours: 12 });
+
+//     // Calculate moon position at underfoot time
+//     const moonUnderfoot = Astronomy.MoonPosition(observer, underfootTime.toJSDate());
+
+//     return { under: DateTime.fromJSDate(moonUnderfoot.time), over: DateTime.fromJSDate(moonOverhead.time) };
+// }
 
 // https://www.fishing.net.nz/fishing-advice/general-articles/understanding-bite-times/#:~:text=He%20concluded%20that%20the%20major,normal)%20at%20moonrise%20and%20moonset.
 
@@ -180,11 +265,17 @@ export async function biteTimes(timeZone: string, caughtWhen: DateTime, latitude
     const minorBiteTimes: IBiteTime[] = [];
     
     // Calculate major bite times (moon overhead and underfoot)
-    if (moonTimes.rise && moonTimes.set && moonrise && moonset) {
+    if (moonTimes.rise && moonTimes.set && moonrise && moonset) {        
         const moonOver = moonrise.plus({ milliseconds: moonset.diff(moonrise).milliseconds / 2 });
         console.log(`moonOver: ${moonOver}`);
         majorBiteTimes.push({ start: moonOver.minus({ hours: 1 }), end: moonOver.plus({ hours: 1 }) });
         majorBiteTimes.push({ start: moonOver.minus({ hours: 1 }).plus({hours: 12}), end: moonOver.plus({ hours: 1 }).plus({hours: 12}) });
+
+        const posTimes = getMoonTransitTimes(latitude, longitude, today);
+        console.log(`Moon Over: ${posTimes.over}`);
+        console.log(`Moon Under: ${posTimes.under}`);
+        majorBiteTimes.push({ start: posTimes.over.minus({ hours: 1 }), end: posTimes.over.plus({ hours: 1 }) });
+        majorBiteTimes.push({ start: posTimes.under.minus({ hours: 1 }), end: posTimes.under.plus({ hours: 1 }) });
     }
 
     // Calculate minor bite times (moonrise and moonset)
@@ -208,10 +299,3 @@ export async function biteTimes(timeZone: string, caughtWhen: DateTime, latitude
 
     return { moonPhase: moon, majorBiteTimes, minorBiteTimes, sunrise, sunset, timeToSunrise, timeToSunset };
 }
-
-const latitude = -36.8485;
-const longitude = 174.7633;
-
-biteTimes('America/New_York', DateTime.now(), latitude, longitude).then(result => {
-    console.log(result);
-});
