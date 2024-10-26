@@ -1,26 +1,24 @@
-// import SunCalc, { GetTimesResult } from 'suncalc';
-import { IBiteTime, IBiteTimesDetails } from '../Models/lambda';
 import { DateTime } from 'luxon';
-import { DateConverter } from '../Helpers/DateConverter';
 import * as Astronomy from 'astronomy-engine';
 
-export interface GetLocalTimesResult {
-    dawn: DateTime;
-    dusk: DateTime;
-    goldenHour: DateTime;
-    goldenHourEnd: DateTime;
-    nadir: DateTime;
-    nauticalDawn: DateTime;
-    nauticalDusk: DateTime;
-    night: DateTime;
-    nightEnd: DateTime;
-    solarNoon: DateTime;
-    sunrise: DateTime;
-    sunriseEnd: DateTime;
-    sunset: DateTime;
-    sunsetStart: DateTime;
+export interface IBite {
+    start: DateTime;
+    end: DateTime;
 }
 
+export interface IBiteDetails {
+    moonPhase: string;
+    majorBiteTimes: IBite[];
+    minorBiteTimes: IBite[];
+    sunrise: DateTime;
+    sunset: DateTime;
+    moonrise?: DateTime;
+    moonset?: DateTime;
+    moonover?: DateTime;
+    moonunder?: DateTime;
+    timeToSunrise?: string;
+    timeToSunset?: string;
+}
 interface IMoonTimes {
     under: DateTime;
     over: DateTime;
@@ -175,7 +173,7 @@ function getMoonTransitTimes(latitude: number, longitude: number, date: Date): I
 //17:31 - 05:00 = 12:31
 //16:32 - 04:12 = 12:20
 
-export async function biteTimes(timeZone: string, caughtWhen: DateTime, latitude: number, longitude: number): Promise<IBiteTimesDetails> {
+export async function biteTimes(timeZone: string, caughtWhen: DateTime, latitude: number, longitude: number): Promise<IBiteDetails> {
     const today = caughtWhen.minus({ hours: 2 }).toJSDate();
     console.log(`Today: ${today}`);
 
@@ -184,8 +182,8 @@ export async function biteTimes(timeZone: string, caughtWhen: DateTime, latitude
     const sunTimes = calcSunTimes(latitude, longitude, today);
     console.log(`Moon Times: ${moonTimes.rise} - ${moonTimes.set}`);
     
-    const majorBiteTimes: IBiteTime[] = [];
-    const minorBiteTimes: IBiteTime[] = [];
+    const majorBiteTimes: IBite[] = [];
+    const minorBiteTimes: IBite[] = [];
     
     const posTimes = getMoonTransitTimes(latitude, longitude, today);
     majorBiteTimes.push({ start: posTimes.over.minus({ hours: 1 }), end: posTimes.over.plus({ hours: 1 }) });

@@ -1,6 +1,6 @@
 import { injectable } from 'tsyringe';
 import { HttpWrapper } from '../Functional/HttpWrapper';
-import { FishSize, IUpdateCatchDetails, ICatchDetails, IDynamoDbCatch, DynamoDbCatch, INewCatch, NewCatch, CatchDetails } from '../Models/lambda';
+import { FishSize, IUpdateCatchDetails, ICatchDetails, IDynamoDbCatch, DynamoDbCatch, INewCatch, NewCatch, CatchDetails, IBiteTime } from '../Models/lambda';
 import { DynamoDbService } from './DynamoDbService';
 import { IdGenerator } from '../Helpers/IdGenerator';
 import { DateConverter } from '../Helpers/DateConverter';
@@ -97,14 +97,20 @@ export class CatchDbService extends DynamoDbService<IDynamoDbCatch> {
             ...c,
             BiteInfo: {
                 moonPhase: biteInfo.moonPhase,
-                majorBiteTimes: biteInfo.majorBiteTimes,
-                minorBiteTimes: biteInfo.minorBiteTimes,
-                sunrise: DateConverter.convertUtcToLocal(biteInfo.sunrise,timeZone),
-                sunset: DateConverter.convertUtcToLocal(biteInfo.sunset,timeZone),
-                moonrise: biteInfo.moonrise != undefined ? DateConverter.convertUtcToLocal(biteInfo.moonrise,timeZone) : undefined, 
-                moonset: biteInfo.moonset ? DateConverter.convertUtcToLocal(biteInfo.moonset,timeZone) : undefined, 
-                moonover: biteInfo.moonover ? DateConverter.convertUtcToLocal(biteInfo.moonover,timeZone) : undefined,
-                moonunder: biteInfo.moonunder ? DateConverter.convertUtcToLocal(biteInfo.moonunder,timeZone) : undefined,
+                majorBiteTimes: biteInfo.majorBiteTimes.map(t => ({
+                    start: DateConverter.isoToString(DateConverter.convertUtcToLocal(t.start,timeZone)),
+                    end:   DateConverter.isoToString(DateConverter.convertUtcToLocal(t.end,  timeZone))
+                    })) as IBiteTime[],                             
+                minorBiteTimes: biteInfo.minorBiteTimes.map(t => ({
+                    start: DateConverter.isoToString(DateConverter.convertUtcToLocal(t.start,timeZone)),
+                    end:   DateConverter.isoToString(DateConverter.convertUtcToLocal(t.end,  timeZone))
+                 })) as IBiteTime[],                             
+                sunrise: DateConverter.isoToString(DateConverter.convertUtcToLocal(biteInfo.sunrise,timeZone)),
+                sunset: DateConverter.isoToString(DateConverter.convertUtcToLocal(biteInfo.sunset,timeZone)),
+                moonrise: biteInfo.moonrise != undefined ? DateConverter.isoToString(DateConverter.convertUtcToLocal(biteInfo.moonrise,timeZone)) : undefined, 
+                moonset: biteInfo.moonset ? DateConverter.isoToString(DateConverter.convertUtcToLocal(biteInfo.moonset,timeZone)) : undefined, 
+                moonover: biteInfo.moonover ? DateConverter.isoToString(DateConverter.convertUtcToLocal(biteInfo.moonover,timeZone)) : undefined,
+                moonunder: biteInfo.moonunder ? DateConverter.isoToString(DateConverter.convertUtcToLocal(biteInfo.moonunder,timeZone)) : undefined,
                 timeToSunrise: biteInfo.timeToSunrise,
                 timeToSunset: biteInfo.timeToSunset
             }

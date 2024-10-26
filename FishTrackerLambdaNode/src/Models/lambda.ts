@@ -4,20 +4,20 @@ import { DateConverter } from '../Helpers/DateConverter';
 // Combinedexport interfaces.ts
 
 export interface IBiteTime {
-    start: DateTime;
-    end: DateTime;
+    start: string;
+    end: string;
 }
 
 export interface IBiteTimesDetails {
     moonPhase: string;
     majorBiteTimes: IBiteTime[];
     minorBiteTimes: IBiteTime[];
-    sunrise: DateTime;
-    sunset: DateTime;
-    moonrise?: DateTime;
-    moonset?: DateTime;
-    moonover?: DateTime;
-    moonunder?: DateTime;
+    sunrise: string;
+    sunset: string;
+    moonrise?: string;
+    moonset?: string;
+    moonover?: string;
+    moonunder?: string;
     timeToSunrise?: string;
     timeToSunset?: string;
 }
