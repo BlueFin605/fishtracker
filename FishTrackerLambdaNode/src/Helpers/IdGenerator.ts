@@ -15,12 +15,7 @@ export class IdGenerator {
     static generatePartTripId(start: DateTime): string {
         const pad = (num: number): string => num.toString().padStart(2, '0');
         const month = pad(start.month);
-        const day = pad(start.day);
-        const hours = pad(start.hour);
-        const minutes = pad(start.minute);
-        const seconds = pad(start.second);
-        const year = start.year.toString().slice(-2);
-        return `${month}${day}:${hours}${minutes}${seconds}-${year}`;
+        return `${month}`;
     }
     
     static generateTripKey(subject: string, tripId: string): string {
