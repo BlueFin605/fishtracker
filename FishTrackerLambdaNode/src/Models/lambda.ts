@@ -66,6 +66,7 @@ export interface IUpdateTripDetails {
     tags?: Set<ITripTags>;
     species?: string[];
     defaultSpecies?: string;
+    moonPhase?: string;
 }
 
 export interface ITripDetails {
@@ -79,6 +80,7 @@ export interface ITripDetails {
     tags: ITripTags[];
     species: string[];
     defaultSpecies: string;
+    moonPhase: string;
 }
 
 export class TripDetails implements ITripDetails {
@@ -92,6 +94,7 @@ export class TripDetails implements ITripDetails {
     tags: ITripTags[];
     species: string[];
     defaultSpecies: string;
+    moonPhase: string;
 
     constructor(
         subject: string,
@@ -103,7 +106,8 @@ export class TripDetails implements ITripDetails {
         rating: string,
         tags: ITripTags[],
         species: string[],
-        defaultSpecies: string
+        defaultSpecies: string,
+        moonPhase: string
     ) {
         this.subject = subject;
         this.tripId = tripId;
@@ -115,6 +119,7 @@ export class TripDetails implements ITripDetails {
         this.tags = tags;
         this.species = species;
         this.defaultSpecies = defaultSpecies;
+        this.moonPhase = moonPhase;
     }
 }
 
@@ -389,6 +394,7 @@ export interface IDynamoDbTrip extends IVersionedRecord {
     Tags: ITripTags[];
     Species: string[];
     DefaultSpecies: string;
+    MoonPhase: string;
 }
 
 export class DynamoDbTrip implements IDynamoDbTrip {
@@ -402,6 +408,7 @@ export class DynamoDbTrip implements IDynamoDbTrip {
     Tags: ITripTags[];
     Species: string[];
     DefaultSpecies: string;
+    MoonPhase: string;
     DynamoDbVersion?: number;
 
     constructor(
@@ -415,6 +422,7 @@ export class DynamoDbTrip implements IDynamoDbTrip {
         tags: ITripTags[],
         species: string[],
         defaultSpecies: string,
+        moonPhase: string,
         dynamoDbVersion?: number
     ) {
         this.Subject = subject;
@@ -427,6 +435,7 @@ export class DynamoDbTrip implements IDynamoDbTrip {
         this.Tags = tags;
         this.Species = species;
         this.DefaultSpecies = defaultSpecies;
+        this.MoonPhase = moonPhase;
         this.DynamoDbVersion = dynamoDbVersion;
     }
 
@@ -442,7 +451,8 @@ export class DynamoDbTrip implements IDynamoDbTrip {
             TripRating.NonRated,
             [],
             [],
-            ''
+            '',
+            'Unknown'
         );
     }
 }

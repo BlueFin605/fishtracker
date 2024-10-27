@@ -87,7 +87,6 @@ export class CatchDbService extends DynamoDbService<IDynamoDbCatch> {
         );
     }
 
-
     static async addBiteTimes(c: IDynamoDbCatch, timeZone: string): Promise<HttpWrapper<IDynamoDbCatch>> {
         const biteInfo = await biteTimes(timeZone, DateConverter.isoFromString(c.CaughtWhen), c.CaughtLocation.latitude, c.CaughtLocation.longitude);
         if (!biteInfo)

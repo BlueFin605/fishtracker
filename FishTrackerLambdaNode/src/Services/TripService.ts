@@ -46,12 +46,13 @@ export class TripService {
     }
 
     public async newTrip(subject: string, newTrip: INewTrip): Promise<HttpWrapper<ITripDetails>> {
-        return (await (await HttpWrapper.Init(newTrip))
+        return (await (await (await HttpWrapper.Init(newTrip))
             .ValidateInput(c => {
                 return newTrip.timeZone != null ? null : Results.NotFound('Must supply timezone');
             })
             .Set(TripDbService.fillInMissingData(newTrip))
             .Map(c => TripDbService.createNewDynamoRecord(c, subject))
+            .MapAsync(c => TripDbService.addBiteTimes(c)))
             .MapAsync(c => this.tripService.createRecord(c)))
             .Map(d => TripDbService.toTripDetails(d));
     }

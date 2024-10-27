@@ -65,7 +65,7 @@ function calcSunTimes(lat: number, lon: number, date: Date) : IRiseSetTimes {
     return calcMTimes(Astronomy.Body.Sun, lat, lon, date);
 }
 
-function calcMoonPhase(date: Date): string {
+export function calcMoonPhase(date: Date): string {
     const diff = date.getTime() - new Date('2001-01-01').getTime();
     const days = diff / (1000 * 60 * 60 * 24);
     const lunations = days / 29.53058867;

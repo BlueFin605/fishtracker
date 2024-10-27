@@ -7,6 +7,7 @@ import { IdGenerator } from '../Helpers/IdGenerator';
 import { DateConverter } from '../Helpers/DateConverter';
 import { DynamoDbHelper } from './AWSWrapper';
 import { StringToEnum, EnumToString } from '../Http/serialisation';
+import { calcMoonPhase, IBiteDetails } from '../Services/BiteTimes';
 
 @injectable()
 export class TripDbService extends DynamoDbService<IDynamoDbTrip> {
@@ -37,6 +38,7 @@ export class TripDbService extends DynamoDbService<IDynamoDbTrip> {
             Array.isArray(trip.tags) ? trip.tags : [...record.Tags],
             trip.species ?? record.Species,
             trip.defaultSpecies ?? record.DefaultSpecies,
+            trip.moonPhase ?? record.MoonPhase,
             record.DynamoDbVersion
         );
     }
@@ -53,6 +55,7 @@ export class TripDbService extends DynamoDbService<IDynamoDbTrip> {
             [...trip.tags],
             trip.species,
             trip.defaultSpecies,
+            trip.moonPhase,
             record.DynamoDbVersion
         );
     }
@@ -71,6 +74,7 @@ export class TripDbService extends DynamoDbService<IDynamoDbTrip> {
             Array.isArray(trip.tags) ? trip.tags : Array.from(trip.tags ?? record.Tags),
             record.Species,
             record.DefaultSpecies,
+            record.MoonPhase,
             record.DynamoDbVersion
         );
     }
@@ -99,8 +103,17 @@ export class TripDbService extends DynamoDbService<IDynamoDbTrip> {
             [...(newTrip.tags ?? [])],
             newTrip.species ?? [],
             newTrip.defaultSpecies ?? '',
+            '',
             undefined
         );
+    }
+
+
+    static async addBiteTimes(c: IDynamoDbTrip): Promise<HttpWrapper<IDynamoDbTrip>> {
+        return HttpWrapper.Ok({
+            ...c,
+            MoonPhase: calcMoonPhase(new Date(c.StartTime))
+        });
     }
 
     static toTripDetails(record: IDynamoDbTrip): ITripDetails {
@@ -114,7 +127,8 @@ export class TripDbService extends DynamoDbService<IDynamoDbTrip> {
             EnumToString(TripRating, record.Rating) ?? "NonRated",
             record.Tags,
             record.Species,
-            record.DefaultSpecies
+            record.DefaultSpecies,
+            record.MoonPhase
         );
     }
 
