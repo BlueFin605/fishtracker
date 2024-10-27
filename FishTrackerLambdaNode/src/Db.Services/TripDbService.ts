@@ -137,4 +137,18 @@ export class TripDbService extends DynamoDbService<IDynamoDbTrip> {
         if (!notes) return append;
         return `${notes}\r\n${append}`;
     }
+
+    async fixupMoonPhase(c: IDynamoDbTrip): Promise<HttpWrapper<IDynamoDbTrip>> {
+        const moonPhase = await calcMoonPhase(new Date(c.StartTime));
+        if (!moonPhase)
+            return HttpWrapper.Ok(c);
+
+        const updated = {
+            ...c,
+            MoonPhase: moonPhase
+        };
+
+        return this.updateTripInDynamoDb(updated);
+    }
+
 }

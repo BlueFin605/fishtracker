@@ -1,16 +1,19 @@
 import { injectable } from 'tsyringe';
 import { HttpWrapper } from '../Functional/HttpWrapper';
 import { IdGenerator } from '../Helpers/IdGenerator';
-import { ICatchDetails, INewCatch, IUpdateCatchDetails, IDynamoDbCatch } from '../Models/lambda';
+import { ICatchDetails, INewCatch, IUpdateCatchDetails, IDynamoDbCatch, IDynamoDbTrip } from '../Models/lambda';
 import { CatchDbService } from '../Db.Services/CatchDbService';
+import { TripDbService } from '../Db.Services/TripDbService';
 import { Results } from '../Http/Result';
 
 @injectable()
 export class CatchService {
     private catchService: CatchDbService;
+    private tripService: TripDbService;
 
-    constructor(catchService: CatchDbService) {
+    constructor(catchService: CatchDbService, tripService: TripDbService) {
         this.catchService = catchService
+        this.tripService = tripService
     }
 
     async getCatch(subject: string, tripId: string, catchId: string): Promise<HttpWrapper<ICatchDetails>> {
@@ -67,6 +70,12 @@ export class CatchService {
             return await (await (await this.catchService.readAllRecords())
                 .MapEachAsync<IDynamoDbCatch, IDynamoDbCatch>(c => this.catchService.fixupBiteTimes(c)))
                 .Map(c => c.map(r => CatchDbService.toCatchDetails(r)));
+        }
+
+        if (action === 'moonphase') {
+            return await (await (await this.tripService.readAllRecords())
+                .MapEachAsync<IDynamoDbTrip, IDynamoDbTrip>(c => this.tripService.fixupMoonPhase(c)))
+                .Map(c => c.map(r => TripDbService.toTripDetails(r)));
         }
         return HttpWrapper.FromResult(Results.NotFound('Unknown action'));
     }    
