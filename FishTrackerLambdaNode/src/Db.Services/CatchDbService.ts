@@ -157,9 +157,10 @@ export class CatchDbService extends DynamoDbService<IDynamoDbCatch> {
         const timeZone = "Pacific/Auckland";
         
         if (!this.isValidCoordinates(c.CaughtLocation.latitude, c.CaughtLocation.longitude)) {
+            console.log(`Invalid coordinates for catch ${c.CatchId} - ${c.CaughtLocation.latitude}, ${c.CaughtLocation.longitude}`);
             return HttpWrapper.Ok(c);
         }
-        
+
         const biteInfo = await biteTimes(timeZone, DateConverter.isoFromString(c.CaughtWhen), c.CaughtLocation.latitude, c.CaughtLocation.longitude);
         if (!biteInfo)
             return HttpWrapper.Ok(c);
