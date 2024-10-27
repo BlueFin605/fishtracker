@@ -38,16 +38,16 @@ function formatTimeDifference(diff: number): string {
     return `${hours}h ${minutes}m`;
 }
 
-function calcMTimes(body: Astronomy.Body, lat: number, lon: number, date: Date) : IRiseSetTimes{
+function calcTimes(body: Astronomy.Body, lat: number, lon: number, date: Date) : IRiseSetTimes{
     const observer = new Astronomy.Observer(lat, lon, 0);
     const time = new Astronomy.AstroTime(date);
 
     // Search for moonrise time
-    const moonrise = Astronomy.SearchRiseSet(Astronomy.Body.Moon, observer, +1, time, 300);
+    const moonrise = Astronomy.SearchRiseSet(body, observer, +1, time, 300);
     const moonriseTime = moonrise ? DateTime.fromJSDate(moonrise.date) : undefined;
 
     // Search for moonset time
-    const moonset = Astronomy.SearchRiseSet(Astronomy.Body.Moon, observer, -1, time, 300);
+    const moonset = Astronomy.SearchRiseSet(body, observer, -1, time, 300);
     const moonsetTime = moonset ? DateTime.fromJSDate(moonset.date) : undefined;
 
     return {
@@ -58,11 +58,11 @@ function calcMTimes(body: Astronomy.Body, lat: number, lon: number, date: Date) 
 
 
 function calcMoonTimes(lat: number, lon: number, date: Date) : IRiseSetTimes{
-    return calcMTimes(Astronomy.Body.Moon, lat, lon, date);
+    return calcTimes(Astronomy.Body.Moon, lat, lon, date);
 }
 
 function calcSunTimes(lat: number, lon: number, date: Date) : IRiseSetTimes {
-    return calcMTimes(Astronomy.Body.Sun, lat, lon, date);
+    return calcTimes(Astronomy.Body.Sun, lat, lon, date);
 }
 
 export function calcMoonPhase(date: Date): string {
@@ -232,3 +232,8 @@ export async function biteTimes(timeZone: string, caughtWhen: DateTime, latitude
 
     return ret;
 }
+
+biteTimes('Pacific/Auckland', DateTime.fromISO('2024-04-14T13:30:00.0000000+12:00'), -36.77763978794035, 174.82790137561403).then(res => {
+    console.log(res);
+    console.log(JSON.stringify(res));
+});
