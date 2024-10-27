@@ -1,4 +1,4 @@
-import { DynamoDBClient, DynamoDBClientConfig, PutItemCommand, GetItemCommand, QueryCommand, UpdateItemCommand, DeleteItemCommand, PutItemCommandInput, GetItemCommandInput, QueryCommandInput, UpdateItemCommandInput, DeleteItemCommandInput } from '@aws-sdk/client-dynamodb';
+import { DynamoDBClient, DynamoDBClientConfig, PutItemCommand, GetItemCommand, QueryCommand, UpdateItemCommand, DeleteItemCommand, PutItemCommandInput, GetItemCommandInput, QueryCommandInput, UpdateItemCommandInput, DeleteItemCommandInput, ScanCommandInput, ScanCommand } from '@aws-sdk/client-dynamodb';
 import { marshall, unmarshall } from '@aws-sdk/util-dynamodb';
 import { HttpWrapper } from '../Functional/HttpWrapper';
 import { Logger } from '@aws-lambda-powertools/logger';
@@ -103,6 +103,33 @@ class DynamoDbService<T extends IVersionedRecord> {
                 return HttpWrapper.NotFound;
             } else {
                 this.logger.error('ReadRecord Unknown Exception', { error });
+                return HttpWrapper.NotFound;
+            }
+        }
+    }
+
+    async readAllRecords(): Promise<HttpWrapper<T[]>> {
+        const params: ScanCommandInput = {
+            TableName: this.tableName
+        };
+
+        try {
+            const command = new ScanCommand(params);
+            const resp = await this.docClient.send(command);
+            this.logger.info('ReadAllRecords Response', { response: resp });
+            if (resp.Items) {
+                const unmarshalledItems: T[] = resp.Items.map(item => DynamoDbService.unmarshallWithOptions(item) as T);
+                return HttpWrapper.Ok(unmarshalledItems);
+            } else {
+                this.logger.info('HttpWrapper.NotFound');
+                return HttpWrapper.NotFound;
+            }
+        } catch (error) {
+            if (error instanceof Error) {
+                this.logger.error('ReadAllRecords Exception', { message: error.message, name: error.name });
+                return HttpWrapper.NotFound;
+            } else {
+                this.logger.error('ReadAllRecords Unknown Exception', { error });
                 return HttpWrapper.NotFound;
             }
         }

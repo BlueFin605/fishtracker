@@ -41,6 +41,7 @@ export class Routes {
         this.router.post('/trip/:tripId/catch', this.newCatch.bind(this));
         this.router.put('/trip/:tripId/catch/:catchId', this.updateCatch.bind(this));
         this.router.patch('/trip/:tripId/catch/:catchId', this.patchCatch.bind(this));
+        this.router.patch('/fixup', this.patchFixup.bind(this));
     }
 
     private getClaimSubject(authorizer: APIGatewayEventDefaultAuthorizerContext): string
@@ -187,4 +188,10 @@ export class Routes {
         const subjectClaim = this.getClaimSubjectFromHeader(req);
         await this.executeService(`PatchCatch subject:[${subjectClaim}] tripId:[${tripId}] catchId:[${catchId}]`, () => this.catchService.patchCatch(subjectClaim, tripId, catchId, updateCatch), res);
     }
-}
+
+    private async patchFixup(req: Request, res: Response) {
+        const action:string = req.query.action as string;
+        const option:string = req.query.option as string;
+        const subjectClaim = this.getClaimSubjectFromHeader(req);
+        await this.executeService(`PatchFixup subject:[${subjectClaim}] action:[${action}] option:[${option}]`, () => this.catchService.patchFixup(subjectClaim, action, option), res);
+    }}

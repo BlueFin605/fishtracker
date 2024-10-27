@@ -1,7 +1,7 @@
 import { injectable } from 'tsyringe';
 import { HttpWrapper } from '../Functional/HttpWrapper';
 import { IdGenerator } from '../Helpers/IdGenerator';
-import { ICatchDetails, INewCatch, IUpdateCatchDetails } from '../Models/lambda';
+import { ICatchDetails, INewCatch, IUpdateCatchDetails, IDynamoDbCatch } from '../Models/lambda';
 import { CatchDbService } from '../Db.Services/CatchDbService';
 import { Results } from '../Http/Result';
 
@@ -61,4 +61,13 @@ export class CatchService {
             .MapAsync(c => this.catchService.updateCatchDetails(c)))
             .Map(c => CatchDbService.toCatchDetails(c));
     }
+
+    async patchFixup(subject: string, action: string, option?: string): Promise<HttpWrapper<any>> {
+        if (action === 'bitetimes') {
+            return await (await (await this.catchService.readAllRecords())
+                .MapEachAsync<IDynamoDbCatch, IDynamoDbCatch>(c => this.catchService.fixupBiteTimes(c)))
+                .Map(c => c.map(r => CatchDbService.toCatchDetails(r)));
+        }
+        return HttpWrapper.FromResult(Results.NotFound('Unknown action'));
+    }    
 }
