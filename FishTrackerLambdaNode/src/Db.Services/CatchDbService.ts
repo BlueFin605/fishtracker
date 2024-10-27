@@ -156,6 +156,14 @@ export class CatchDbService extends DynamoDbService<IDynamoDbCatch> {
     async fixupBiteTimes(c: IDynamoDbCatch): Promise<HttpWrapper<IDynamoDbCatch>> {
         const timeZone = "Pacific/Auckland";
         
+        const wrongCase:any = c.CaughtLocation;
+        if (wrongCase.Latitude != undefined && this.isValidCoordinates(wrongCase.Latitude, wrongCase.Longitude)) {
+            c.CaughtLocation.latitude = wrongCase.Latitude;
+            c.CaughtLocation.longitude = wrongCase.Longitude; 
+            wrongCase.Latitude = undefined;
+            wrongCase.Longitude = undefined;
+        }
+        
         if (!this.isValidCoordinates(c.CaughtLocation.latitude, c.CaughtLocation.longitude)) {
             console.log(`Invalid coordinates for catch ${c.CatchId} - ${c.CaughtLocation.latitude}, ${c.CaughtLocation.longitude}`);
             return HttpWrapper.Ok(c);
