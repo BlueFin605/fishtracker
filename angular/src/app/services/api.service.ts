@@ -139,6 +139,7 @@ export interface TripDetails {
   tags: TripTags[];
   species: string[];
   defaultSpecies: string;
+  moonPhase: string;
 }
 
 export interface EndTripDetails {

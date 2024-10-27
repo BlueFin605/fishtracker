@@ -16,6 +16,7 @@
                 <th>catchSize</th>
                 <th>rating</th>
                 <th>tags</th>
+                <th>Moon Phase</th>
                 <th>Actions</th>
             </tr>
         </thead>
@@ -27,6 +28,7 @@
                 <td>{{ trip.catchSize }}</td>
                 <td>{{ trip.rating }}</td>
                 <td>{{ trip.tags }}</td>
+                <td>{{ trip.moonPhase }}</td>
                 <td>
                     <i class="fas fa-trash" (click)="confirmDeleteTrip(trip.tripId, $event)"></i>
                 </td>
