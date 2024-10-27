@@ -20,9 +20,9 @@ export class TripDbService extends DynamoDbService<IDynamoDbTrip> {
     }
 
     async readRelevantTripsFromDynamoDb(subject: string): Promise<HttpWrapper<IDynamoDbTrip[]>> {
-        const month = new Date().getMonth();
-        const startSortValue = IdGenerator.generateTripKey(subject, (month - 1).toString().padStart(2, '0'));
-        const endSortValue = IdGenerator.generateTripKey(subject, (month + 2).toString().padStart(2, '0'));
+        const now = DateTime.now();
+        const startSortValue = IdGenerator.generatePartTripId(now.minus({ months: 1 }));
+        const endSortValue = IdGenerator.generatePartTripId(now.plus({ months: 2 }));
         return this.readRecordsBetweenSortKeys(subject, startSortValue, endSortValue);
     }
 

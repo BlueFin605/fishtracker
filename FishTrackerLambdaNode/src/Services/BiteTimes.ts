@@ -233,7 +233,7 @@ export async function biteTimes(timeZone: string, caughtWhen: DateTime, latitude
     return ret;
 }
 
-biteTimes('Pacific/Auckland', DateTime.fromISO('2024-04-14T13:30:00.0000000+12:00'), -36.77763978794035, 174.82790137561403).then(res => {
-    console.log(res);
-    console.log(JSON.stringify(res));
-});
+// biteTimes('Pacific/Auckland', DateTime.fromISO('2024-04-14T13:30:00.0000000+12:00'), -36.77763978794035, 174.82790137561403).then(res => {
+//     console.log(res);
+//     console.log(JSON.stringify(res));
+// });
