@@ -236,12 +236,12 @@ export enum FishSize
 }
 
 export enum TripRating {
-    NonRated = 'NonRated',
-    Bust = 'Bust',
-    Okay = 'Okay',
-    Good = 'Good',
-    Fantastic = 'Fantastic',
-    OutOfThisWorld = 'OutOfThisWorld'
+    NonRated,
+    Bust,
+    Okay,
+    Good,
+    Fantastic,
+    OutOfThisWorld
 }
 
 export interface ITripTags {
