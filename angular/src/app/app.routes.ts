@@ -6,12 +6,13 @@ import { TripsComponent } from './pages/trips/trips.component';
 import { NewTripComponent } from './pages/new-trip/new-trip.component';
 import { ProfileComponent} from './pages/profile/profile.component';
 import { CallbackComponent } from './pages/callback/callback.component';
+import { AuthGuard } from './auth.guard';   
 
 export const routes: Routes = [
     { path: 'callback', component: CallbackComponent },
-    { path: 'trip/:tripid', component: TripCatchComponent },
-    { path: 'trips', component: TripsComponent },
-    { path: 'newtrip', component: NewTripComponent },
-    { path: 'debug', component: DebugDisplayComponent },
-    { path: 'profile', component: ProfileComponent }
+    { path: 'trip/:tripid', component: TripCatchComponent, canActivate: [AuthGuard]  },
+    { path: 'trips', component: TripsComponent, canActivate: [AuthGuard]  },
+    { path: 'newtrip', component: NewTripComponent, canActivate: [AuthGuard]  },
+    { path: 'debug', component: DebugDisplayComponent, canActivate: [AuthGuard]  },
+    { path: 'profile', component: ProfileComponent, canActivate: [AuthGuard]  }
 ];
