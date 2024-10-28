@@ -23,7 +23,7 @@ export class CallbackComponent implements OnInit {
       if (code) {
         this.authService.handleAuthCallback(code).subscribe(
           () => {
-            this.router.navigate(['/']); // Redirect to home or another page after successful authentication
+            this.router.navigate(['/trips']); // Redirect to home or another page after successful authentication
           },
           error => {
             console.error('Authentication error', error);

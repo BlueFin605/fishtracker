@@ -7,6 +7,7 @@ import { GoogleMapsLoaderService } from './google-maps-loader.service';
 import { HeaderComponent } from './components/header/header.component';
 import { LoadingService } from './services/loading.service';
 import { LoadingSpinnerComponent } from './loading-spinner/loading-spinner.component';
+import { AuthenticationService } from './services/authentication.service';
 
 @Component({
   selector: 'app-root',
@@ -28,11 +29,18 @@ export class AppComponent implements OnInit {
     private router: Router,
     private zone: NgZone,
     private cdr: ChangeDetectorRef,
-    private loadingService: LoadingService) {
+    private loadingService: LoadingService,
+    private authService: AuthenticationService ) {
     this.loading$ = this.loadingService.loading$;
   }
 
   ngOnInit() {
+    // if (this.authService.isAuthenticated()) {
+    //   this.router.navigate(['/trips']);
+    // } else {
+    //   this.router.navigate(['/landing']);
+    // }
+    
     // this.googleMapsLoader.loadScript().then(() => {
     //   console.log('Google Maps API script loaded');
     //   // Initialize your Google Maps here
