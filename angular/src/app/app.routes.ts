@@ -7,7 +7,7 @@ import { NewTripComponent } from './pages/new-trip/new-trip.component';
 import { ProfileComponent} from './pages/profile/profile.component';
 import { CallbackComponent } from './pages/callback/callback.component';
 import { AuthGuard } from './auth.guard';   
-import { LandingComponent } from './pages/landing/landing.component';
+import { LoginComponent } from './pages/login/login.component';
 
 export const routes: Routes = [
     { path: 'callback', component: CallbackComponent },
@@ -16,7 +16,7 @@ export const routes: Routes = [
     { path: 'newtrip', component: NewTripComponent, canActivate: [AuthGuard]  },
     { path: 'debug', component: DebugDisplayComponent, canActivate: [AuthGuard]  },
     { path: 'profile', component: ProfileComponent, canActivate: [AuthGuard]  },
-    { path: 'landing', component: LandingComponent },
-    { path: '', redirectTo: '/landing', pathMatch: 'full' },
-    { path: '**', redirectTo: '/landing' }    
+    { path: 'login', component: LoginComponent },
+    { path: '', redirectTo: '/login', pathMatch: 'full' },
+    { path: '**', redirectTo: '/login' }    
 ];

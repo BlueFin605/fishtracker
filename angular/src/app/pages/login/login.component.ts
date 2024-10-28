@@ -5,12 +5,12 @@ import { AuthenticationService } from '../../services/authentication.service';
 
 @Component({
   standalone: true,
-  selector: 'app-landing',
-  templateUrl: './landing.component.html',
-  styleUrls: ['./landing.component.css'],
+  selector: 'app-login',
+  templateUrl: './login.component.html',
+  styleUrls: ['./login.component.css'],
   imports: [AuthButtonComponent]
 })
-export class LandingComponent {
+export class LoginComponent {
 
   constructor(private router: Router, private authService: AuthenticationService ) {
   }

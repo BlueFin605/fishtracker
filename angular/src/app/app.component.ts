@@ -38,7 +38,7 @@ export class AppComponent implements OnInit {
     // if (this.authService.isAuthenticated()) {
     //   this.router.navigate(['/trips']);
     // } else {
-    //   this.router.navigate(['/landing']);
+    //   this.router.navigate(['/login']);
     // }
     
     // this.googleMapsLoader.loadScript().then(() => {
