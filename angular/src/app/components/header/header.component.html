@@ -1,7 +1,6 @@
 <ng-container *ngIf="authService.isAuthenticated() ; else loggedOut">
     <header>
         <nav class="nav-links">
-            <a class="nav-link" [routerLink]="['/debug']">Debug</a>
             <a class="nav-link" [routerLink]="['/trips']">Trips</a>
             <a class="nav-link" [routerLink]="['/newtrip']">New Trip</a>
         </nav>
@@ -13,6 +12,7 @@
             </button>
             <mat-menu #menu="matMenu">
               <button mat-menu-item (click)="onPreferences()">Preferences</button>
+              <button mat-menu-item (click)="onDebug()">Debug</button>
               <button mat-menu-item (click)="onLogout()">Log out</button>
               <!-- <app-auth-button></app-auth-button> -->
             </mat-menu>

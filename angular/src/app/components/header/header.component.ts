@@ -42,6 +42,11 @@ export class HeaderComponent {
     // this.router.navigate(['/preferences']);
   }
 
+  onDebug() {
+    // Navigate to preferences page or open preferences dialog
+    this.router.navigate(['/debug']);    
+    // this.router.navigate(['/preferences']);
+  }
   onLogout() {
     // Handle logout logic
     this.authService.signOut();

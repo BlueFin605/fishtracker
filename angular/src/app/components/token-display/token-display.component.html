@@ -1,20 +1,20 @@
 <div class="token-container">
     <div class="token-group">
       <h3>Access Token</h3>
-      <p class="token">{{ access_token }}</p>
+      <!-- <p class="token">{{ access_token }}</p> -->
       <button mat-button (click)="copyToClipboard(access_token)">Copy to Clipboard</button>
       <pre class="token-details">{{ decodedAccessToken | json }}</pre>
     </div>
     <div class="token-group">
       <h3>Id Token</h3>
-      <p class="token">{{ id_token }}</p>
+      <!-- <p class="token">{{ id_token }}</p> -->
       <button mat-button (click)="copyToClipboard(id_token)">Copy to Clipboard</button>
       <pre class="token-details">{{ decodedIdToken | json }}</pre>
     </div>
-    <div class="token-group">
+    <!-- <div class="token-group">
       <h3>Refresh Token</h3>
       <p class="token">{{ refresh_token }}</p>
       <button mat-button (click)="copyToClipboard(refresh_token)">Copy to Clipboard</button>
       <pre class="token-details">{{ decodedRefreshToken | json }}</pre>
-    </div>
+    </div> -->
   </div>
