@@ -1,8 +1,11 @@
 <ng-container *ngIf="authService.isAuthenticated() ; else loggedOut">
     <header>
         <nav class="nav-links">
-            <a class="nav-link" [routerLink]="['/trips']">Trips</a>
-            <a class="nav-link" [routerLink]="['/newtrip']">New Trip</a>
+            <!-- <a class="nav-link" [routerLink]="['/trips']">Trips</a> -->
+            <button class="favicon-button" [routerLink]="['/trips']">
+              <img src="favicon.png" alt="Trips" class="favicon-icon">
+            </button>             
+            <a class="nav-link button-link" [routerLink]="['/newtrip']">Start Trip</a>
         </nav>
         <div class="avatar-menu">
             <button mat-icon-button [matMenuTriggerFor]="menu"  class="avatar-button">

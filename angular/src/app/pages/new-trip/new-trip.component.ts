@@ -67,4 +67,8 @@ export class NewTripComponent implements OnInit {
       }
     });
   }
+
+  onCancel() {
+    this.router.navigate(['/trips']);
+  }  
 }

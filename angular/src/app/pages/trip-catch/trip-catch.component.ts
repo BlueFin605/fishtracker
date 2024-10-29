@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { ApiService, CatchDetails, TripDetails, NewCatch, EndTripDetails, TripRating, FishSize } from '../../services/api.service';
 import { CommonModule } from '@angular/common';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms'; // Add this line
 import { GoogleMapsModule } from '@angular/google-maps'; // Add this line\
 import { GoogleMapsLoaderService } from '../../google-maps-loader.service';
@@ -56,7 +56,8 @@ export class TripCatchComponent implements OnInit {
               private apiService: ApiService,
               private googleMapsLoader: GoogleMapsLoaderService,
               private dateFormatter: DateConversionService,
-              private preferencesService: PreferencesService) {
+              private preferencesService: PreferencesService,
+              private router: Router) {
     this.tripCatch = [];
   }
 
@@ -295,5 +296,10 @@ export class TripCatchComponent implements OnInit {
       return 'Very Large';
     }
     return size;
+  }
+
+
+  onCancel() {
+    this.router.navigate(['/trips']);
   }  
 }

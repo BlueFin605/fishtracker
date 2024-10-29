@@ -1,10 +1,15 @@
-    <div class="advanced">
+<div class="advanced">
     <div class="switch-container">
-        <label class="switch">
-            <input type="checkbox" (change)="toggleMode()" [checked]="isAdvancedMode">
-            <span class="slider round"></span>
-        </label>
-        <span class="switch-label">Advanced</span>
+        <div class="left-section">
+            <label class="switch">
+                <input type="checkbox" (change)="toggleMode()" [checked]="isAdvancedMode">
+                <span class="slider round"></span>
+            </label>
+            <span class="switch-label">Advanced</span>
+        </div>
+        <div class="right-section">
+            <button class="cancel-button" (click)="onCancel()">Cancel</button>
+        </div>
     </div>
 </div>
 
@@ -171,11 +176,12 @@
 <section *ngIf="!showAdvancedMode">
     <!-- Basic Mode Content -->
     <div class="basic-mode">
-      <!-- <h2>Basic Mode</h2> -->
-      <div class="button-container">
-        <div *ngFor="let size of fishSizes" class="button-wrapper">
-          <button  [ngClass]="getButtonClass(size)" (click)="onFishSizeSelected(size)">{{ formatSize(size) }} {{ tripDetails.defaultSpecies }}</button>
+        <!-- <h2>Basic Mode</h2> -->
+        <div class="button-container">
+            <div *ngFor="let size of fishSizes" class="button-wrapper">
+                <button [ngClass]="getButtonClass(size)" (click)="onFishSizeSelected(size)">{{ formatSize(size) }} {{
+                    tripDetails.defaultSpecies }}</button>
+            </div>
         </div>
-      </div>
     </div>
-  </section>
+</section>

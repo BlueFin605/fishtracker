@@ -1,35 +1,41 @@
-<form (ngSubmit)="postTrip()">
+<div class="new-trip-container">
+  <h2>New Trip</h2>
+  <form (ngSubmit)="postTrip()">
     <div>
       <label for="startTime">Start Time:</label>
       <input type="datetime-local" id="startTime" [(ngModel)]="startTime" name="startTime">
     </div>
     <!-- <div>
-      <label for="timeZone">Timezone:</label>
-      <select id="timeZone" name="timeZone" [(ngModel)]="newTrip.timeZone">
-          <option *ngFor="let tz of timeZones" [value]="tz">{{ tz }}</option>
-      </select>
-    </div>         -->
-    <div>
-      <label for="notes">Notes:</label>
-      <textarea id="notes" [(ngModel)]="newTrip.notes" name="notes"></textarea>
-    </div>
-    <div>
+        <label for="timeZone">Timezone:</label>
+        <select id="timeZone" name="timeZone" [(ngModel)]="newTrip.timeZone">
+            <option *ngFor="let tz of timeZones" [value]="tz">{{ tz }}</option>
+        </select>
+      </div>         -->
+      <div class="form-group">
+        <label for="notes">Notes</label>
+        <textarea id="notes" [(ngModel)]="newTrip.notes" name="notes" rows="4"></textarea>
+      </div>    
+      <div>
       <label for="targetSpecies">Default Species:</label>
       <select id="targetSpecies" [(ngModel)]="newTrip.defaultSpecies" name="targetSpecies">
         <option *ngFor="let species of speciesList" [value]="species">{{ species }}</option>
       </select>
-    </div>    
+    </div>
     <div>
       <label for="targetSpecies">Target Species:</label>
       <div class="target-species-box">
-        <app-species-selector [speciesList]="speciesList" [(selectedSpecies)]="newTrip.species"></app-species-selector>      
+        <app-species-selector [speciesList]="speciesList" [(selectedSpecies)]="newTrip.species"></app-species-selector>
       </div>
     </div>
-    <div>
-      <label for="tags">Tags:</label>
-      <select multiple id="tags" [(ngModel)]="newTrip.tags" name="tags">
+    <!-- <div> -->
+      <!-- <label for="tags">Tags:</label> -->
+      <!-- <select multiple id="tags" [(ngModel)]="newTrip.tags" name="tags"> -->
         <!-- Options for tags should be populated here -->
-      </select>
+      <!-- </select> -->
+    <!-- </div> -->
+    <div class="button-group">
+      <button type="submit" class="submit-button">Create Trip</button>
+      <button type="button" class="cancel-button" (click)="onCancel()">Cancel</button>
     </div>
-    <button type="submit">Save Trip</button>
   </form>
+</div>
