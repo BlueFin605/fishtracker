@@ -10,16 +10,15 @@ import { LoadingSpinnerComponent } from './loading-spinner/loading-spinner.compo
 import { AuthenticationService } from './services/authentication.service';
 
 @Component({
-  selector: 'app-root',
-  standalone: true,
-  imports: [
-    CommonModule,
-    RouterOutlet,
-    HeaderComponent,
-    LoadingSpinnerComponent
-  ],
-  templateUrl: './app.component.html',
-  styleUrl: './app.component.css'
+    selector: 'app-root',
+    imports: [
+        CommonModule,
+        RouterOutlet,
+        HeaderComponent,
+        LoadingSpinnerComponent
+    ],
+    templateUrl: './app.component.html',
+    styleUrl: './app.component.css'
 })
 export class AppComponent implements OnInit {
   title = 'fishtracker';

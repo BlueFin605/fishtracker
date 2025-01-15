@@ -4,11 +4,10 @@ import { AuthButtonComponent } from '../../components/auth-button/auth-button.co
 import { AuthenticationService } from '../../services/authentication.service';
 
 @Component({
-  standalone: true,
-  selector: 'app-login',
-  templateUrl: './login.component.html',
-  styleUrls: ['./login.component.css'],
-  imports: [AuthButtonComponent]
+    selector: 'app-login',
+    templateUrl: './login.component.html',
+    styleUrls: ['./login.component.css'],
+    imports: [AuthButtonComponent]
 })
 export class LoginComponent {
 

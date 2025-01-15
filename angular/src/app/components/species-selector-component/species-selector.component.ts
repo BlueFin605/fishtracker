@@ -3,11 +3,10 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 
 @Component({
-  standalone: true,
-  selector: 'app-species-selector',
-  templateUrl: './species-selector.component.html',
-  styleUrls: ['./species-selector.component.css'],
-  imports: [CommonModule, FormsModule]
+    selector: 'app-species-selector',
+    templateUrl: './species-selector.component.html',
+    styleUrls: ['./species-selector.component.css'],
+    imports: [CommonModule, FormsModule]
 })
 export class SpeciesSelector {
   private _selectedSpecies: string[] = [];

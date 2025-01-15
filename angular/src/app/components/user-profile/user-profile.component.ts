@@ -3,11 +3,10 @@ import { CommonModule } from '@angular/common';
 import { AuthenticationService, UserProfile } from '../../services/authentication.service';
 
 @Component({
-  selector: 'app-user-profile',
-  standalone: true,
-  imports: [CommonModule],
-  templateUrl: './user-profile.component.html',
-  styleUrl: './user-profile.component.css'
+    selector: 'app-user-profile',
+    imports: [CommonModule],
+    templateUrl: './user-profile.component.html',
+    styleUrl: './user-profile.component.css'
 })
 export class UserProfileComponent {
   // udets: User | null | undefined;

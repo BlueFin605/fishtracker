@@ -4,11 +4,10 @@ import { CommonModule } from '@angular/common'; // Import CommonModule
 import {AuthenticationService} from '../../services/authentication.service';
 
 @Component({
-  standalone: true,
-  selector: 'app-auth-button',
-  templateUrl: './auth-button.component.html',
-  styleUrls: ['./auth-button.component.css'],
-  imports: [CommonModule] // Add CommonModule to the imports array
+    selector: 'app-auth-button',
+    templateUrl: './auth-button.component.html',
+    styleUrls: ['./auth-button.component.css'],
+    imports: [CommonModule] // Add CommonModule to the imports array
 })
 export class AuthButtonComponent {
   constructor(public auth: AuthenticationService) {}

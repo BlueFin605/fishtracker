@@ -8,17 +8,16 @@ import { CommonModule } from '@angular/common'; // Import CommonModule
 import { AuthenticationService } from '../../services/authentication.service';
 
 @Component({
-  selector: 'app-header',
-  standalone: true,
-  imports: [CommonModule,
-    AuthButtonComponent,
-    RouterLink,
-    MatIconModule,
-    MatMenuModule,
-    MatButtonModule
-  ],
-  templateUrl: './header.component.html',
-  styleUrl: './header.component.css'
+    selector: 'app-header',
+    imports: [CommonModule,
+        AuthButtonComponent,
+        RouterLink,
+        MatIconModule,
+        MatMenuModule,
+        MatButtonModule
+    ],
+    templateUrl: './header.component.html',
+    styleUrl: './header.component.css'
 })
 export class HeaderComponent {
   // userProfile: any = {};

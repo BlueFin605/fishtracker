@@ -3,12 +3,11 @@ import { UserProfileComponent } from '../../components/user-profile/user-profile
 import { TokenDisplayComponent } from '../../components/token-display/token-display.component'; 
 
 @Component({
-  selector: 'app-debug-display',
-  standalone: true,
-  imports: [UserProfileComponent,
-            TokenDisplayComponent],
-  templateUrl: './debug-display.component.html',
-  styleUrl: './debug-display.component.css'
+    selector: 'app-debug-display',
+    imports: [UserProfileComponent,
+        TokenDisplayComponent],
+    templateUrl: './debug-display.component.html',
+    styleUrl: './debug-display.component.css'
 })
 export class DebugDisplayComponent {
 

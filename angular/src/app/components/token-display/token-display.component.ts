@@ -6,15 +6,14 @@ import { AuthenticationService } from '../../services/authentication.service';
 import { jwtDecode } from "jwt-decode";
 
 @Component({
-  selector: 'app-token-display',
-  standalone: true,
-  imports: [
-    // BrowserModule,
-    CommonModule,
-    ClipboardModule
-  ],
-  templateUrl: './token-display.component.html',
-  styleUrls: ['./token-display.component.css']
+    selector: 'app-token-display',
+    imports: [
+        // BrowserModule,
+        CommonModule,
+        ClipboardModule
+    ],
+    templateUrl: './token-display.component.html',
+    styleUrls: ['./token-display.component.css']
 })
 export class TokenDisplayComponent implements OnInit {
   access_token: string;

@@ -8,11 +8,10 @@ import { LoadingService } from '../../services/loading.service';
 import { firstValueFrom } from 'rxjs';
 
 @Component({
-  selector: 'app-trips',
-  standalone: true,
-  imports: [CommonModule, DateFormatModule],
-  templateUrl: './trips.component.html',
-  styleUrl: './trips.component.css'
+    selector: 'app-trips',
+    imports: [CommonModule, DateFormatModule],
+    templateUrl: './trips.component.html',
+    styleUrl: './trips.component.css'
 })
 export class TripsComponent {
   trips: TripDetails[];

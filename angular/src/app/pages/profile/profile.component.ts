@@ -5,11 +5,10 @@ import { SpeciesSelector } from '../../components/species-selector-component/spe
 import { ApiService, ProfileDetails, SettingsDetails } from '../../services/api.service';
 
 @Component({
-  standalone: true,
-  selector: 'app-profile',
-  templateUrl: './profile.component.html',
-  styleUrls: ['./profile.component.css'],
-  imports: [CommonModule, FormsModule, SpeciesSelector]
+    selector: 'app-profile',
+    templateUrl: './profile.component.html',
+    styleUrls: ['./profile.component.css'],
+    imports: [CommonModule, FormsModule, SpeciesSelector]
 })
 export class ProfileComponent implements OnInit {
   profileDetails: ProfileDetails = {

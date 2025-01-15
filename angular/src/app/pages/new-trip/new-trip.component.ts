@@ -10,11 +10,10 @@ import { FishTrackerSettingsService } from '../../services/fish-tracker-settings
 import { SpeciesSelector} from '../../components/species-selector-component/species-selector.component';
 
 @Component({
-  standalone: true,
-  selector: 'app-new-trip',
-  templateUrl: './new-trip.component.html',
-  styleUrls: ['./new-trip.component.css'],
-  imports: [CommonModule, FormsModule, SpeciesSelector]
+    selector: 'app-new-trip',
+    templateUrl: './new-trip.component.html',
+    styleUrls: ['./new-trip.component.css'],
+    imports: [CommonModule, FormsModule, SpeciesSelector]
 })
 export class NewTripComponent implements OnInit {
   newTrip: NewTrip = {

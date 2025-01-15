@@ -11,11 +11,10 @@ import { DateFormatModule } from '../../components/date-format/date-format.modul
 import { PreferencesService } from '../../services/preferences.service';
 
 @Component({
-  standalone: true,
-  selector: 'app-trip-catch',
-  templateUrl: './trip-catch.component.html',
-  styleUrls: ['./trip-catch.component.css'],
-  imports: [CommonModule, FormsModule, GoogleMapsModule, DateFormatModule]
+    selector: 'app-trip-catch',
+    templateUrl: './trip-catch.component.html',
+    styleUrls: ['./trip-catch.component.css'],
+    imports: [CommonModule, FormsModule, GoogleMapsModule, DateFormatModule]
 })
 export class TripCatchComponent implements OnInit {
   currentPositionMapVisible = false;
