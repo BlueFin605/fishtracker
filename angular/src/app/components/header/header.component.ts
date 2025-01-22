@@ -1,5 +1,4 @@
 import { Component, Inject } from '@angular/core';
-import { AuthButtonComponent } from '../auth-button/auth-button.component';
 import { RouterLink, Router } from '@angular/router';
 import { MatIconModule } from '@angular/material/icon';
 import { MatMenuModule } from '@angular/material/menu';
@@ -11,7 +10,6 @@ import { AuthenticationService } from '../../services/authentication.service';
   selector: 'app-header',
   standalone: true,
   imports: [CommonModule,
-    AuthButtonComponent,
     RouterLink,
     MatIconModule,
     MatMenuModule,

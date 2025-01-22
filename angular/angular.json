@@ -67,10 +67,10 @@
           "builder": "@angular-devkit/build-angular:dev-server",
           "configurations": {
             "production": {
-              "browserTarget": "fishtrackerwebsite:build:production"
+              "buildTarget": "fishtrackerwebsite:build:production"
             },
             "development": {
-              "browserTarget": "fishtrackerwebsite:build:development"
+              "buildTarget": "fishtrackerwebsite:build:development"
             }
           },
           "defaultConfiguration": "development"
