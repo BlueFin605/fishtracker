@@ -10,7 +10,6 @@ import { AuthenticationService } from '../../services/authentication.service';
 @Component({
     selector: 'app-header',
     imports: [CommonModule,
-        AuthButtonComponent,
         RouterLink,
         MatIconModule,
         MatMenuModule,
