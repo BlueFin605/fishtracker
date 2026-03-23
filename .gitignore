@@ -400,3 +400,9 @@ environment.development.ts
 
 # JetBrains Rider
 *.sln.iml
+
+# Claude Code
+.claude/
+
+# RepoQL
+.repoql/
