@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef, NgZone } from '@angular/core';
 import { ApiService, CatchDetails, TripDetails, NewCatch, EndTripDetails, TripRating, FishSize } from '../../services/api.service';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -57,7 +57,9 @@ export class TripCatchComponent implements OnInit {
               private googleMapsLoader: GoogleMapsLoaderService,
               private dateFormatter: DateConversionService,
               private preferencesService: PreferencesService,
-              private router: Router) {
+              private router: Router,
+              private cdr: ChangeDetectorRef,
+              private ngZone: NgZone) {
     this.tripCatch = [];
   }
 
@@ -181,33 +183,41 @@ export class TripCatchComponent implements OnInit {
   }
 
   toggleCurrentPositionMapVisibility(event: any) {
-    event.preventDefault();    
-    if (this.currentPositionMapVisible == false) {
-        this.googleMapsLoader.loadScript().then(() => {
+    event.preventDefault();
+    if (this.currentPositionMapVisible) {
+      // If map is visible, close it
+      this.currentPositionMapVisible = false;
+    } else {
+      // If map is hidden, load script and show it
+      this.googleMapsLoader.loadScript().then(() => {
+        this.ngZone.run(() => {
           this.currentPositionMapVisible = true;
+          this.cdr.detectChanges();
           console.log('Google Maps API script loaded');
-          // Initialize your Google Maps here
-        }).catch(error => {
-          console.error('Error loading Google Maps:', error);
         });
+      }).catch(error => {
+        console.error('Error loading Google Maps:', error);
+      });
     }
-    
-    this.currentPositionMapVisible = false;
   }
 
   togglecatchHistoryVisibility(event: any): void {
-    event.preventDefault();    
-    if (this.catchHistoryMapVisible == false) {
-        this.googleMapsLoader.loadScript().then(() => {
+    event.preventDefault();
+    if (this.catchHistoryMapVisible) {
+      // If map is visible, close it
+      this.catchHistoryMapVisible = false;
+    } else {
+      // If map is hidden, load script and show it
+      this.googleMapsLoader.loadScript().then(() => {
+        this.ngZone.run(() => {
           this.catchHistoryMapVisible = true;
+          this.cdr.detectChanges();
           console.log('Google Maps API script loaded');
-          // Initialize your Google Maps here
-        }).catch(error => {
-          console.error('Error loading Google Maps:', error);
         });
+      }).catch(error => {
+        console.error('Error loading Google Maps:', error);
+      });
     }
-    
-    this.catchHistoryMapVisible = false;
   }  
 
   openEndTripModal() {
