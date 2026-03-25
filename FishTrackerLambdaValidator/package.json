@@ -12,14 +12,14 @@
   "dependencies": {
     "auth0": "^2.5.0",
     "aws-jwt-verify": "^4.0.1",
-    "bluebird": "^3.4.6",
+    "bluebird": "^3.7.2",
     "dotenv": "^5.0.1",
-    "jsonwebtoken": "^9.0.2",
+    "jsonwebtoken": "^9.0.3",
     "jwks-rsa": "^1.1.1"
   },
   "devDependencies": {
-    "aws-sdk": "^2.2.48",
-    "lambda-local": "^1.4.8"
+    "aws-sdk": "^2.1693.0",
+    "lambda-local": "^1.7.4"
   },
   "repository": {
     "type": "git",
