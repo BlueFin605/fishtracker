@@ -1,11 +1,70 @@
+.profile-container {
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 16px;
+}
+
+.profile-container h2 {
+  margin-bottom: 16px;
+}
+
+.form-section {
+  margin-bottom: 20px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.form-section:last-of-type {
+  border-bottom: none;
+}
+
+.form-section label {
+  font-size: 1rem;
+  font-weight: 500;
+  color: #1a3a5c;
+  margin-bottom: 2px;
+}
+
+.form-hint {
+  font-size: 0.85rem;
+  color: #999;
+  margin-top: 0;
+  margin-bottom: 10px;
+}
+
+.add-species-row {
+  display: flex;
+  gap: 8px;
+}
+
+.add-species-row input {
+  flex: 1;
+}
+
 .button-group {
   display: flex;
   gap: 12px;
-  margin-top: 16px;
+  margin-top: 20px;
+}
+
+.save-button {
+  flex: 1;
+  padding: 14px 24px;
+  background-color: #2e7d32;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.save-button:hover {
+  background-color: #1b5e20;
 }
 
 .back-button {
-  padding: 12px 24px;
+  padding: 14px 24px;
   background: #fff;
   color: #555;
   border: 2px solid #bdbdbd;
@@ -35,21 +94,6 @@
   color: #b71c1c;
   background: #ffebee;
   border: 1px solid #ef9a9a;
-}
-
-.add-species-section {
-  margin-top: 16px;
-  margin-bottom: 16px;
-}
-
-.add-species-row {
-  display: flex;
-  gap: 8px;
-  margin-top: 6px;
-}
-
-.add-species-row input {
-  flex: 1;
 }
 
 .error-message {

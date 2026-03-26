@@ -133,41 +133,49 @@
         </ul>
     </section>
 
-    <section> <!-- Trip Details -->
+    <section class="trip-details">
         <h2>Trip Details</h2>
-        <div>
-            <strong>Subject:</strong> {{ tripDetails.subject }}
+        <div class="detail-grid">
+            <div class="detail-item">
+                <span class="detail-label">Started</span>
+                <span class="detail-value">{{ tripDetails.startTime | dateFormat }}</span>
+            </div>
+            <div class="detail-item" *ngIf="tripDetails.endTime">
+                <span class="detail-label">Ended</span>
+                <span class="detail-value">{{ tripDetails.endTime | dateFormat }}</span>
+            </div>
+            <div class="detail-item">
+                <span class="detail-label">Catches</span>
+                <span class="detail-value">{{ tripDetails.catchSize }}</span>
+            </div>
+            <div class="detail-item" *ngIf="tripDetails.rating && tripDetails.rating !== 'NonRated'">
+                <span class="detail-label">Rating</span>
+                <span class="detail-value">{{ tripDetails.rating }}</span>
+            </div>
+            <div class="detail-item">
+                <span class="detail-label">Moon Phase</span>
+                <span class="detail-value">{{ tripDetails.moonPhase }}</span>
+            </div>
+            <div class="detail-item">
+                <span class="detail-label">Default Species</span>
+                <span class="detail-value">{{ tripDetails.defaultSpecies }}</span>
+            </div>
         </div>
-        <div>
-            <strong>Trip ID:</strong> {{ tripDetails.tripId }}
+        <div class="detail-tags" *ngIf="tripDetails.species?.length">
+            <span class="detail-label">Species</span>
+            <div class="tag-list">
+                <span class="tag" *ngFor="let specie of tripDetails.species">{{ specie }}</span>
+            </div>
         </div>
-        <div>
-            <strong>Start Time:</strong> {{ tripDetails.startTime | dateFormat }}
+        <div class="detail-tags" *ngIf="tripDetails.tags?.length">
+            <span class="detail-label">Tags</span>
+            <div class="tag-list">
+                <span class="tag" *ngFor="let tag of tripDetails.tags">{{ tag }}</span>
+            </div>
         </div>
-        <div>
-            <strong>End Time:</strong> {{ tripDetails.endTime | dateFormat }}
-        </div>
-        <div>
-            <strong>Notes:</strong><br>
-            <span [innerHTML]="formatNotes(tripDetails.notes)"></span>
-        </div>
-        <div>
-            <strong>Catch Size:</strong> {{ tripDetails.catchSize }}
-        </div>
-        <div>
-            <strong>Rating:</strong> {{ tripDetails.rating }}
-        </div>
-        <div>
-            <strong>Tags:</strong> <span *ngFor="let tag of tripDetails.tags">{{ tag }} </span>
-        </div>
-        <div>
-            <strong>Default Species:</strong> {{ tripDetails.defaultSpecies }}
-        </div>
-        <div>
-            <strong>Target Species:</strong>
-            <ul>
-                <li *ngFor="let specie of tripDetails.species">{{ specie }}</li>
-            </ul>
+        <div class="detail-notes" *ngIf="tripDetails.notes">
+            <span class="detail-label">Notes</span>
+            <div class="notes-content" [innerHTML]="formatNotes(tripDetails.notes)"></div>
         </div>
     </section>
 </section>

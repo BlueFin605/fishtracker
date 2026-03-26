@@ -132,3 +132,69 @@
 .basic-mode .button-medium:hover { background-color: #fff176; }
 .basic-mode .button-large:hover { background-color: #81c784; }
 .basic-mode .button-verylarge:hover { background-color: #4caf50; color: #fff; }
+
+/* ===== Trip Details ===== */
+.trip-details .detail-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0;
+  margin-bottom: 0;
+}
+
+.trip-details .detail-item {
+  padding: 10px 0;
+  border-bottom: 1px solid #f0f0f0;
+  margin-bottom: 0;
+}
+
+.trip-details .detail-label {
+  display: block;
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: #999;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 2px;
+}
+
+.trip-details .detail-value {
+  display: block;
+  font-size: 1rem;
+  color: #212121;
+  font-weight: 400;
+}
+
+.trip-details .detail-tags {
+  padding: 10px 0;
+  border-bottom: 1px solid #f0f0f0;
+  margin-bottom: 0;
+}
+
+.trip-details .tag-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 4px;
+}
+
+.trip-details .tag {
+  display: inline-block;
+  padding: 4px 12px;
+  background: #e8edf2;
+  color: #1a3a5c;
+  border-radius: 16px;
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+
+.trip-details .detail-notes {
+  padding: 10px 0;
+  margin-bottom: 0;
+}
+
+.trip-details .notes-content {
+  margin-top: 4px;
+  color: #333;
+  line-height: 1.5;
+  font-size: 0.95rem;
+}

@@ -1,28 +1,36 @@
-<form (ngSubmit)="saveProfileDetails()">
-  <div>
-    <label for="defaultSpecies">Default Species:</label>
-    <select id="defaultSpecies" [(ngModel)]="profileDetails.defaultSpecies" name="defaultSpecies">
-      <option *ngFor="let species of profileDetails.species" [value]="species">{{ species }}</option>
-    </select>
-  </div>
-  <div>
-    <label for="targetSpecies">Target Species:</label>
-    <div class="target-species-box">
+<div class="profile-container">
+  <h2>Preferences</h2>
+  <form (ngSubmit)="saveProfileDetails()">
+    <div class="form-section">
+      <label for="defaultSpecies">Default Species</label>
+      <p class="form-hint">Used for one-tap catch recording in simple mode.</p>
+      <select id="defaultSpecies" [(ngModel)]="profileDetails.defaultSpecies" name="defaultSpecies">
+        <option *ngFor="let species of profileDetails.species" [value]="species">{{ species }}</option>
+      </select>
+    </div>
+
+    <div class="form-section">
+      <label>Your Species</label>
+      <p class="form-hint">Select the species you typically target. These appear on your trips.</p>
       <app-species-selector [speciesList]="settings.species" [(selectedSpecies)]="profileDetails.species"></app-species-selector>
     </div>
-  </div>
-  <div class="add-species-section">
-    <label>Add a new species:</label>
-    <div class="add-species-row">
-      <input type="text" [(ngModel)]="newSpeciesName" name="newSpeciesName" placeholder="e.g. Kahawai">
-      <button type="button" (click)="addSpecies()">Add</button>
+
+    <div class="form-section">
+      <label>Add a New Species</label>
+      <p class="form-hint">Can't find your species? Add it for everyone to use.</p>
+      <div class="add-species-row">
+        <input type="text" [(ngModel)]="newSpeciesName" name="newSpeciesName" placeholder="e.g. Kahawai" (keyup.enter)="addSpecies()">
+        <button type="button" (click)="addSpecies()">Add</button>
+      </div>
+      <div class="error-message" *ngIf="addSpeciesError">{{ addSpeciesError }}</div>
     </div>
-    <div class="error-message" *ngIf="addSpeciesError">{{ addSpeciesError }}</div>
-  </div>
-  <div class="save-message success" *ngIf="saveSuccess">Profile saved.</div>
-  <div class="save-message error" *ngIf="saveError">Failed to save profile. Please try again.</div>
-  <div class="button-group">
-    <button type="submit">Save Profile</button>
-    <button type="button" class="back-button" (click)="goBack()">Back</button>
-  </div>
-</form>
+
+    <div class="save-message success" *ngIf="saveSuccess">Profile saved.</div>
+    <div class="save-message error" *ngIf="saveError">Failed to save profile. Please try again.</div>
+
+    <div class="button-group">
+      <button type="submit" class="save-button">Save</button>
+      <button type="button" class="back-button" (click)="goBack()">Back</button>
+    </div>
+  </form>
+</div>
