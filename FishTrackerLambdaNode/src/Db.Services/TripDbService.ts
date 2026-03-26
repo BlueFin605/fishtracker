@@ -23,7 +23,23 @@ export class TripDbService extends DynamoDbService<IDynamoDbTrip> {
         const now = DateTime.now();
         const startSortValue = IdGenerator.generatePartTripId(now.minus({ months: 1 }));
         const endSortValue = IdGenerator.generatePartTripId(now.plus({ months: 2 }));
-        return this.readRecordsBetweenSortKeys(subject, startSortValue, endSortValue);
+
+        // When the seasonal window wraps across the year boundary (e.g., Nov→Feb),
+        // startSortValue > endSortValue lexicographically ("11" > "02").
+        // DynamoDB BETWEEN requires start <= end, so split into two queries:
+        // start→"12" (end of year) and "01"→end (start of year), then merge.
+        if (startSortValue > endSortValue) {
+            const firstHalf = await this.readRecordsBetweenSortKeys(subject, startSortValue, '12\uffff');
+            const secondHalf = await this.readRecordsBetweenSortKeys(subject, '01', endSortValue + '\uffff');
+
+            const firstTrips = firstHalf.continue ? firstHalf.value ?? [] : [];
+            const secondTrips = secondHalf.continue ? secondHalf.value ?? [] : [];
+
+            const merged = [...firstTrips, ...secondTrips];
+            return merged.length > 0 ? HttpWrapper.Ok(merged) : HttpWrapper.NotFound;
+        }
+
+        return this.readRecordsBetweenSortKeys(subject, startSortValue, endSortValue + '\uffff');
     }
 
     static patchTrip(record: IDynamoDbTrip, trip: IUpdateTripDetails): IDynamoDbTrip {
