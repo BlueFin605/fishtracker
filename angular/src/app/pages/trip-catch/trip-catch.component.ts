@@ -50,7 +50,8 @@ export class TripCatchComponent implements OnInit {
   sizeOptions = Object.values(FishSize);
 
   isAdvancedMode: boolean = true;
-  fishSizes = Object.values(FishSize); // Use the FishSize enum
+  fishSizes = Object.values(FishSize);
+  activeSpecies: string = '';
 
   constructor(private route: ActivatedRoute, 
               private apiService: ApiService,
@@ -101,9 +102,14 @@ export class TripCatchComponent implements OnInit {
   fetchTripDetails(tripid: string) {
     this.apiService.getTrip(tripid).subscribe(data => {
       this.tripDetails = data;
+      this.activeSpecies = data.defaultSpecies;
       this.isAdvancedMode = false;
       console.log(`trip rating[${this.tripDetails.rating}]`);
     });
+  }
+
+  selectSpecies(species: string) {
+    this.activeSpecies = species;
   }
   
   fetchCatches(tripid: string) {
@@ -229,16 +235,17 @@ export class TripCatchComponent implements OnInit {
   }
   
   onFishSizeSelected(size: FishSize) {
+    const species = this.activeSpecies || this.tripDetails.defaultSpecies;
     this.getCurrentLocation().then((position) => {
       const mycatch: NewCatch = {
        timeZone: this.newCatch.timeZone,
        caughtWhen: this.dateFormatter.createLocalDate(new Date(), this.newCatch.timeZone),
-       speciesId: this.tripDetails.defaultSpecies,
+       speciesId: species,
        caughtSize: size,
        caughtLocation: { latitude: position.lat, longitude: position.lng },
        caughtLength: 0
      }
-    
+
      this.apiService.postCatch(this.tripId, mycatch).subscribe({
        next: (response) => {
          console.log('Catch saved successfully', response);
@@ -248,11 +255,11 @@ export class TripCatchComponent implements OnInit {
            lng: response.caughtLocation.longitude
          };
          this.catchHistoryMapMarkerPosition.push(markerPosition);
-    
+         this.activeSpecies = this.tripDetails.defaultSpecies;
        },
        error: (error) => {
          console.error('Error saving catch', error);
-         // Handle error, e.g., show an error message
+         this.activeSpecies = this.tripDetails.defaultSpecies;
        }
      });
     }).catch((error) => {

@@ -176,13 +176,19 @@
 </section>
 
 <section *ngIf="!showAdvancedMode">
-    <!-- Basic Mode Content -->
     <div class="basic-mode">
-        <!-- <h2>Basic Mode</h2> -->
+        <div class="species-buttons" *ngIf="tripDetails.species && tripDetails.species.length > 1">
+            <button *ngFor="let species of tripDetails.species"
+                    class="species-select-button"
+                    [class.species-active]="activeSpecies === species"
+                    [class.species-default]="species === tripDetails.defaultSpecies && activeSpecies === species"
+                    (click)="selectSpecies(species)">
+                {{ species }}
+            </button>
+        </div>
         <div class="button-container">
             <div *ngFor="let size of fishSizes" class="button-wrapper">
-                <button [ngClass]="getButtonClass(size)" (click)="onFishSizeSelected(size)">{{ formatSize(size) }} {{
-                    tripDetails.defaultSpecies }}</button>
+                <button [ngClass]="getButtonClass(size)" (click)="onFishSizeSelected(size)">{{ formatSize(size) }} {{ activeSpecies || tripDetails.defaultSpecies }}</button>
             </div>
         </div>
     </div>
