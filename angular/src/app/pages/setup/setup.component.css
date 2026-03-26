@@ -1,0 +1,86 @@
+.setup-wizard {
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.setup-wizard h1 {
+  text-align: center;
+  margin-bottom: 8px;
+}
+
+.setup-wizard h2 {
+  margin-bottom: 4px;
+}
+
+.setup-wizard p {
+  color: #666;
+  margin-bottom: 16px;
+}
+
+.add-species-section {
+  margin-top: 16px;
+}
+
+.add-species-row {
+  display: flex;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.add-species-row input {
+  flex: 1;
+  padding: 8px;
+  font-size: 16px;
+}
+
+.add-species-row button {
+  padding: 8px 16px;
+  font-size: 16px;
+}
+
+.default-species-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 12px;
+  margin: 16px 0;
+}
+
+.species-button {
+  padding: 16px;
+  font-size: 18px;
+  border: 2px solid #ccc;
+  border-radius: 8px;
+  background: #fff;
+  cursor: pointer;
+  min-height: 56px;
+}
+
+.species-button.selected {
+  border-color: #3f51b5;
+  background: #e8eaf6;
+  font-weight: bold;
+}
+
+.primary-button {
+  display: block;
+  width: 100%;
+  padding: 16px;
+  margin-top: 24px;
+  font-size: 18px;
+  background: #3f51b5;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.primary-button:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+}
+
+.error-message {
+  color: #c62828;
+  margin-top: 8px;
+}
