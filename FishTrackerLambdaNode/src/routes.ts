@@ -29,6 +29,7 @@ export class Routes {
         this.router.patch('/profile', this.updateProfile.bind(this));
         this.router.get('/settings', this.getSettings.bind(this));
         this.router.patch('/settings', this.updateSettings.bind(this));
+        this.router.post('/settings/species', this.addSpecies.bind(this));
         this.router.get('/trip', this.getAllTrips.bind(this));
         this.router.get('/trip/:tripId', this.getTrip.bind(this));
         this.router.delete('/trip/:tripId', this.deleteTrip.bind(this));
@@ -109,6 +110,12 @@ export class Routes {
         const settings = req.body as ISettingsDetails;
         const subjectClaim = this.getClaimSubjectFromHeader(req);
         await this.executeService(`UpdateSettings subject:[${subjectClaim}]`, () => this.settingsService.updateSettings(settings), res);
+    }
+
+    private async addSpecies(req: Request, res: Response) {
+        const { species } = req.body as { species: string };
+        const subjectClaim = this.getClaimSubjectFromHeader(req);
+        await this.executeService(`AddSpecies subject:[${subjectClaim}] species:[${species}]`, () => this.settingsService.addSpecies(species), res);
     }
 
     private async getAllTrips(req: Request, res: Response) {

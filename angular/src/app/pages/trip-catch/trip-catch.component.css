@@ -2,14 +2,13 @@
     flex: 1; /* Ensure each button wrapper takes equal space */
 }
 
-.basic-mode button {
+.basic-mode .button-container button {
     display: block;
-    width: calc(100% - 10px); /* Subtracting 10px to account for the 5px border on each side */
-    height: 15vh; /* Each button takes 20% of the viewport height */
-    /* border: 5px solid black; Add the 5px border */
-    box-sizing: border-box; /* Ensure padding and border are included in the element's total width and height */
-    margin: 0; /* Remove any default margin */
-    padding: 10px; /* Optional: Add padding for better appearance */
+    width: calc(100% - 10px);
+    height: 15vh;
+    box-sizing: border-box;
+    margin: 0;
+    padding: 10px;
 }
 
 /* Specific button sizes with corresponding colors and text sizes */
@@ -36,6 +35,34 @@
 .basic-mode .button-verylarge {
     /* background-color: #008000; Green */
     font-size: 22px; /* Slightly larger */
+}
+
+.species-buttons {
+    display: flex;
+    gap: 8px;
+    padding: 8px 5px;
+    flex-wrap: wrap;
+}
+
+.species-select-button {
+    flex: 1;
+    min-width: 80px;
+    min-height: 28px;
+    font-size: 18px;
+    font-weight: 500;
+    padding: 6px 16px;
+    border: 3px solid #999;
+    border-radius: 8px;
+    background: #f5f5f5;
+    color: #333;
+    cursor: pointer;
+}
+
+.species-select-button.species-active {
+    border-color: #3f51b5;
+    background: #3f51b5;
+    color: #fff;
+    font-weight: bold;
 }
 
 .advanced {

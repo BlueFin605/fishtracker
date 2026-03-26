@@ -24,4 +24,46 @@ export class SettingsService {
             .MapAsync(c => this.settingsService.updateSettingsInDynamoDb(c)))
             .Map(c => SettingsDbService.toSettingsDetails(c));
     }
+
+    public async addSpecies(speciesName: string): Promise<HttpWrapper<ISettingsDetails>> {
+        const normalised = SettingsService.titleCase(speciesName.trim());
+        if (!normalised) {
+            return HttpWrapper.NotFound;
+        }
+
+        const maxRetries = 3;
+        for (let attempt = 0; attempt < maxRetries; attempt++) {
+            const settingsResult = await (await this.settingsService.readRecord("global"))
+                .OnResultAsync(404, () => this.settingsService.createRecord(SettingsDbService.buildDefault()));
+
+            if (!settingsResult.continue || !settingsResult.value) {
+                return settingsResult.Map(c => SettingsDbService.toSettingsDetails(c));
+            }
+
+            const existing = settingsResult.value.Species;
+            const duplicate = existing.find(s => s.toLowerCase() === normalised.toLowerCase());
+            if (duplicate) {
+                return HttpWrapper.Ok(SettingsDbService.toSettingsDetails(settingsResult.value));
+            }
+
+            const updated = SettingsDbService.patchSettings(settingsResult.value, {
+                species: [...existing, normalised]
+            });
+
+            const writeResult = await this.settingsService.updateSettingsInDynamoDb(updated);
+            if (writeResult.continue) {
+                return writeResult.Map(c => SettingsDbService.toSettingsDetails(c));
+            }
+
+            // Version conflict — retry
+        }
+
+        return HttpWrapper.NotFound;
+    }
+
+    private static titleCase(str: string): string {
+        return str.replace(/\w\S*/g, word =>
+            word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
+        );
+    }
 }

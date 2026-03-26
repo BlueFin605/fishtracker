@@ -1,10 +1,9 @@
 import { Component, OnInit } from '@angular/core';
-import { ApiService, NewTrip } from '../../services/api.service';
-import { FormsModule } from '@angular/forms'; // Add this line
+import { ApiService, NewTrip, TripDetails, ProfileDetails } from '../../services/api.service';
+import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
-import { Router } from '@angular/router'; // Add this line
+import { Router } from '@angular/router';
 import { DateConversionService } from '../../services/date-conversion.service';
-// import * as moment from 'moment-timezone';
 import { PreferencesService } from '../../services/preferences.service';
 import { FishTrackerSettingsService } from '../../services/fish-tracker-settings.service';
 import { SpeciesSelector} from '../../components/species-selector-component/species-selector.component';
@@ -29,20 +28,69 @@ export class NewTripComponent implements OnInit {
   startTime: Date | undefined = new Date();
   speciesList: string[] = [];
 
-  constructor(private apiService: ApiService, 
-              private router: Router, 
+  constructor(private apiService: ApiService,
+              private router: Router,
               private dateFormatter: DateConversionService,
               private preferencesService: PreferencesService,
               private settingsService: FishTrackerSettingsService) {}
 
   ngOnInit() {
-    console.log(`ngOnInit`);
     this.startTime = new Date();
-    this.newTrip.timeZone = this.preferencesService.getTimeZone();   
-    this.settingsService.profile.subscribe(s => { 
-                                                 this.speciesList = s.species;
-                                                 this.newTrip.species = s.species;
-                                                 this.newTrip.defaultSpecies = s.defaultSpecies;});
+    this.newTrip.timeZone = this.preferencesService.getTimeZone();
+
+    // Load profile as fallback, then try to auto-populate from trip history
+    this.settingsService.profile.subscribe((profile: ProfileDetails) => {
+      this.speciesList = profile.species;
+
+      // Try to derive species from recent seasonal trips
+      this.apiService.getAllTrips(true).subscribe({
+        next: (seasonalTrips: TripDetails[]) => {
+          if (seasonalTrips.length > 0) {
+            this.applySpeciesFromTrips(seasonalTrips.slice(-5));
+          } else {
+            // No seasonal trips — fall back to last 5 trips overall
+            this.apiService.getAllTrips(false).subscribe({
+              next: (allTrips: TripDetails[]) => {
+                if (allTrips.length > 0) {
+                  this.applySpeciesFromTrips(allTrips.slice(-5));
+                } else {
+                  this.applyProfileFallback(profile);
+                }
+              },
+              error: () => this.applyProfileFallback(profile)
+            });
+          }
+        },
+        error: () => this.applyProfileFallback(profile)
+      });
+    });
+  }
+
+  private applySpeciesFromTrips(trips: TripDetails[]): void {
+    const frequent = this.getFrequentSpecies(trips);
+    if (frequent.length > 0) {
+      this.newTrip.species = frequent;
+      this.newTrip.defaultSpecies = frequent[0];
+    }
+  }
+
+  private applyProfileFallback(profile: ProfileDetails): void {
+    this.newTrip.species = profile.species;
+    this.newTrip.defaultSpecies = profile.defaultSpecies;
+  }
+
+  private getFrequentSpecies(trips: TripDetails[]): string[] {
+    const counts = new Map<string, number>();
+    for (const trip of trips) {
+      if (trip.species) {
+        for (const species of trip.species) {
+          counts.set(species, (counts.get(species) || 0) + 1);
+        }
+      }
+    }
+    return [...counts.entries()]
+      .sort((a, b) => b[1] - a[1])
+      .map(([species]) => species);
   }
 
   onSpeciesSelected(species: string[]) {

@@ -1,0 +1,44 @@
+<div class="setup-wizard">
+  <h1>Welcome to FishTracker</h1>
+
+  <div *ngIf="step === 1">
+    <h2>Step 1: Select your species</h2>
+    <p>Choose the fish you typically target. You can always change this later in your profile.</p>
+
+    <app-species-selector [speciesList]="settings.species" [(selectedSpecies)]="selectedSpecies"></app-species-selector>
+
+    <div class="add-species-section">
+      <label>Can't find your species?</label>
+      <div class="add-species-row">
+        <input type="text" [(ngModel)]="newSpeciesName" placeholder="e.g. Kahawai" (keyup.enter)="addSpecies()">
+        <button type="button" (click)="addSpecies()">Add</button>
+      </div>
+    </div>
+
+    <div class="error-message" *ngIf="error">{{ error }}</div>
+
+    <button class="primary-button" [disabled]="selectedSpecies.length === 0" (click)="nextStep()">
+      Next
+    </button>
+  </div>
+
+  <div *ngIf="step === 2">
+    <h2>Step 2: Set your default species</h2>
+    <p>This is the species used for quick-catch (one-tap recording). Tap to select.</p>
+
+    <div class="default-species-grid">
+      <button *ngFor="let species of selectedSpecies"
+              class="species-button"
+              [class.selected]="defaultSpecies === species"
+              (click)="selectDefault(species)">
+        {{ species }}
+      </button>
+    </div>
+
+    <div class="error-message" *ngIf="error">{{ error }}</div>
+
+    <button class="primary-button" [disabled]="!defaultSpecies" (click)="complete()">
+      Start Fishing
+    </button>
+  </div>
+</div>
