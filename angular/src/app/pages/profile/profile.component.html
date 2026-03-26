@@ -8,9 +8,16 @@
   <div>
     <label for="targetSpecies">Target Species:</label>
     <div class="target-species-box">
-      <app-species-selector [speciesList]="settings.species" [(selectedSpecies)]="profileDetails.species"></app-species-selector>      
+      <app-species-selector [speciesList]="settings.species" [(selectedSpecies)]="profileDetails.species"></app-species-selector>
     </div>
   </div>
-  <!-- Add other profile-related fields here -->
+  <div class="add-species-section">
+    <label>Add a new species:</label>
+    <div class="add-species-row">
+      <input type="text" [(ngModel)]="newSpeciesName" name="newSpeciesName" placeholder="e.g. Kahawai">
+      <button type="button" (click)="addSpecies()">Add</button>
+    </div>
+    <div class="error-message" *ngIf="addSpeciesError">{{ addSpeciesError }}</div>
+  </div>
   <button type="submit">Save Profile</button>
 </form>

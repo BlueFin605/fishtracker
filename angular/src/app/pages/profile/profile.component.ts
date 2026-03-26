@@ -15,12 +15,14 @@ export class ProfileComponent implements OnInit {
   profileDetails: ProfileDetails = {
     species: [],
     defaultSpecies: ''
-    // Initialize other fields if necessary
   };
 
   settings: SettingsDetails = {
     species: []
   }
+
+  newSpeciesName: string = '';
+  addSpeciesError: string = '';
 
   constructor(private apiService: ApiService) {}
 
@@ -50,8 +52,28 @@ export class ProfileComponent implements OnInit {
     });
   }
 
+  addSpecies(): void {
+    const name = this.newSpeciesName.trim();
+    if (!name) return;
+
+    this.addSpeciesError = '';
+    this.apiService.addSpecies(name).subscribe({
+      next: (updatedSettings) => {
+        this.settings = updatedSettings;
+        const titleCased = name.replace(/\w\S*/g, w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase());
+        if (!this.profileDetails.species.includes(titleCased)) {
+          this.profileDetails.species = [...this.profileDetails.species, titleCased];
+        }
+        this.newSpeciesName = '';
+      },
+      error: (error) => {
+        this.addSpeciesError = 'Failed to add species. Please try again.';
+        console.error('Error adding species', error);
+      }
+    });
+  }
+
   onSpeciesSelected(species: string[]) {
     this.profileDetails.species = species;
-    console.log(this.profileDetails.species);
   }
 }

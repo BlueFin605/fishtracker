@@ -30,8 +30,13 @@ import { LoadingService } from './loading.service';
   }
 
   getSettings(): Observable<SettingsDetails> {
-    const apiUrl = `${this.baseApiUrl}/settings`; // Construct full API URL
+    const apiUrl = `${this.baseApiUrl}/settings`;
     return this.withLoading(this.http.get<SettingsDetails>(apiUrl));
+  }
+
+  addSpecies(species: string): Observable<SettingsDetails> {
+    const apiUrl = `${this.baseApiUrl}/settings/species`;
+    return this.withLoading(this.http.post<SettingsDetails>(apiUrl, { species }));
   }
 
   getTripCatch(tripid: string): Observable<CatchDetails[]> {

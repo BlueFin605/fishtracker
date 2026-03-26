@@ -50,7 +50,9 @@
         <form (ngSubmit)="postCatch()">
             <div>
                 <label for="species">Species:</label>
-                <input type="text" id="species" name="species" [(ngModel)]="newCatch.speciesId">
+                <select id="species" name="species" [(ngModel)]="newCatch.speciesId">
+                    <option *ngFor="let species of tripDetails.species" [value]="species">{{ species }}</option>
+                </select>
             </div>
             <div>
                 <label for="caughtWhen">When:</label>
