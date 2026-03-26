@@ -7,10 +7,13 @@
 .setup-wizard h1 {
   text-align: center;
   margin-bottom: 8px;
+  color: #1a3a5c;
 }
 
 .setup-wizard h2 {
   margin-bottom: 4px;
+  color: #1a3a5c;
+  border-bottom: none;
 }
 
 .setup-wizard p {
@@ -25,18 +28,11 @@
 .add-species-row {
   display: flex;
   gap: 8px;
-  margin-top: 4px;
+  margin-top: 6px;
 }
 
 .add-species-row input {
   flex: 1;
-  padding: 8px;
-  font-size: 16px;
-}
-
-.add-species-row button {
-  padding: 8px 16px;
-  font-size: 16px;
 }
 
 .default-species-grid {
@@ -49,16 +45,19 @@
 .species-button {
   padding: 16px;
   font-size: 18px;
-  border: 2px solid #ccc;
+  font-weight: 500;
+  border: 3px solid #bdbdbd;
   border-radius: 8px;
   background: #fff;
+  color: #333;
   cursor: pointer;
   min-height: 56px;
 }
 
 .species-button.selected {
-  border-color: #3f51b5;
-  background: #e8eaf6;
+  border-color: #1a3a5c;
+  background: #1a3a5c;
+  color: #fff;
   font-weight: bold;
 }
 
@@ -72,29 +71,39 @@
   flex: 1;
   padding: 16px;
   font-size: 18px;
-  background: #3f51b5;
+  font-weight: 500;
+  background: #2e7d32;
   color: white;
   border: none;
   border-radius: 8px;
   cursor: pointer;
 }
 
+.primary-button:hover {
+  background: #1b5e20;
+}
+
+.primary-button:disabled {
+  background: #bdbdbd;
+  cursor: not-allowed;
+}
+
 .secondary-button {
   padding: 16px 24px;
   font-size: 18px;
+  font-weight: 500;
   background: #fff;
-  color: #333;
-  border: 2px solid #999;
+  color: #555;
+  border: 2px solid #bdbdbd;
   border-radius: 8px;
   cursor: pointer;
 }
 
-.primary-button:disabled {
-  background: #ccc;
-  cursor: not-allowed;
+.secondary-button:hover {
+  background-color: #f5f5f5;
 }
 
 .error-message {
-  color: #c62828;
+  color: #b71c1c;
   margin-top: 8px;
 }
