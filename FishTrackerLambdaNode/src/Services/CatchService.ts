@@ -77,6 +77,52 @@ export class CatchService {
                 .MapEachAsync<IDynamoDbTrip, IDynamoDbTrip>(c => this.tripService.fixupMoonPhase(c)))
                 .Map(c => c.map(r => TripDbService.toTripDetails(r)));
         }
+
+        if (action === 'species') {
+            // Normalise species on catches
+            const catchResult = await (await (await this.catchService.readAllRecords())
+                .MapEachAsync<IDynamoDbCatch, IDynamoDbCatch>(c => this.fixupSpeciesName(c)))
+                .Map(c => c.map(r => CatchDbService.toCatchDetails(r)));
+
+            // Normalise species on trips
+            await (await this.tripService.readAllRecords())
+                .MapEachAsync<IDynamoDbTrip, IDynamoDbTrip>(c => this.fixupTripSpecies(c));
+
+            return catchResult;
+        }
+
         return HttpWrapper.FromResult(Results.NotFound('Unknown action'));
-    }    
+    }
+
+    private static titleCase(str: string): string {
+        return str.replace(/\w\S*/g, word =>
+            word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
+        );
+    }
+
+    private async fixupTripSpecies(trip: IDynamoDbTrip): Promise<HttpWrapper<IDynamoDbTrip>> {
+        const normalisedSpecies = (trip.Species || []).map(s => CatchService.titleCase(s));
+        const normalisedDefault = trip.DefaultSpecies ? CatchService.titleCase(trip.DefaultSpecies) : trip.DefaultSpecies;
+
+        const speciesChanged = JSON.stringify(normalisedSpecies) !== JSON.stringify(trip.Species);
+        const defaultChanged = normalisedDefault !== trip.DefaultSpecies;
+
+        if (!speciesChanged && !defaultChanged) {
+            return HttpWrapper.Ok(trip);
+        }
+
+        const updated = { ...trip, Species: normalisedSpecies, DefaultSpecies: normalisedDefault || '' };
+        return this.tripService.updateTripInDynamoDb(updated);
+    }
+
+    private async fixupSpeciesName(c: IDynamoDbCatch): Promise<HttpWrapper<IDynamoDbCatch>> {
+        const normalised = CatchService.titleCase(c.SpeciesId);
+
+        if (normalised === c.SpeciesId) {
+            return HttpWrapper.Ok(c);
+        }
+
+        const updated = { ...c, SpeciesId: normalised };
+        return this.catchService.updateCatchDetails(updated);
+    }
 }
