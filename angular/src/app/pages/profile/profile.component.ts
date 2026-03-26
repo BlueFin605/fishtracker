@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms'; 
+import { FormsModule } from '@angular/forms';
+import { Router } from '@angular/router';
 import { SpeciesSelector } from '../../components/species-selector-component/species-selector.component';
 import { ApiService, ProfileDetails, SettingsDetails } from '../../services/api.service';
 
@@ -23,8 +24,10 @@ export class ProfileComponent implements OnInit {
 
   newSpeciesName: string = '';
   addSpeciesError: string = '';
+  saveSuccess: boolean = false;
+  saveError: boolean = false;
 
-  constructor(private apiService: ApiService) {}
+  constructor(private apiService: ApiService, private router: Router) {}
 
   ngOnInit(): void {
     this.loadSettings();
@@ -42,14 +45,22 @@ export class ProfileComponent implements OnInit {
   }
 
   saveProfileDetails(): void {
+    this.saveSuccess = false;
+    this.saveError = false;
     this.apiService.postProfile(this.profileDetails).subscribe({
       next: (response) => {
+        this.saveSuccess = true;
         console.log('Profile updated successfully', response);
       },
       error: (error) => {
+        this.saveError = true;
         console.error('Error updating profile', error);
       }
     });
+  }
+
+  goBack(): void {
+    this.router.navigate(['/trips']);
   }
 
   addSpecies(): void {

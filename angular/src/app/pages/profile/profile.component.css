@@ -1,0 +1,57 @@
+.button-group {
+  display: flex;
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.back-button {
+  padding: 10px 20px;
+  background: #fff;
+  color: #333;
+  border: 2px solid #999;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.save-message {
+  margin-top: 12px;
+  padding: 8px;
+  border-radius: 4px;
+}
+
+.save-message.success {
+  color: #2e7d32;
+  background: #e8f5e9;
+}
+
+.save-message.error {
+  color: #c62828;
+  background: #ffebee;
+}
+
+.add-species-section {
+  margin-top: 16px;
+  margin-bottom: 16px;
+}
+
+.add-species-row {
+  display: flex;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.add-species-row input {
+  flex: 1;
+  padding: 8px;
+  font-size: 16px;
+}
+
+.add-species-row button {
+  padding: 8px 16px;
+  font-size: 16px;
+}
+
+.error-message {
+  color: #c62828;
+  margin-top: 8px;
+}

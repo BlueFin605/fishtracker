@@ -89,7 +89,12 @@
     margin: 20px;
   }
   
-  .cancel-button {
+  .right-section {
+    display: flex;
+    gap: 10px;
+  }
+
+  .end-trip-button {
     padding: 10px 20px;
     background-color: #e74c3c;
     color: white;
@@ -97,7 +102,16 @@
     border-radius: 4px;
     cursor: pointer;
   }
-  
-  .cancel-button:hover {
+
+  .end-trip-button:hover {
     background-color: #c0392b;
+  }
+
+  .back-button {
+    padding: 10px 20px;
+    background-color: #fff;
+    color: #333;
+    border: 2px solid #999;
+    border-radius: 4px;
+    cursor: pointer;
   }

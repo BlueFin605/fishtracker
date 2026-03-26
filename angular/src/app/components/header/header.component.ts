@@ -1,10 +1,11 @@
 import { Component, Inject } from '@angular/core';
-import { RouterLink, Router } from '@angular/router';
+import { RouterLink, Router, NavigationEnd } from '@angular/router';
 import { MatIconModule } from '@angular/material/icon';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatButtonModule } from '@angular/material/button';
-import { CommonModule } from '@angular/common'; // Import CommonModule
+import { CommonModule } from '@angular/common';
 import { AuthenticationService } from '../../services/authentication.service';
+import { filter } from 'rxjs/operators';
 
 @Component({
   selector: 'app-header',
@@ -19,9 +20,21 @@ import { AuthenticationService } from '../../services/authentication.service';
   styleUrl: './header.component.css'
 })
 export class HeaderComponent {
-  // userProfile: any = {};
+  currentRoute: string = '';
 
-  constructor(private router: Router, public authService: AuthenticationService) { }
+  constructor(private router: Router, public authService: AuthenticationService) {
+    this.router.events.pipe(
+      filter(event => event instanceof NavigationEnd)
+    ).subscribe((event: any) => {
+      this.currentRoute = event.urlAfterRedirects || event.url;
+    });
+  }
+
+  get showStartTrip(): boolean {
+    return !this.currentRoute.startsWith('/setup')
+        && !this.currentRoute.startsWith('/newtrip')
+        && !this.currentRoute.startsWith('/trip/');
+  }
 
   ngOnInit() {
     // if (this.authService.isAuthenticated()) {

@@ -8,16 +8,13 @@
             <span class="switch-label">Advanced</span>
         </div>
         <div class="right-section">
-            <button class="cancel-button" (click)="onCancel()">Cancel</button>
+            <button *ngIf="tripIsOpen" class="end-trip-button" (click)="openEndTripModal()">End Trip</button>
+            <button class="back-button" (click)="onCancel()">Back</button>
         </div>
     </div>
 </div>
 
 <section *ngIf="showAdvancedMode">
-    <section *ngIf="tripIsOpen"> <!-- End Trip Button -->
-        <button (click)="openEndTripModal()">End Trip</button>
-    </section>
-
     <!-- End Trip Modal -->
     <div *ngIf="showEndTripModal" class="modal">
         <div class="modal-content">

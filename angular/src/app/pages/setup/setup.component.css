@@ -62,15 +62,29 @@
   font-weight: bold;
 }
 
-.primary-button {
-  display: block;
-  width: 100%;
-  padding: 16px;
+.button-row {
+  display: flex;
+  gap: 12px;
   margin-top: 24px;
+}
+
+.primary-button {
+  flex: 1;
+  padding: 16px;
   font-size: 18px;
   background: #3f51b5;
   color: white;
   border: none;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.secondary-button {
+  padding: 16px 24px;
+  font-size: 18px;
+  background: #fff;
+  color: #333;
+  border: 2px solid #999;
   border-radius: 8px;
   cursor: pointer;
 }

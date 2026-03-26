@@ -37,8 +37,11 @@
 
     <div class="error-message" *ngIf="error">{{ error }}</div>
 
-    <button class="primary-button" [disabled]="!defaultSpecies" (click)="complete()">
-      Start Fishing
-    </button>
+    <div class="button-row">
+      <button class="secondary-button" (click)="backToStep1()">Back</button>
+      <button class="primary-button" [disabled]="!defaultSpecies" (click)="complete()">
+        Start Fishing
+      </button>
+    </div>
   </div>
 </div>

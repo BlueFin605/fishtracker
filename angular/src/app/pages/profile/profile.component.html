@@ -19,5 +19,10 @@
     </div>
     <div class="error-message" *ngIf="addSpeciesError">{{ addSpeciesError }}</div>
   </div>
-  <button type="submit">Save Profile</button>
+  <div class="save-message success" *ngIf="saveSuccess">Profile saved.</div>
+  <div class="save-message error" *ngIf="saveError">Failed to save profile. Please try again.</div>
+  <div class="button-group">
+    <button type="submit">Save Profile</button>
+    <button type="button" class="back-button" (click)="goBack()">Back</button>
+  </div>
 </form>
