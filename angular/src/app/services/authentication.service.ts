@@ -3,7 +3,7 @@ import { Injectable } from '@angular/core';
 import { Router } from '@angular/router';
 import { environment } from '../../environments/environment';
 import { BehaviorSubject, Observable, throwError } from 'rxjs';
-import { tap, map, catchError } from 'rxjs/operators';
+import { map, catchError, share, finalize } from 'rxjs/operators';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { PkceService } from './pkce.service';
 import { jwtDecode } from "jwt-decode";
@@ -16,6 +16,7 @@ import { jwtDecode } from "jwt-decode";
 export class AuthenticationService {
   private accessTokenSubject: BehaviorSubject<string> = new BehaviorSubject<string>('');
   public accessToken$: Observable<string> = this.accessTokenSubject.asObservable();
+  private refreshTokenInFlight$: Observable<string> | null = null;
 
   private loginUrl = `${environment.domain}/oauth2/authorize?client_id=${environment.clientId}&response_type=code&scope=aws.cognito.signin.user.admin+email+openid+profile&redirect_uri=${encodeURIComponent(environment.redirectUri)}`;
   private tokenUrl = `${environment.domain}/oauth2/token`;
@@ -77,9 +78,16 @@ export class AuthenticationService {
     );
   }
 
-  refreshToken(): Observable<any> {
+  refreshToken(): Observable<string> {
+    // If a refresh is already in flight, return the same observable
+    // so concurrent 401s don't each trigger separate refresh calls
+    if (this.refreshTokenInFlight$) {
+      return this.refreshTokenInFlight$;
+    }
+
     const refreshToken = localStorage.getItem('refresh_token');
     if (!refreshToken) {
+      this.signOut();
       return throwError('No refresh token available');
     }
 
@@ -92,11 +100,11 @@ export class AuthenticationService {
       'Content-Type': 'application/x-www-form-urlencoded'
     });
 
-    return this.http.post(this.tokenUrl, body.toString(), { headers }).pipe(
+    this.refreshTokenInFlight$ = this.http.post(this.tokenUrl, body.toString(), { headers }).pipe(
       map((response: any) => {
         const newAccessToken = response.access_token;
         const newIdToken = response.id_token;
-        const newRefreshToken = response.refresh_token || refreshToken; // Use the new refresh token if provided
+        const newRefreshToken = response.refresh_token || refreshToken;
 
         localStorage.setItem('access_token', newAccessToken);
         localStorage.setItem('id_token', newIdToken);
@@ -107,9 +115,17 @@ export class AuthenticationService {
         return newAccessToken;
       }),
       catchError(error => {
+        console.error('Token refresh failed, signing out:', error);
+        this.signOut();
         return throwError(error);
-      })
+      }),
+      finalize(() => {
+        this.refreshTokenInFlight$ = null;
+      }),
+      share()
     );
+
+    return this.refreshTokenInFlight$;
   }
 
   getUserInfo(): Observable<UserProfile> {
