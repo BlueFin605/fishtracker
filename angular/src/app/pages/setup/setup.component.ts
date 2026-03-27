@@ -55,6 +55,10 @@ export class SetupComponent implements OnInit {
     }
   }
 
+  backToStep1(): void {
+    this.step = 1;
+  }
+
   selectDefault(species: string): void {
     this.defaultSpecies = species;
   }

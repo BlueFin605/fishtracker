@@ -30,6 +30,18 @@ app.use(express.json());
 
 if (!process.env.IS_LAMBDA) {
     console.log('Applying injectApiGatewayEventHeader middleware'); // Debug log
+
+    app.use((req: express.Request, res: express.Response, next: express.NextFunction): void => {
+        res.header('Access-Control-Allow-Origin', '*');
+        res.header('Access-Control-Allow-Headers', 'Content-Type,Authorization');
+        res.header('Access-Control-Allow-Methods', 'GET,POST,PATCH,PUT,DELETE,OPTIONS');
+        if (req.method === 'OPTIONS') {
+            res.sendStatus(204);
+            return;
+        }
+        next();
+    });
+
     app.use(injectApiGatewayEventHeader);
 
     const awswrapper = container.resolve(DynamoDbHelper);

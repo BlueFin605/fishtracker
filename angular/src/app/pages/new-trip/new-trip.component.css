@@ -1,72 +1,54 @@
-.target-species-box {
-    border: 2px solid #ccc;
-    padding: 15px;
-    border-radius: 5px;
-    background-color: #f9f9f9;
-    margin-top: 10px;
-  }
-  
-  .target-species-box label {
-    font-weight: bold;
-    display: block;
-    margin-bottom: 10px;
-  }
+.new-trip-container {
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 16px;
+}
 
-  .new-trip-container {
-    max-width: 600px;
-    margin: 0 auto;
-    padding: 20px;
-    background-color: #f9f9f9;
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  }
-  
-  .form-group {
-    margin-bottom: 15px;
-  }
-  
-  .form-group label {
-    display: block;
-    margin-bottom: 5px;
-    color: #333;
-  }
-  
-  .form-group input,
-  .form-group textarea,
-  .target-species-box {
-    width: 100%;
-    padding: 8px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-  }
-  
-  .button-group {
-    display: flex;
-    justify-content: flex-end;
-    gap: 10px;
-  }
-  
-  .submit-button, .cancel-button {
-    padding: 10px 20px;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-  }
-  
-  .submit-button {
-    background-color: #3498db;
-    color: white;
-  }
-  
-  .submit-button:hover {
-    background-color: #2980b9;
-  }
-  
-  .cancel-button {
-    background-color: #e74c3c;
-    color: white;
-  }
-  
-  .cancel-button:hover {
-    background-color: #c0392b;
-  }
+.target-species-box {
+  border: 1px solid #ccc;
+  padding: 12px;
+  border-radius: 6px;
+  background-color: #fafafa;
+  margin-top: 8px;
+}
+
+.form-group {
+  margin-bottom: 12px;
+}
+
+.button-group {
+  display: flex;
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.submit-button {
+  flex: 1;
+  padding: 14px 24px;
+  background-color: #2e7d32;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.submit-button:hover {
+  background-color: #1b5e20;
+}
+
+.cancel-button {
+  padding: 14px 24px;
+  background-color: #fff;
+  color: #555;
+  border: 2px solid #bdbdbd;
+  border-radius: 6px;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.cancel-button:hover {
+  background-color: #f5f5f5;
+}

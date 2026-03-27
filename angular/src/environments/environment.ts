@@ -1,5 +1,6 @@
 export const environment = {
   production: true,
+  bypassAuth: false,
   clientId: 'COGNITO_CLIENTID',
   domain: 'COGNITO_DOMAIN',
   region: 'COGNITO_REGION',

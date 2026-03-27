@@ -1,5 +1,6 @@
 export const environment = {
     production: false,
+    bypassAuth: false,
     clientId: '<<Put your cognito clientid here>>',
     domain: '<<Put your cognito domain here>>',
     region: '<<Put your cognito region here>>',

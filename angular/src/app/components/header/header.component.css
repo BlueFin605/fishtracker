@@ -1,107 +1,79 @@
 header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    background-color: #0056b3;
-    /* Dark blue background */
-    color: white;
-    /* White text color */
-    padding: 1em;
-    /* Padding for spacing */
-    border-bottom: 2px solid #004494;
-    /* Slightly darker border */
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    /* Subtle shadow */
-}
-
-.auth-button {
-    margin-right: 1em;
-    /* Margin to separate from nav links */
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #1a3a5c;
+  color: white;
+  padding: 8px 16px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+  position: sticky;
+  top: 0;
+  z-index: 100;
 }
 
 .nav-links {
-    display: flex;
-    gap: 1em;
-    /* Space between nav links */
+  display: flex;
+  gap: 12px;
+  align-items: center;
 }
 
 .nav-link {
-    color: white;
-    /* White text color */
-    text-decoration: none;
-    /* Remove underline */
-    padding: 0.5em 1em;
-    /* Padding for spacing */
-    border-radius: 4px;
-    /* Rounded corners */
-    transition: background-color 0.3s;
-    /* Smooth transition */
+  color: white;
+  text-decoration: none;
+  padding: 8px 16px;
+  border-radius: 6px;
+  transition: background-color 0.2s;
+  font-weight: 500;
+  font-size: 0.95rem;
 }
 
 .nav-link:hover {
-    background-color: #004494;
-    /* Slightly darker background on hover */
+  background-color: rgba(255, 255, 255, 0.15);
 }
 
 .avatar-menu {
-    display: flex;
-    align-items: center;
+  display: flex;
+  align-items: center;
 }
 
-.avatar {
-    width: 24px;
-    height: 24px;
-    border-radius: 50%;
-}
-
-/* Style for the avatar menu button */
 .avatar-button {
-    background-color: #ff5722;
-    /* Change to your desired color */
-    color: white;
+  background-color: rgba(255, 255, 255, 0.15);
+  color: white;
+  min-height: 40px;
+  min-width: 40px;
 }
 
 .avatar-button:hover {
-    background-color: #e64a19;
-    /* Darker shade for hover effect */
-}
-
-/* Style for the avatar menu */
-.custom-menu {
-    background-color: #ffccbc;
-    /* Change to your desired color */
-    color: black;
-}
-
-/* Optional: Style for the menu items */
-.custom-menu .mat-menu-item {
-    color: black;
+  background-color: rgba(255, 255, 255, 0.25);
 }
 
 .favicon-button {
-    background: none;
-    border: none;
-    cursor: pointer;
-    padding: 0;
-    margin-right: 10px;
-  }
-  
-  .favicon-icon {
-    width: 32px;
-    height: 32px;
-  }
-  
-  .button-link {
-    display: inline-block;
-    padding: 10px 20px;
-    background-color: #3498db;
-    color: white;
-    text-decoration: none;
-    border-radius: 5px;
-    transition: background-color 0.3s ease;
-  }
-  
-  .button-link:hover {
-    background-color: #2980b9;
-  }
-  
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+  min-height: auto;
+  display: flex;
+  align-items: center;
+}
+
+.favicon-icon {
+  width: 32px;
+  height: 32px;
+}
+
+.button-link {
+  display: inline-block;
+  padding: 10px 20px;
+  background-color: #2e7d32;
+  color: white;
+  text-decoration: none;
+  border-radius: 6px;
+  font-weight: 500;
+  font-size: 0.95rem;
+  transition: background-color 0.2s;
+}
+
+.button-link:hover {
+  background-color: #1b5e20;
+}

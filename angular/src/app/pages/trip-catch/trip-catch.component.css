@@ -1,103 +1,200 @@
-.basic-mode .button-wrapper {
-    flex: 1; /* Ensure each button wrapper takes equal space */
+/* ===== Top bar ===== */
+.advanced {
+  margin: 0;
+  padding: 8px 12px;
+  background: #fff;
+  border-bottom: 1px solid #e0e0e0;
 }
 
-.basic-mode .button-container button {
-    display: block;
-    width: calc(100% - 10px);
-    height: 15vh;
-    box-sizing: border-box;
-    margin: 0;
-    padding: 10px;
+.switch-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
-/* Specific button sizes with corresponding colors and text sizes */
-.basic-mode .button-undersize {
-    /* background-color: red; */
-    font-size: 14px; /* Base font size */
+.left-section {
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
-.basic-mode .button-small {
-    /* background-color: #FFA500; Orange */
-    font-size: 16px; /* Slightly larger */
+.right-section {
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
 
-.basic-mode .button-medium {
-    /* background-color: #FFFF00; Yellow */
-    font-size: 18px; /* Slightly larger */
+.end-trip-button {
+  padding: 10px 20px;
+  background-color: #c62828;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 500;
 }
 
-.basic-mode .button-large {
-    /* background-color: #ADFF2F; Light Green */
-    font-size: 20px; /* Slightly larger */
+.end-trip-button:hover {
+  background-color: #8e0000;
 }
 
-.basic-mode .button-verylarge {
-    /* background-color: #008000; Green */
-    font-size: 22px; /* Slightly larger */
+.back-button {
+  padding: 10px 20px;
+  background-color: #fff;
+  color: #555;
+  border: 2px solid #bdbdbd;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 500;
 }
 
+.back-button:hover {
+  background-color: #f5f5f5;
+}
+
+/* ===== Species override buttons ===== */
 .species-buttons {
-    display: flex;
-    gap: 8px;
-    padding: 8px 5px;
-    flex-wrap: wrap;
+  display: flex;
+  gap: 8px;
+  padding: 8px 12px;
+  flex-wrap: wrap;
 }
 
 .species-select-button {
-    flex: 1;
-    min-width: 80px;
-    min-height: 28px;
-    font-size: 18px;
-    font-weight: 500;
-    padding: 6px 16px;
-    border: 3px solid #999;
-    border-radius: 8px;
-    background: #f5f5f5;
-    color: #333;
-    cursor: pointer;
+  flex: 1;
+  min-width: 80px;
+  min-height: 56px;
+  font-size: 18px;
+  font-weight: 500;
+  padding: 14px 16px;
+  border: 3px solid #bdbdbd;
+  border-radius: 8px;
+  background: #fff;
+  color: #333;
+  cursor: pointer;
 }
 
 .species-select-button.species-active {
-    border-color: #3f51b5;
-    background: #3f51b5;
-    color: #fff;
-    font-weight: bold;
+  border-color: #1a3a5c;
+  background: #1a3a5c;
+  color: #fff;
+  font-weight: bold;
 }
 
-.advanced {
-    /* margin-bottom: 10px; */
-    margin-top: 5px;
-    margin-left: 5px;    
-  }
-  
-  .switch-container {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-  }
-  
-  .left-section {
-    display: flex;
-    align-items: center;
-    margin-left: 10px;
-  }
-  
-  .right-section {
-    display: flex;
-    align-items: center;
-    margin: 20px;
-  }
-  
-  .cancel-button {
-    padding: 10px 20px;
-    background-color: #e74c3c;
-    color: white;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-  }
-  
-  .cancel-button:hover {
-    background-color: #c0392b;
-  }
+/* ===== Quick-catch size buttons ===== */
+.basic-mode .button-wrapper {
+  flex: 1;
+}
+
+.basic-mode .button-container button {
+  display: block;
+  width: calc(100% - 10px);
+  height: 15vh;
+  box-sizing: border-box;
+  margin: 0;
+  padding: 10px;
+  font-weight: 600;
+  border-radius: 8px;
+}
+
+.basic-mode .button-undersize {
+  font-size: 14px;
+  background-color: #ef9a9a;
+  color: #333;
+}
+
+.basic-mode .button-small {
+  font-size: 16px;
+  background-color: #ffcc80;
+  color: #333;
+}
+
+.basic-mode .button-medium {
+  font-size: 18px;
+  background-color: #fff59d;
+  color: #333;
+}
+
+.basic-mode .button-large {
+  font-size: 20px;
+  background-color: #a5d6a7;
+  color: #333;
+}
+
+.basic-mode .button-verylarge {
+  font-size: 22px;
+  background-color: #66bb6a;
+  color: #fff;
+}
+
+.basic-mode .button-undersize:hover { background-color: #e57373; }
+.basic-mode .button-small:hover { background-color: #ffb74d; }
+.basic-mode .button-medium:hover { background-color: #fff176; }
+.basic-mode .button-large:hover { background-color: #81c784; }
+.basic-mode .button-verylarge:hover { background-color: #4caf50; color: #fff; }
+
+/* ===== Trip Details ===== */
+.trip-details .detail-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0;
+  margin-bottom: 0;
+}
+
+.trip-details .detail-item {
+  padding: 10px 0;
+  border-bottom: 1px solid #f0f0f0;
+  margin-bottom: 0;
+}
+
+.trip-details .detail-label {
+  display: block;
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: #999;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 2px;
+}
+
+.trip-details .detail-value {
+  display: block;
+  font-size: 1rem;
+  color: #212121;
+  font-weight: 400;
+}
+
+.trip-details .detail-tags {
+  padding: 10px 0;
+  border-bottom: 1px solid #f0f0f0;
+  margin-bottom: 0;
+}
+
+.trip-details .tag-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 4px;
+}
+
+.trip-details .tag {
+  display: inline-block;
+  padding: 4px 12px;
+  background: #e8edf2;
+  color: #1a3a5c;
+  border-radius: 16px;
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+
+.trip-details .detail-notes {
+  padding: 10px 0;
+  margin-bottom: 0;
+}
+
+.trip-details .notes-content {
+  margin-top: 4px;
+  color: #333;
+  line-height: 1.5;
+  font-size: 0.95rem;
+}

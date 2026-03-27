@@ -1,0 +1,103 @@
+.profile-container {
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 16px;
+}
+
+.profile-container h2 {
+  margin-bottom: 16px;
+}
+
+.form-section {
+  margin-bottom: 20px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.form-section:last-of-type {
+  border-bottom: none;
+}
+
+.form-section label {
+  font-size: 1rem;
+  font-weight: 500;
+  color: #1a3a5c;
+  margin-bottom: 2px;
+}
+
+.form-hint {
+  font-size: 0.85rem;
+  color: #999;
+  margin-top: 0;
+  margin-bottom: 10px;
+}
+
+.add-species-row {
+  display: flex;
+  gap: 8px;
+}
+
+.add-species-row input {
+  flex: 1;
+}
+
+.button-group {
+  display: flex;
+  gap: 12px;
+  margin-top: 20px;
+}
+
+.save-button {
+  flex: 1;
+  padding: 14px 24px;
+  background-color: #2e7d32;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.save-button:hover {
+  background-color: #1b5e20;
+}
+
+.back-button {
+  padding: 14px 24px;
+  background: #fff;
+  color: #555;
+  border: 2px solid #bdbdbd;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 500;
+}
+
+.back-button:hover {
+  background-color: #f5f5f5;
+}
+
+.save-message {
+  margin-top: 12px;
+  padding: 10px 12px;
+  border-radius: 6px;
+  font-weight: 500;
+}
+
+.save-message.success {
+  color: #1b5e20;
+  background: #e8f5e9;
+  border: 1px solid #a5d6a7;
+}
+
+.save-message.error {
+  color: #b71c1c;
+  background: #ffebee;
+  border: 1px solid #ef9a9a;
+}
+
+.error-message {
+  color: #b71c1c;
+  margin-top: 8px;
+  font-size: 0.9rem;
+}
