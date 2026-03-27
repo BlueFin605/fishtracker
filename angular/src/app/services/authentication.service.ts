@@ -125,6 +125,10 @@ export class AuthenticationService {
   }
 
   isAuthenticated(): boolean {
+    if (environment.bypassAuth) {
+      return true;
+    }
+
     const idToken = this.id_token;
     if (!idToken) {
       return false;

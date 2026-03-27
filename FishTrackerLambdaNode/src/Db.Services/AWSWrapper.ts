@@ -14,7 +14,7 @@ export class DynamoDbHelper {
 
     public configureLocal(): void {
         this._docClient = new DynamoDBClient({
-            region: 'us-west-2', // Replace with your desired region
+            region: 'eu-central-1',
             endpoint: 'http://localhost:8000', // Replace with your DynamoDB service URL
             credentials: {
                 accessKeyId: 'xxx', // Replace with your AWS access key ID

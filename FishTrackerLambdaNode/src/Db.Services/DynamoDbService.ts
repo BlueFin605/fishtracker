@@ -224,11 +224,23 @@ class DynamoDbService<T extends IVersionedRecord> {
         // Increment the version
         updateExpressionParts.push('#DynamoDbVersion = :newVersion');
         expressionAttributeNames['#DynamoDbVersion'] = 'DynamoDbVersion';
-        if (value.DynamoDbVersion === undefined)
-            value.DynamoDbVersion = 0;
-        expressionAttributeValues[':newVersion'] = value.DynamoDbVersion + 1;
+        const isNewRecord = value.DynamoDbVersion === undefined;
+        const currentVersion = value.DynamoDbVersion ?? 0;
+        value.DynamoDbVersion = currentVersion;
+        expressionAttributeValues[':newVersion'] = currentVersion + 1;
 
         const updateExpression = `SET ${updateExpressionParts.join(', ')}`;
+
+        const conditionExpression = isNewRecord
+            ? 'attribute_not_exists(#DynamoDbVersion)'
+            : '#DynamoDbVersion = :currentVersion';
+
+        const marshalledValues = isNewRecord
+            ? DynamoDbService.marshallWithOptions(expressionAttributeValues)
+            : DynamoDbService.marshallWithOptions({
+                ...expressionAttributeValues,
+                ':currentVersion': currentVersion
+            });
 
         const params: UpdateItemCommandInput = {
             TableName: this.tableName,
@@ -237,12 +249,9 @@ class DynamoDbService<T extends IVersionedRecord> {
                 [sortKeyName]: sortValue
             }),
             UpdateExpression: updateExpression,
-            ConditionExpression: '#DynamoDbVersion = :currentVersion',
+            ConditionExpression: conditionExpression,
             ExpressionAttributeNames: expressionAttributeNames,
-            ExpressionAttributeValues: DynamoDbService.marshallWithOptions({
-                ...expressionAttributeValues,
-                ':currentVersion': value.DynamoDbVersion
-            }),
+            ExpressionAttributeValues: marshalledValues,
             ReturnValues: 'ALL_NEW'
         };
 
@@ -287,11 +296,23 @@ class DynamoDbService<T extends IVersionedRecord> {
         // Increment the version
         updateExpressionParts.push('#DynamoDbVersion = :newVersion');
         expressionAttributeNames['#DynamoDbVersion'] = 'DynamoDbVersion';
-        if (value.DynamoDbVersion === undefined)
-            value.DynamoDbVersion = 0;
-        expressionAttributeValues[':newVersion'] = value.DynamoDbVersion + 1;
+        const isNewRecord = value.DynamoDbVersion === undefined;
+        const currentVersion = value.DynamoDbVersion ?? 0;
+        value.DynamoDbVersion = currentVersion;
+        expressionAttributeValues[':newVersion'] = currentVersion + 1;
 
         const updateExpression = `SET ${updateExpressionParts.join(', ')}`;
+
+        const conditionExpression = isNewRecord
+            ? 'attribute_not_exists(#DynamoDbVersion)'
+            : '#DynamoDbVersion = :currentVersion';
+
+        const marshalledValues = isNewRecord
+            ? DynamoDbService.marshallWithOptions(expressionAttributeValues)
+            : DynamoDbService.marshallWithOptions({
+                ...expressionAttributeValues,
+                ':currentVersion': currentVersion
+            });
 
         const params: UpdateItemCommandInput = {
             TableName: this.tableName,
@@ -299,12 +320,9 @@ class DynamoDbService<T extends IVersionedRecord> {
                 [partitionKeyName]: partitionValue
             }),
             UpdateExpression: updateExpression,
-            ConditionExpression: '#DynamoDbVersion = :currentVersion',
+            ConditionExpression: conditionExpression,
             ExpressionAttributeNames: expressionAttributeNames,
-            ExpressionAttributeValues: DynamoDbService.marshallWithOptions({
-                ...expressionAttributeValues,
-                ':currentVersion': value.DynamoDbVersion
-            }),
+            ExpressionAttributeValues: marshalledValues,
             ReturnValues: 'ALL_NEW'
         };
 
