@@ -1,6 +1,10 @@
 <div class="new-trip-container">
-  <h2>New Trip</h2>
-  <form (ngSubmit)="postTrip()">
+  <div *ngIf="profileUnavailable" class="offline-notice">
+    <i class="fas fa-wifi"></i>
+    <p>Connect to the internet to set up your profile before your first trip.</p>
+  </div>
+  <h2 *ngIf="!profileUnavailable">New Trip</h2>
+  <form *ngIf="!profileUnavailable" (ngSubmit)="postTrip()">
     <div>
       <label for="startTime">Start Time:</label>
       <input type="datetime-local" id="startTime" [(ngModel)]="startTime" name="startTime">

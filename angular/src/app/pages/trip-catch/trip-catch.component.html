@@ -118,7 +118,10 @@
                 </thead>
                 <tbody>
                     <tr *ngFor="let item of tripCatch">
-                        <td>{{ item.caughtWhen | date:'MMMM d, y, h:mm a' }}</td>
+                        <td>
+                            {{ item.caughtWhen | date:'MMMM d, y, h:mm a' }}
+                            <i *ngIf="isCatchPending(item)" class="fas fa-cloud-upload-alt sync-pending-icon" title="Waiting to sync"></i>
+                        </td>
                         <td>{{ item.speciesId }}</td>
                         <td>{{ item.caughtSize }}</td>
                         <td>{{ item.caughtLength }}</td>
@@ -134,7 +137,7 @@
     </section>
 
     <section class="trip-details">
-        <h2>Trip Details</h2>
+        <h2>Trip Details <i *ngIf="isTripPending()" class="fas fa-cloud-upload-alt sync-pending-icon" title="Waiting to sync"></i></h2>
         <div class="detail-grid">
             <div class="detail-item">
                 <span class="detail-label">Started</span>

@@ -5,7 +5,10 @@ import { MatMenuModule } from '@angular/material/menu';
 import { MatButtonModule } from '@angular/material/button';
 import { CommonModule } from '@angular/common';
 import { AuthenticationService } from '../../services/authentication.service';
+import { SyncService } from '../../services/offline/sync.service';
+import { SyncState } from '../../services/offline/offline.types';
 import { filter } from 'rxjs/operators';
+import { Observable } from 'rxjs';
 
 @Component({
   selector: 'app-header',
@@ -21,8 +24,13 @@ import { filter } from 'rxjs/operators';
 })
 export class HeaderComponent {
   currentRoute: string = '';
+  syncState$: Observable<SyncState>;
+  pendingCount$: Observable<number>;
 
-  constructor(private router: Router, public authService: AuthenticationService) {
+  constructor(private router: Router, public authService: AuthenticationService, private syncService: SyncService) {
+    this.syncState$ = this.syncService.syncState$;
+    this.pendingCount$ = this.syncService.pendingCount$;
+
     this.router.events.pipe(
       filter(event => event instanceof NavigationEnd)
     ).subscribe((event: any) => {

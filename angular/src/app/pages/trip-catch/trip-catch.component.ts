@@ -1,5 +1,7 @@
 import { Component, OnInit, ChangeDetectorRef, NgZone } from '@angular/core';
 import { ApiService, CatchDetails, TripDetails, NewCatch, EndTripDetails, TripRating, FishSize } from '../../services/api.service';
+import { OfflineDataService } from '../../services/offline/offline-data.service';
+import { SyncStatus, LocalTripRecord, LocalCatchRecord } from '../../services/offline/offline.types';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms'; // Add this line
@@ -31,7 +33,7 @@ export class TripCatchComponent implements OnInit {
     notes: '',
     rating: TripRating.Okay,
     tags: ''
-  };  
+  };
 
   newCatch: NewCatch = {
     timeZone: 'UCT',
@@ -53,8 +55,9 @@ export class TripCatchComponent implements OnInit {
   fishSizes = Object.values(FishSize);
   activeSpecies: string = '';
 
-  constructor(private route: ActivatedRoute, 
+  constructor(private route: ActivatedRoute,
               private apiService: ApiService,
+              private offlineData: OfflineDataService,
               private googleMapsLoader: GoogleMapsLoaderService,
               private dateFormatter: DateConversionService,
               private preferencesService: PreferencesService,
@@ -65,7 +68,7 @@ export class TripCatchComponent implements OnInit {
   }
 
   ngOnInit() {
-    // this.timeZones = moment.tz.names();  
+    // this.timeZones = moment.tz.names();
     this.newCatch.timeZone = this.preferencesService.getTimeZone();
     this.tripId = this.route.snapshot.paramMap.get('tripid')!;
     console.log(`tripId: ${this.tripId}`);
@@ -98,9 +101,9 @@ export class TripCatchComponent implements OnInit {
   formatNotes(notes: string): string {
     return notes?.replace(/\r\n/g, '<br>');
   }
-  
+
   fetchTripDetails(tripid: string) {
-    this.apiService.getTrip(tripid).subscribe(data => {
+    this.offlineData.getTrip(tripid).subscribe(data => {
       this.tripDetails = data;
       this.activeSpecies = data.defaultSpecies;
       this.isAdvancedMode = false;
@@ -111,9 +114,9 @@ export class TripCatchComponent implements OnInit {
   selectSpecies(species: string) {
     this.activeSpecies = species;
   }
-  
+
   fetchCatches(tripid: string) {
-    this.apiService.getTripCatch(tripid).subscribe(data => {
+    this.offlineData.getCatches(tripid).subscribe(data => {
       this.tripCatch = data;
       this.tripCatch.forEach(item => {
         if (item.caughtLocation) {
@@ -124,14 +127,14 @@ export class TripCatchComponent implements OnInit {
           this.catchHistoryMapMarkerPosition.push(markerPosition);
         }
       });
-  
+
     });
-  }  
-  
+  }
+
   postCatch() {
     this.newCatch.caughtWhen = this.dateFormatter.createLocalDate(this.caughtWhen, this.newCatch.timeZone);
 
-    this.apiService.postCatch(this.tripId, this.newCatch).subscribe({
+    this.offlineData.createCatch(this.tripId, this.newCatch).subscribe({
       next: (response) => {
         console.log('Catch saved successfully', response);
         this.tripCatch.push(response);
@@ -177,7 +180,7 @@ export class TripCatchComponent implements OnInit {
       return;
 
     this.currentPositionMarkerPosition = event.latLng.toJSON();
-    this.newCatch.caughtLocation = { latitude: this.currentPositionMarkerPosition.lat, longitude: this.currentPositionMarkerPosition.lng };    
+    this.newCatch.caughtLocation = { latitude: this.currentPositionMarkerPosition.lat, longitude: this.currentPositionMarkerPosition.lng };
   }
 
   onMarkerDragEnd(event: any) {
@@ -224,7 +227,7 @@ export class TripCatchComponent implements OnInit {
         console.error('Error loading Google Maps:', error);
       });
     }
-  }  
+  }
 
   openEndTripModal() {
     this.showEndTripModal = true;
@@ -233,7 +236,7 @@ export class TripCatchComponent implements OnInit {
   closeEndTripModal() {
     this.showEndTripModal = false;
   }
-  
+
   onFishSizeSelected(size: FishSize) {
     const species = this.activeSpecies || this.tripDetails.defaultSpecies;
     this.getCurrentLocation().then((position) => {
@@ -246,7 +249,7 @@ export class TripCatchComponent implements OnInit {
        caughtLength: 0
      }
 
-     this.apiService.postCatch(this.tripId, mycatch).subscribe({
+     this.offlineData.createCatch(this.tripId, mycatch).subscribe({
        next: (response) => {
          console.log('Catch saved successfully', response);
          this.tripCatch.push(response);
@@ -277,7 +280,7 @@ export class TripCatchComponent implements OnInit {
       // tags: this.endTripData.tags.split(',').map(tag => tag.trim())
     };
 
-    this.apiService.endTrip(this.tripDetails.tripId, updatedTrip).subscribe({
+    this.offlineData.endTrip(this.tripDetails.tripId, updatedTrip).subscribe({
       next: (response) => {
         this.closeEndTripModal();
         console.log('Trip ended successfully', response);
@@ -289,7 +292,7 @@ export class TripCatchComponent implements OnInit {
         // Handle error, e.g., show an error message
       }
     });
-  }  
+  }
 
   getButtonClass(size: string): string {
     switch (size.toLowerCase()) {
@@ -316,7 +319,16 @@ export class TripCatchComponent implements OnInit {
   }
 
 
+  isTripPending(): boolean {
+    const trip = this.tripDetails as LocalTripRecord;
+    return trip?.syncStatus === 'pending' || trip?.syncStatus === 'modified';
+  }
+
+  isCatchPending(item: CatchDetails): boolean {
+    return (item as LocalCatchRecord)?.syncStatus === 'pending';
+  }
+
   onCancel() {
     this.router.navigate(['/trips']);
-  }  
+  }
 }

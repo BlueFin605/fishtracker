@@ -67,6 +67,11 @@ import { LoadingService } from './loading.service';
     return this.withLoading(this.http.post<TripDetails>(apiUrl, newTrip));
   }
 
+  patchTrip(tripid: string, updates: Partial<TripDetails>): Observable<TripDetails> {
+    const apiUrl = `${this.baseApiUrl}/trip/${tripid}`;
+    return this.withLoading(this.http.patch<TripDetails>(apiUrl, updates));
+  }
+
   endTrip(tripid: string, patchTrip: EndTripDetails): Observable<TripDetails> {
     const apiUrl = `${this.baseApiUrl}/trip/${tripid}/endtrip`; // Construct full API URL
     return this.withLoading(this.http.post<TripDetails>(apiUrl, patchTrip));

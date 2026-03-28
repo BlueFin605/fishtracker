@@ -6,6 +6,7 @@ import { Router } from '@angular/router';
 import { DateConversionService } from '../../services/date-conversion.service';
 import { PreferencesService } from '../../services/preferences.service';
 import { FishTrackerSettingsService } from '../../services/fish-tracker-settings.service';
+import { OfflineDataService } from '../../services/offline/offline-data.service';
 import { SpeciesSelector} from '../../components/species-selector-component/species-selector.component';
 
 @Component({
@@ -27,8 +28,10 @@ export class NewTripComponent implements OnInit {
 
   startTime: Date | undefined = new Date();
   speciesList: string[] = [];
+  profileUnavailable = false;
 
   constructor(private apiService: ApiService,
+              private offlineData: OfflineDataService,
               private router: Router,
               private dateFormatter: DateConversionService,
               private preferencesService: PreferencesService,
@@ -40,25 +43,21 @@ export class NewTripComponent implements OnInit {
 
     // Load profile as fallback, then try to auto-populate from trip history
     this.settingsService.profile.subscribe((profile: ProfileDetails) => {
+      if (!profile || !profile.species || profile.species.length === 0) {
+        // No profile available (first-time user offline)
+        this.profileUnavailable = true;
+        return;
+      }
+
       this.speciesList = profile.species;
 
-      // Try to derive species from recent seasonal trips
-      this.apiService.getAllTrips(true).subscribe({
-        next: (seasonalTrips: TripDetails[]) => {
-          if (seasonalTrips.length > 0) {
-            this.applySpeciesFromTrips(seasonalTrips.slice(-5));
+      // Try to derive species from locally cached trips
+      this.offlineData.getTrips().subscribe({
+        next: (trips: TripDetails[]) => {
+          if (trips.length > 0) {
+            this.applySpeciesFromTrips(trips.slice(-5));
           } else {
-            // No seasonal trips — fall back to last 5 trips overall
-            this.apiService.getAllTrips(false).subscribe({
-              next: (allTrips: TripDetails[]) => {
-                if (allTrips.length > 0) {
-                  this.applySpeciesFromTrips(allTrips.slice(-5));
-                } else {
-                  this.applyProfileFallback(profile);
-                }
-              },
-              error: () => this.applyProfileFallback(profile)
-            });
+            this.applyProfileFallback(profile);
           }
         },
         error: () => this.applyProfileFallback(profile)
@@ -98,20 +97,17 @@ export class NewTripComponent implements OnInit {
     console.log(this.newTrip.species);
   }
 
-  postTrip() {    
+  postTrip() {
     this.newTrip.startTime = this.dateFormatter.createLocalDate(this.startTime, this.newTrip.timeZone);
 
-    this.apiService.postTrip(this.newTrip).subscribe({
+    this.offlineData.createTrip(this.newTrip).subscribe({
       next: (response) => {
         console.log('Trip saved successfully', response);
-
-        // Handle success, e.g., navigate to another page or show a success message
         const tripId = response.tripId;
         this.router.navigate(['trip', tripId]);
       },
       error: (error) => {
         console.error('Error saving trip', error);
-        // Handle error, e.g., show an error message
       }
     });
   }

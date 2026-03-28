@@ -77,3 +77,26 @@ header {
 .button-link:hover {
   background-color: #1b5e20;
 }
+
+.sync-indicator {
+  display: flex;
+  align-items: center;
+  margin-left: 8px;
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 0.85rem;
+}
+
+.sync-pending {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.sync-count {
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.sync-auth-warning {
+  color: #ffb74d;
+}

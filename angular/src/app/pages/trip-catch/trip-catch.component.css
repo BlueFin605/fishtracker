@@ -198,3 +198,9 @@
   line-height: 1.5;
   font-size: 0.95rem;
 }
+
+.sync-pending-icon {
+  color: #90a4ae;
+  font-size: 0.75rem;
+  margin-left: 4px;
+}

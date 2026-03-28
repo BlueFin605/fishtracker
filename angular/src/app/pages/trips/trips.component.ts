@@ -1,11 +1,11 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ApiService, TripDetails, CatchDetails } from '../../services/api.service';
+import { TripDetails } from '../../services/api.service';
 import { Router } from '@angular/router';
 import { FishTrackerSettingsService } from '../../services/fish-tracker-settings.service';
+import { OfflineDataService } from '../../services/offline/offline-data.service';
 import { DateFormatModule } from '../../components/date-format/date-format.module';
-import { LoadingService } from '../../services/loading.service';
-import { firstValueFrom } from 'rxjs';
+import { SyncStatus } from '../../services/offline/offline.types';
 
 @Component({
   selector: 'app-trips',
@@ -15,13 +15,12 @@ import { firstValueFrom } from 'rxjs';
   styleUrl: './trips.component.css'
 })
 export class TripsComponent {
-  trips: TripDetails[];
+  trips: (TripDetails & { syncStatus?: SyncStatus })[];
   relevantTrips: boolean;
 
   constructor(private router: Router,
-    private apiService: ApiService,
+    private offlineData: OfflineDataService,
     private fishTrackerSettingsService: FishTrackerSettingsService,
-    private loadingService: LoadingService
   ) {
     this.trips = [];
     this.relevantTrips = this.fishTrackerSettingsService.relevantTrips;
@@ -29,25 +28,19 @@ export class TripsComponent {
 
   ngOnInit() {
     console.log('TripsComponent ngOnInit');
-    this.loadingService.show();
-    this.getAllTrips()
-      .then(() => {
-        // Additional API calls can be chained here
-      })
-      .finally(() => {
-        console.log('TripsComponent ngOnInit finally');
-        this.loadingService.hide();
-      });
+    this.getAllTrips();
   }
 
-  async getAllTrips(): Promise<void> {
-    try {
-      const data = await firstValueFrom(this.apiService.getAllTrips(this.relevantTrips));
-      this.trips = data;
-      console.log(`trips data ${JSON.stringify(this.trips)}`);
-    } catch (error) {
-      console.error('Error fetching trips:', error);
-    }
+  getAllTrips(): void {
+    this.offlineData.getTrips().subscribe({
+      next: (data) => {
+        this.trips = data as (TripDetails & { syncStatus?: SyncStatus })[];
+        console.log(`trips data ${JSON.stringify(this.trips)}`);
+      },
+      error: (error) => {
+        console.error('Error fetching trips:', error);
+      }
+    });
   }
 
   confirmDeleteTrip(tripId: string, event: Event): void {
@@ -59,20 +52,29 @@ export class TripsComponent {
   }
 
   deleteTrip(tripId: string): void {
-    this.apiService.deleteTrip(tripId).subscribe((data: CatchDetails[]) => {
-      console.log(`removed catch data ${JSON.stringify(data)}`);
-      this.getAllTrips();
+    this.offlineData.deleteTrip(tripId).subscribe({
+      next: () => {
+        console.log(`Trip ${tripId} deleted`);
+        this.getAllTrips();
+      },
+      error: (error) => {
+        console.error('Error deleting trip:', error);
+      }
     });
   }
 
   toggleTrips(event: Event) {
     const checkbox = event.target as HTMLInputElement;
     this.relevantTrips = checkbox.checked;
-    this.fishTrackerSettingsService.relevantTrips = this.relevantTrips; // Store the value in the service    
+    this.fishTrackerSettingsService.relevantTrips = this.relevantTrips;
     this.getAllTrips();
   }
 
   navigateToTripCatch(tripId: string) {
     this.router.navigate(['/trip', tripId]);
+  }
+
+  isPending(trip: TripDetails & { syncStatus?: SyncStatus }): boolean {
+    return trip.syncStatus === 'pending' || trip.syncStatus === 'modified';
   }
 }

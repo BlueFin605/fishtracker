@@ -6,6 +6,14 @@
               <img src="favicon.png" alt="Trips" class="favicon-icon">
             </button>             
             <a *ngIf="showStartTrip" class="nav-link button-link" [routerLink]="['/newtrip']">Start Trip</a>
+            <span class="sync-indicator" *ngIf="(syncState$ | async) as syncState">
+                <i *ngIf="syncState === 'syncing'" class="fas fa-sync fa-spin" title="Syncing..."></i>
+                <span *ngIf="syncState === 'pending'" class="sync-pending" title="Items waiting to sync">
+                    <i class="fas fa-cloud-upload-alt"></i>
+                    <span class="sync-count">{{ pendingCount$ | async }}</span>
+                </span>
+                <i *ngIf="syncState === 'authExpired'" class="fas fa-exclamation-triangle sync-auth-warning" title="Re-login needed to sync"></i>
+            </span>
         </nav>
         <div class="avatar-menu">
             <button mat-icon-button [matMenuTriggerFor]="menu"  class="avatar-button">
