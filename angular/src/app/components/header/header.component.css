@@ -100,3 +100,30 @@ header {
 .sync-auth-warning {
   color: #ffb74d;
 }
+
+.avatar-initial {
+  font-size: 1rem;
+  font-weight: 600;
+  color: white;
+  line-height: 1;
+}
+
+.menu-user-info {
+  padding: 8px 16px 4px;
+  border-bottom: 1px solid #eee;
+  margin-bottom: 4px;
+  display: flex;
+  flex-direction: column;
+}
+
+.menu-user-name {
+  font-weight: 500;
+  font-size: 0.9rem;
+  color: #333;
+}
+
+.menu-user-email {
+  font-size: 0.8rem;
+  color: #888;
+  margin-top: 2px;
+}

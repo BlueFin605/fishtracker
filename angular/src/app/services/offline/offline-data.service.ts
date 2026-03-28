@@ -1,4 +1,5 @@
 import { Injectable, Inject, forwardRef, NgZone } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
 import { Observable, from, of, switchMap, catchError } from 'rxjs';
 import { toZonedTime } from 'date-fns-tz';
 import { jwtDecode } from 'jwt-decode';
@@ -28,6 +29,7 @@ export class OfflineDataService {
   constructor(
     private db: IndexedDbService,
     private apiService: ApiService,
+    private http: HttpClient,
     @Inject(forwardRef(() => SyncService)) private syncService: SyncService,
     private ngZone: NgZone,
   ) {}
@@ -72,18 +74,32 @@ export class OfflineDataService {
     return this.fromZoned(this.db.getAllTrips()).pipe(
       switchMap(trips => {
         if (trips.length > 0) {
+          // Return local data immediately, refresh from API in background
+          if (navigator.onLine) {
+            this.backgroundRefreshTrips();
+          }
           return of(trips as TripDetails[]);
         }
         if (!navigator.onLine) {
           return of([] as TripDetails[]);
         }
-        // Fallback to API if IndexedDB is empty and online
+        // No local data — must fetch from API
         return this.apiService.getAllTrips(true).pipe(
           switchMap(serverTrips => from(this.cacheTrips(serverTrips))),
           catchError(() => of([] as TripDetails[])),
         );
       }),
     );
+  }
+
+  /** Fetch trips from API in background (no spinner) and update IndexedDB cache */
+  private backgroundRefreshTrips(): void {
+    this.http.get<TripDetails[]>(`${environment.apiUrl}/trip?view=relevant`).subscribe({
+      next: serverTrips => {
+        this.cacheTrips(serverTrips);
+      },
+      error: () => {},
+    });
   }
 
   getTrip(tripId: string): Observable<TripDetails> {

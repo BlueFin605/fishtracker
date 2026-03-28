@@ -1,5 +1,9 @@
 <div class="profile-container">
   <h2>Preferences</h2>
+  <div class="user-info" *ngIf="authService.userDisplayName || authService.userEmail">
+    <span class="user-name" *ngIf="authService.userDisplayName">{{ authService.userDisplayName }}</span>
+    <span class="user-email" *ngIf="authService.userEmail">{{ authService.userEmail }}</span>
+  </div>
   <form (ngSubmit)="saveProfileDetails()">
     <div class="form-section">
       <label for="defaultSpecies">Default Species</label>

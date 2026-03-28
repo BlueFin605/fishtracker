@@ -16,16 +16,17 @@
             </span>
         </nav>
         <div class="avatar-menu">
-            <button mat-icon-button [matMenuTriggerFor]="menu"  class="avatar-button">
-              <mat-icon>person</mat-icon> <!-- Add person icon here -->
-              <!-- <img *ngIf="userProfile.picture" [src]="userProfile.picture" alt="Avatar" class="avatar"> -->
-              <!-- <mat-icon *ngIf="!userProfile.picture">account_circle</mat-icon> -->
+            <button mat-icon-button [matMenuTriggerFor]="menu" class="avatar-button" [title]="authService.userDisplayName || authService.userEmail">
+              <span class="avatar-initial">{{ authService.userInitial }}</span>
             </button>
             <mat-menu #menu="matMenu">
+              <div class="menu-user-info" *ngIf="authService.userDisplayName || authService.userEmail">
+                <span class="menu-user-name">{{ authService.userDisplayName }}</span>
+                <span class="menu-user-email" *ngIf="authService.userEmail">{{ authService.userEmail }}</span>
+              </div>
               <button mat-menu-item (click)="onPreferences()">Preferences</button>
               <button mat-menu-item (click)="onDebug()">Debug</button>
               <button mat-menu-item (click)="onLogout()">Log out</button>
-              <!-- <app-auth-button></app-auth-button> -->
             </mat-menu>
           </div>    </header>
 </ng-container>

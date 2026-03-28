@@ -156,9 +156,42 @@ export class AuthenticationService {
     return decodedToken.exp > currentTime;
   }
 
+  get userDisplayName(): string {
+    if (environment.bypassAuth) {
+      return 'Local Dev User';
+    }
+    const idToken = this.id_token;
+    if (!idToken) return '';
+    try {
+      const decoded: any = jwtDecode(idToken);
+      return decoded.name || decoded.email || decoded.preferred_username || '';
+    } catch {
+      return '';
+    }
+  }
+
+  get userEmail(): string {
+    if (environment.bypassAuth) {
+      return 'user123@local';
+    }
+    const idToken = this.id_token;
+    if (!idToken) return '';
+    try {
+      const decoded: any = jwtDecode(idToken);
+      return decoded.email || '';
+    } catch {
+      return '';
+    }
+  }
+
+  get userInitial(): string {
+    const name = this.userDisplayName || this.userEmail;
+    return name ? name.charAt(0).toUpperCase() : '?';
+  }
+
   get id_token(): string | null {
     return localStorage.getItem('id_token');
-  }  
+  }
 
   get access_token(): string | null {
     return localStorage.getItem('access_token');  
