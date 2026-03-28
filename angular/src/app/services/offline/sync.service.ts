@@ -82,6 +82,10 @@ export class SyncService implements OnDestroy {
       this.retryTimer = null;
     }
 
+    const queueCount = await this.db.getSyncQueueCount();
+    if (queueCount === 0) return;
+
+    console.log(`[Sync] Starting sync pass, ${queueCount} entries in queue`);
     this.syncing = true;
     this._syncState$.next('syncing');
 
@@ -91,6 +95,7 @@ export class SyncService implements OnDestroy {
       this.syncing = false;
       await this.updatePendingCount();
       const remaining = this._pendingCount$.value;
+      console.log(`[Sync] Pass complete, ${remaining} entries remaining`);
       this._syncState$.next(remaining > 0 ? 'pending' : 'idle');
     }
   }
@@ -129,6 +134,7 @@ export class SyncService implements OnDestroy {
   }
 
   private async processEntry(entry: SyncQueueEntry): Promise<boolean> {
+    console.log(`[Sync] Processing: ${entry.operation} for ${entry.entityId}`, entry.payload);
     await this.db.updateSyncQueueEntry(entry.id, { status: 'in-progress', lastAttempt: Date.now() });
 
     try {
@@ -151,9 +157,11 @@ export class SyncService implements OnDestroy {
       }
 
       // Success — remove from queue
+      console.log(`[Sync] Success: ${entry.operation} for ${entry.entityId}`);
       await this.db.deleteSyncQueueEntry(entry.id);
       return true;
     } catch (err: unknown) {
+      console.error(`[Sync] Failed: ${entry.operation} for ${entry.entityId}`, err);
       const status = (err as { status?: number })?.status;
 
       if (status === 401) {
