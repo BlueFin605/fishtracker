@@ -1,4 +1,4 @@
-import { Injectable, OnDestroy } from '@angular/core';
+import { Injectable, NgZone, OnDestroy } from '@angular/core';
 import { BehaviorSubject, Observable, Subscription } from 'rxjs';
 import { IndexedDbService } from './indexed-db.service';
 import { ApiService, NewTrip, NewCatch, EndTripDetails } from '../api.service';
@@ -25,6 +25,7 @@ export class SyncService implements OnDestroy {
   constructor(
     private db: IndexedDbService,
     private apiService: ApiService,
+    private ngZone: NgZone,
   ) {
     this.setupTriggers();
     this.updatePendingCount();
@@ -87,7 +88,7 @@ export class SyncService implements OnDestroy {
 
     console.log(`[Sync] Starting sync pass, ${queueCount} entries in queue`);
     this.syncing = true;
-    this._syncState$.next('syncing');
+    this.ngZone.run(() => this._syncState$.next('syncing'));
 
     try {
       await this.processSyncQueue();
@@ -96,7 +97,7 @@ export class SyncService implements OnDestroy {
       await this.updatePendingCount();
       const remaining = this._pendingCount$.value;
       console.log(`[Sync] Pass complete, ${remaining} entries remaining`);
-      this._syncState$.next(remaining > 0 ? 'pending' : 'idle');
+      this.ngZone.run(() => this._syncState$.next(remaining > 0 ? 'pending' : 'idle'));
     }
   }
 
@@ -166,7 +167,7 @@ export class SyncService implements OnDestroy {
 
       if (status === 401) {
         this.authBlocked = true;
-        this._syncState$.next('authExpired');
+        this.ngZone.run(() => this._syncState$.next('authExpired'));
         await this.db.updateSyncQueueEntry(entry.id, { status: 'failed', retryCount: entry.retryCount + 1 });
         return false;
       }
@@ -259,7 +260,7 @@ export class SyncService implements OnDestroy {
   private async updatePendingCount(): Promise<void> {
     try {
       const count = await this.db.getSyncQueueCount();
-      this._pendingCount$.next(count);
+      this.ngZone.run(() => this._pendingCount$.next(count));
     } catch {
       // Non-critical
     }
