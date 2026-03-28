@@ -1,6 +1,6 @@
 import { Injectable, Inject, forwardRef, NgZone } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, from, of, switchMap, catchError } from 'rxjs';
+import { Observable, from, of, switchMap, catchError, concat } from 'rxjs';
 import { toZonedTime } from 'date-fns-tz';
 import { jwtDecode } from 'jwt-decode';
 import { environment } from '../../../environments/environment';
@@ -72,33 +72,46 @@ export class OfflineDataService {
 
   getTrips(): Observable<TripDetails[]> {
     return this.fromZoned(this.db.getAllTrips()).pipe(
-      switchMap(trips => {
-        if (trips.length > 0) {
-          // Return local data immediately, refresh from API in background
-          if (navigator.onLine) {
-            this.backgroundRefreshTrips();
-          }
-          return of(trips as TripDetails[]);
-        }
+      switchMap(localTrips => {
+        const local$ = of(localTrips as TripDetails[]);
+
         if (!navigator.onLine) {
-          return of([] as TripDetails[]);
+          return localTrips.length > 0 ? local$ : of([] as TripDetails[]);
         }
-        // No local data — must fetch from API
-        return this.apiService.getAllTrips(true).pipe(
-          switchMap(serverTrips => from(this.cacheTrips(serverTrips))),
-          catchError(() => of([] as TripDetails[])),
-        );
+
+        if (localTrips.length === 0) {
+          // No local data — fetch from API as primary source
+          return this.apiService.getAllTrips(true).pipe(
+            switchMap(serverTrips => from(this.cacheTrips(serverTrips))),
+            catchError(() => of([] as TripDetails[])),
+          );
+        }
+
+        // Emit local data first, then emit again with refreshed data from API
+        const refresh$ = this.fetchAndMergeTrips();
+        return concat(local$, refresh$);
       }),
     );
   }
 
-  /** Fetch trips from API in background (no spinner) and update IndexedDB cache */
-  private backgroundRefreshTrips(): void {
-    this.http.get<TripDetails[]>(`${environment.apiUrl}/trip?view=relevant`).subscribe({
-      next: serverTrips => {
-        this.cacheTrips(serverTrips);
-      },
-      error: () => {},
+  /** Fetch trips from API (no spinner), merge with local pending data, update cache, and return */
+  private fetchAndMergeTrips(): Observable<TripDetails[]> {
+    return new Observable<TripDetails[]>(subscriber => {
+      this.http.get<TripDetails[]>(`${environment.apiUrl}/trip?view=relevant`).subscribe({
+        next: async serverTrips => {
+          await this.cacheTrips(serverTrips);
+          // Re-read all trips from IndexedDB (includes both server and local pending)
+          const allTrips = await this.db.getAllTrips();
+          this.ngZone.run(() => {
+            subscriber.next(allTrips as TripDetails[]);
+            subscriber.complete();
+          });
+        },
+        error: () => {
+          // Silent — local data already emitted
+          subscriber.complete();
+        },
+      });
     });
   }
 

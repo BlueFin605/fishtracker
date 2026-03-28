@@ -200,7 +200,11 @@ export class SyncService implements OnDestroy {
     return new Promise((resolve, reject) => {
       this.apiService.postCatch(tripId, entry.payload as NewCatch).subscribe({
         next: async serverCatch => {
-          // Update local record with server response (bite times, etc.)
+          // Delete the local catch (client-generated catchId) and store server version
+          // Server generates a new catchId, so we need to remove the old one
+          if (serverCatch.catchId !== entry.entityId) {
+            await this.db.deleteCatch(entry.entityId);
+          }
           await this.db.putCatch({ ...serverCatch, syncStatus: 'synced' });
           resolve();
         },
