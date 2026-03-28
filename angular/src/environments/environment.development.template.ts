@@ -7,5 +7,6 @@ export const environment = {
     redirectUri: '<<Put your cognito callback url here>>',
     logoutRedirectUri: '<<Put your login age url here>>',
     apiUrl: 'https://api.fishtracker.bluefin605.com/api',
-    googleMapiApi: 'GOOGLE_API_KEY'
+    googleMapiApi: 'GOOGLE_API_KEY',
+    buildVersion: 'dev'
   };

@@ -5,6 +5,7 @@ import { Router } from '@angular/router';
 import { SpeciesSelector } from '../../components/species-selector-component/species-selector.component';
 import { ApiService, ProfileDetails, SettingsDetails } from '../../services/api.service';
 import { FishTrackerSettingsService } from '../../services/fish-tracker-settings.service';
+import { environment } from '../../../environments/environment';
 
 @Component({
   standalone: true,
@@ -27,6 +28,7 @@ export class ProfileComponent implements OnInit {
   addSpeciesError: string = '';
   saveSuccess: boolean = false;
   saveError: boolean = false;
+  buildVersion: string = environment.buildVersion;
 
   constructor(private apiService: ApiService, private router: Router, private settingsService: FishTrackerSettingsService) {}
 
