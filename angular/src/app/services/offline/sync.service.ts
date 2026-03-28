@@ -62,9 +62,17 @@ export class SyncService implements OnDestroy {
     });
 
     // Periodic foreground check (30s) — fallback for iOS
-    this.periodicTimer = setInterval(() => {
+    // Only attempts sync if there are pending items (no unnecessary API calls)
+    this.periodicTimer = setInterval(async () => {
       if (document.visibilityState === 'visible') {
-        this.attemptSync();
+        try {
+          const count = await this.db.getSyncQueueCount();
+          if (count > 0) {
+            this.attemptSync();
+          }
+        } catch {
+          // Ignore — IndexedDB read only, no network
+        }
       }
     }, 30000);
   }
