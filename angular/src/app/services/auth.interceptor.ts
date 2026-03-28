@@ -29,7 +29,8 @@ export class AuthInterceptor implements HttpInterceptor {
 
     return next.handle(authReq).pipe(
       catchError((error: HttpErrorResponse) => {
-        if (error.status === 401 || (error.status === 0 && error.error instanceof ProgressEvent)) {
+        // Only refresh on actual 401 responses, not network errors
+        if (error.status === 401) {
           return this.authService.refreshToken().pipe(
             switchMap(() => {
               const newToken = this.authService.access_token;
@@ -40,7 +41,7 @@ export class AuthInterceptor implements HttpInterceptor {
             })
           );
         }
-        return throwError(error);
+        return throwError(() => error);
       })
     );
   }
