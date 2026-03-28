@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { SpeciesSelector } from '../../components/species-selector-component/species-selector.component';
 import { ApiService, SettingsDetails } from '../../services/api.service';
+import { FishTrackerSettingsService } from '../../services/fish-tracker-settings.service';
 
 @Component({
   standalone: true,
@@ -20,7 +21,7 @@ export class SetupComponent implements OnInit {
   newSpeciesName: string = '';
   error: string = '';
 
-  constructor(private apiService: ApiService, private router: Router) {}
+  constructor(private apiService: ApiService, private router: Router, private settingsService: FishTrackerSettingsService) {}
 
   ngOnInit(): void {
     this.apiService.getSettings().subscribe({
@@ -37,6 +38,7 @@ export class SetupComponent implements OnInit {
     this.apiService.addSpecies(name).subscribe({
       next: (updatedSettings) => {
         this.settings = updatedSettings;
+        this.settingsService.updateSettingsCache(updatedSettings);
         const titleCased = name.replace(/\w\S*/g, w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase());
         if (!this.selectedSpecies.includes(titleCased)) {
           this.selectedSpecies = [...this.selectedSpecies, titleCased];

@@ -14,34 +14,32 @@
     </div>
 </div>
 
-<section *ngIf="showAdvancedMode">
-    <!-- End Trip Modal -->
-    <div *ngIf="showEndTripModal" class="modal">
-        <div class="modal-content">
-            <span class="close" (click)="closeEndTripModal()">&times;</span>
-            <h2>End Trip</h2>
-            <form (ngSubmit)="endTrip()">
-                <label for="endTime">End Time:</label>
-                <input type="datetime-local" id="endTime" [(ngModel)]="endTripData.endTime" name="endTime" required>
+<!-- End Trip Modal — outside showAdvancedMode so it's always available -->
+<div *ngIf="showEndTripModal" class="modal">
+    <div class="modal-content">
+        <span class="close" (click)="closeEndTripModal()">&times;</span>
+        <h2>End Trip</h2>
+        <form (ngSubmit)="endTrip()">
+            <label for="endTime">End Time:</label>
+            <input type="datetime-local" id="endTime" [(ngModel)]="endTripData.endTime" name="endTime" required>
 
-                <label for="notes">Notes:</label>
-                <textarea id="notes" [(ngModel)]="endTripData.notes" name="notes"></textarea>
+            <label for="notes">Notes:</label>
+            <textarea id="notes" [(ngModel)]="endTripData.notes" name="notes"></textarea>
 
-                <label for="rating">Rating:</label>
-                <select id="rating" [(ngModel)]="endTripData.rating" name="rating" required>
-                    <option *ngFor="let option of ratingOptions" [value]="option">{{ option }}</option>
-                </select>
+            <label for="rating">Rating:</label>
+            <select id="rating" [(ngModel)]="endTripData.rating" name="rating" required>
+                <option *ngFor="let option of ratingOptions" [value]="option">{{ option }}</option>
+            </select>
 
-                <!-- <input type="number" id="rating" [(ngModel)]="endTripData.rating" name="rating" min="1" max="5"> -->
+            <label for="tags">Tags:</label>
+            <input type="text" id="tags" [(ngModel)]="endTripData.tags" name="tags">
 
-                <label for="tags">Tags:</label>
-                <input type="text" id="tags" [(ngModel)]="endTripData.tags" name="tags">
-
-                <button type="submit">Submit</button>
-            </form>
-        </div>
+            <button type="submit">Submit</button>
+        </form>
     </div>
+</div>
 
+<section *ngIf="showAdvancedMode">
     <section *ngIf="tripIsOpen"> <!-- New Catch-->
         <h2>New Catch</h2>
         <form (ngSubmit)="postCatch()">
@@ -76,8 +74,8 @@
                     {{newCatch.caughtLocation?.longitude}} (Select from map):</label>
                 <button (click)="toggleCurrentPositionMapVisibility($event)">Show Map</button>
 
-                <div *ngIf="currentPositionMapVisible">
-                    <google-map height="400px" width="750px" [center]="center" [zoom]="zoom"
+                <div *ngIf="currentPositionMapVisible" style="height:400px;width:750px;">
+                    <google-map *ngIf="currentPositionMapReady" height="400px" width="750px" [center]="center" [zoom]="zoom"
                         (mapClick)="onMapClick($event)">
                         <map-marker [position]="currentPositionMarkerPosition" [options]="currentPositionMarkerOptions"
                             (mapDragend)="onMarkerDragEnd($event)" />
@@ -94,8 +92,8 @@
     <section> <!-- Catch History -->
         <h2>Catch History</h2>
         <button (click)="togglecatchHistoryVisibility($event)">Show catches on Map</button> <!-- Show on Maps button -->
-        <div *ngIf="catchHistoryMapVisible">
-            <google-map height="400px" width="750px" [center]="center" [zoom]="zoom">
+        <div *ngIf="catchHistoryMapVisible" style="height:400px;width:750px;">
+            <google-map *ngIf="catchHistoryMapReady" height="400px" width="750px" [center]="center" [zoom]="zoom">
                 <map-marker *ngFor="let position of catchHistoryMapMarkerPosition" [position]="position"
                     [options]="catchHistoryMapMarkerOptions" />
             </google-map>
@@ -118,7 +116,10 @@
                 </thead>
                 <tbody>
                     <tr *ngFor="let item of tripCatch">
-                        <td>{{ item.caughtWhen | date:'MMMM d, y, h:mm a' }}</td>
+                        <td>
+                            {{ item.caughtWhen | date:'MMMM d, y, h:mm a' }}
+                            <i *ngIf="isCatchPending(item)" class="fas fa-cloud-upload-alt sync-pending-icon" title="Waiting to sync"></i>
+                        </td>
                         <td>{{ item.speciesId }}</td>
                         <td>{{ item.caughtSize }}</td>
                         <td>{{ item.caughtLength }}</td>
@@ -134,7 +135,7 @@
     </section>
 
     <section class="trip-details">
-        <h2>Trip Details</h2>
+        <h2>Trip Details <i *ngIf="isTripPending()" class="fas fa-cloud-upload-alt sync-pending-icon" title="Waiting to sync"></i></h2>
         <div class="detail-grid">
             <div class="detail-item">
                 <span class="detail-label">Started</span>

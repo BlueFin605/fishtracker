@@ -1,0 +1,36 @@
+<div class="settings-container">
+  <h2>Settings</h2>
+
+  <div class="settings-section">
+    <h3>Local Data</h3>
+    <div class="setting-row">
+      <div class="setting-info">
+        <span class="setting-label">Cached data</span>
+        <span class="setting-hint">Trips, catches, and profile stored on this device for offline use.</span>
+        <span class="setting-hint" *ngIf="pendingCount > 0">{{ pendingCount }} item(s) waiting to sync.</span>
+      </div>
+      <button class="clear-button" (click)="clearCache()" [disabled]="cacheCleared">
+        {{ cacheCleared ? 'Cleared' : 'Clear Cache' }}
+      </button>
+    </div>
+    <div class="success-message" *ngIf="cacheCleared">
+      Cache cleared. Data will be re-downloaded from the server.
+    </div>
+  </div>
+
+  <div class="settings-section">
+    <h3>Account</h3>
+    <div class="setting-row">
+      <div class="setting-info">
+        <span class="setting-label" *ngIf="authService.userDisplayName">{{ authService.userDisplayName }}</span>
+        <span class="setting-hint" *ngIf="authService.userEmail">{{ authService.userEmail }}</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="button-group">
+    <button class="back-button" (click)="goBack()">Back</button>
+  </div>
+
+  <div class="version-info">v{{ buildVersion }}</div>
+</div>

@@ -22,7 +22,10 @@
         </thead>
         <tbody>
             <tr *ngFor="let trip of trips" (click)="navigateToTripCatch(trip.tripId)">
-                <td>{{ trip.startTime | dateFormat}}</td>
+                <td>
+                    {{ trip.startTime | dateFormat}}
+                    <i *ngIf="isPending(trip)" class="fas fa-cloud-upload-alt sync-pending-icon" title="Waiting to sync"></i>
+                </td>
                 <td>{{ trip.endTime | dateFormat}}</td>
                 <td>{{ trip.notes }}</td>
                 <td>{{ trip.catchSize }}</td>

@@ -7,5 +7,6 @@ export const environment = {
   redirectUri: 'http://localhost:4201',
   logoutRedirectUri: 'http://localhost:4201',
   apiUrl: 'http://localhost:3000/api',
-  googleMapiApi: 'GOOGLE_API_KEY'
+  googleMapiApi: 'GOOGLE_API_KEY',
+  buildVersion: 'local-dev'
 };

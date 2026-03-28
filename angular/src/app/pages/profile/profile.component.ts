@@ -4,6 +4,9 @@ import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { SpeciesSelector } from '../../components/species-selector-component/species-selector.component';
 import { ApiService, ProfileDetails, SettingsDetails } from '../../services/api.service';
+import { FishTrackerSettingsService } from '../../services/fish-tracker-settings.service';
+import { environment } from '../../../environments/environment';
+import { AuthenticationService } from '../../services/authentication.service';
 
 @Component({
   standalone: true,
@@ -26,8 +29,9 @@ export class ProfileComponent implements OnInit {
   addSpeciesError: string = '';
   saveSuccess: boolean = false;
   saveError: boolean = false;
+  buildVersion: string = environment.buildVersion;
 
-  constructor(private apiService: ApiService, private router: Router) {}
+  constructor(private apiService: ApiService, private router: Router, private settingsService: FishTrackerSettingsService, public authService: AuthenticationService) {}
 
   ngOnInit(): void {
     this.loadSettings();
@@ -71,6 +75,7 @@ export class ProfileComponent implements OnInit {
     this.apiService.addSpecies(name).subscribe({
       next: (updatedSettings) => {
         this.settings = updatedSettings;
+        this.settingsService.updateSettingsCache(updatedSettings);
         const titleCased = name.replace(/\w\S*/g, w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase());
         if (!this.profileDetails.species.includes(titleCased)) {
           this.profileDetails.species = [...this.profileDetails.species, titleCased];
