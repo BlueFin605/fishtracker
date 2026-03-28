@@ -61,6 +61,10 @@ export class HeaderComponent {
     // this.router.navigate(['/preferences']);
   }
 
+  onSettings() {
+    this.router.navigate(['/settings']);
+  }
+
   onDebug() {
     // Navigate to preferences page or open preferences dialog
     this.router.navigate(['/debug']);    

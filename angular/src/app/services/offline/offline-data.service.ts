@@ -26,6 +26,8 @@ import {
   providedIn: 'root',
 })
 export class OfflineDataService {
+  private deletedTripIds = new Set<string>();
+
   constructor(
     private db: IndexedDbService,
     private apiService: ApiService,
@@ -33,6 +35,11 @@ export class OfflineDataService {
     @Inject(forwardRef(() => SyncService)) private syncService: SyncService,
     private ngZone: NgZone,
   ) {}
+
+  /** Called by SyncService after a deleteTrip sync succeeds */
+  clearDeletedTripId(tripId: string): void {
+    this.deletedTripIds.delete(tripId);
+  }
 
   /** Wraps a Promise into an Observable that emits inside Angular's zone */
   private fromZoned<T>(promise: Promise<T>): Observable<T> {
@@ -154,6 +161,9 @@ export class OfflineDataService {
 
   async cacheTrips(trips: TripDetails[]): Promise<TripDetails[]> {
     for (const trip of trips) {
+      // Don't re-cache trips that were locally deleted
+      if (this.deletedTripIds.has(trip.tripId)) continue;
+
       const existing = await this.db.getTrip(trip.tripId);
       // Don't overwrite local pending/modified data with server data
       if (!existing || existing.syncStatus === 'synced') {
@@ -253,6 +263,9 @@ export class OfflineDataService {
   private async deleteTripLocally(tripId: string): Promise<void> {
     const trip = await this.db.getTrip(tripId);
     if (!trip) return;
+
+    // Track deletion to prevent background refresh from re-caching
+    this.deletedTripIds.add(tripId);
 
     // Remove catches locally
     await this.db.deleteCatchesByTripId(tripId);

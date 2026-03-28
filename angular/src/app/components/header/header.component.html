@@ -25,6 +25,7 @@
                 <span class="menu-user-email" *ngIf="authService.userEmail">{{ authService.userEmail }}</span>
               </div>
               <button mat-menu-item (click)="onPreferences()">Preferences</button>
+              <button mat-menu-item (click)="onSettings()">Settings</button>
               <button mat-menu-item (click)="onDebug()">Debug</button>
               <button mat-menu-item (click)="onLogout()">Log out</button>
             </mat-menu>
