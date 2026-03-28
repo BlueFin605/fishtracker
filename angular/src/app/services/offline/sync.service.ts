@@ -104,6 +104,7 @@ export class SyncService implements OnDestroy {
   private async processSyncQueue(): Promise<void> {
     // Process in order: createTrip → createCatch → updateTrip/endTrip → deleteTrip
     const operationOrder: string[] = ['createTrip', 'createCatch', 'updateTrip', 'endTrip', 'deleteTrip'];
+    let hadFailure = false;
 
     for (const operation of operationOrder) {
       const entries = await this.getQueuedEntriesForOperation(operation);
@@ -113,17 +114,30 @@ export class SyncService implements OnDestroy {
         if (entry.operation === 'createCatch' && entry.parentId) {
           const parentTrip = await this.db.getTrip(entry.parentId);
           if (!parentTrip || parentTrip.syncStatus !== 'synced') {
-            continue; // Skip — parent trip not yet synced
+            console.log(`[Sync] Skipping ${entry.operation} for ${entry.entityId} — parent trip not synced`);
+            continue;
+          }
+        }
+
+        // For endTrip/updateTrip, check trip exists on server (not still pending)
+        if (entry.operation === 'endTrip' || entry.operation === 'updateTrip') {
+          const trip = await this.db.getTrip(entry.entityId);
+          if (!trip || trip.syncStatus === 'pending') {
+            console.log(`[Sync] Skipping ${entry.operation} for ${entry.entityId} — trip not yet created on server`);
+            continue;
           }
         }
 
         const success = await this.processEntry(entry);
         if (!success) {
-          // Network failure — stop this sync pass, schedule retry
-          this.scheduleRetry(entry.retryCount);
-          return;
+          hadFailure = true;
+          // Don't stop — continue with other entries
         }
       }
+    }
+
+    if (hadFailure) {
+      this.scheduleRetry(1);
     }
   }
 

@@ -201,15 +201,20 @@ export class OfflineDataService {
   }
 
   private async endTripLocally(tripId: string, endTripData: EndTripDetails): Promise<TripDetails> {
-    console.log('endTripLocally', { tripId, endTripData });
     const trip = await this.db.getTrip(tripId);
-    console.log('endTripLocally trip from db', trip);
     if (!trip) {
       throw new Error(`Trip ${tripId} not found locally`);
     }
 
     const catches = await this.db.getCatchesByTripId(tripId);
     const endTime = endTripData.endTime ? new Date(endTripData.endTime) : new Date();
+
+    // Ensure the queue payload has a concrete endTime (not undefined)
+    const endTimeIso = endTripData.endTime || new Date().toISOString();
+    const queuePayload: EndTripDetails = {
+      ...endTripData,
+      endTime: endTimeIso,
+    };
 
     const updatedTrip: LocalTripRecord = {
       ...trip,
@@ -222,7 +227,7 @@ export class OfflineDataService {
     };
 
     await this.db.putTrip(updatedTrip);
-    await this.addToQueue('endTrip', tripId, undefined, endTripData);
+    await this.addToQueue('endTrip', tripId, undefined, queuePayload);
 
     return updatedTrip;
   }
