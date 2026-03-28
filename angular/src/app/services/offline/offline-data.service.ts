@@ -1,7 +1,8 @@
-import { Injectable, Inject, forwardRef } from '@angular/core';
+import { Injectable, Inject, forwardRef, NgZone } from '@angular/core';
 import { Observable, from, of, switchMap, catchError } from 'rxjs';
 import { toZonedTime } from 'date-fns-tz';
 import { jwtDecode } from 'jwt-decode';
+import { environment } from '../../../environments/environment';
 import { IndexedDbService } from './indexed-db.service';
 import { SyncService } from './sync.service';
 import {
@@ -28,36 +29,47 @@ export class OfflineDataService {
     private db: IndexedDbService,
     private apiService: ApiService,
     @Inject(forwardRef(() => SyncService)) private syncService: SyncService,
+    private ngZone: NgZone,
   ) {}
+
+  /** Wraps a Promise into an Observable that emits inside Angular's zone */
+  private fromZoned<T>(promise: Promise<T>): Observable<T> {
+    return new Observable<T>(subscriber => {
+      promise.then(
+        value => this.ngZone.run(() => { subscriber.next(value); subscriber.complete(); }),
+        err => this.ngZone.run(() => subscriber.error(err)),
+      );
+    });
+  }
 
   // --- Trip Operations ---
 
   createTrip(newTrip: NewTrip): Observable<TripDetails> {
-    return from(this.createTripLocally(newTrip));
+    return this.fromZoned(this.createTripLocally(newTrip));
   }
 
   endTrip(tripId: string, endTripData: EndTripDetails): Observable<TripDetails> {
-    return from(this.endTripLocally(tripId, endTripData));
+    return this.fromZoned(this.endTripLocally(tripId, endTripData));
   }
 
   updateTripNotes(tripId: string, notes: string): Observable<TripDetails> {
-    return from(this.updateTripNotesLocally(tripId, notes));
+    return this.fromZoned(this.updateTripNotesLocally(tripId, notes));
   }
 
   deleteTrip(tripId: string): Observable<void> {
-    return from(this.deleteTripLocally(tripId));
+    return this.fromZoned(this.deleteTripLocally(tripId));
   }
 
   // --- Catch Operations ---
 
   createCatch(tripId: string, newCatch: NewCatch): Observable<CatchDetails> {
-    return from(this.createCatchLocally(tripId, newCatch));
+    return this.fromZoned(this.createCatchLocally(tripId, newCatch));
   }
 
   // --- Read Operations ---
 
   getTrips(): Observable<TripDetails[]> {
-    return from(this.db.getAllTrips()).pipe(
+    return this.fromZoned(this.db.getAllTrips()).pipe(
       switchMap(trips => {
         if (trips.length > 0) {
           return of(trips as TripDetails[]);
@@ -75,7 +87,7 @@ export class OfflineDataService {
   }
 
   getTrip(tripId: string): Observable<TripDetails> {
-    return from(this.db.getTrip(tripId)).pipe(
+    return this.fromZoned(this.db.getTrip(tripId)).pipe(
       switchMap(trip => {
         if (trip) {
           return of(trip as TripDetails);
@@ -92,7 +104,7 @@ export class OfflineDataService {
   }
 
   getCatches(tripId: string): Observable<CatchDetails[]> {
-    return from(this.db.getCatchesByTripId(tripId)).pipe(
+    return this.fromZoned(this.db.getCatchesByTripId(tripId)).pipe(
       switchMap(catches => {
         if (catches.length > 0) {
           return of(catches as CatchDetails[]);
@@ -160,7 +172,9 @@ export class OfflineDataService {
   }
 
   private async endTripLocally(tripId: string, endTripData: EndTripDetails): Promise<TripDetails> {
+    console.log('endTripLocally', { tripId, endTripData });
     const trip = await this.db.getTrip(tripId);
+    console.log('endTripLocally trip from db', trip);
     if (!trip) {
       throw new Error(`Trip ${tripId} not found locally`);
     }
@@ -277,6 +291,9 @@ export class OfflineDataService {
   }
 
   private getSubject(): string {
+    if (environment.bypassAuth) {
+      return 'user123';
+    }
     const idToken = localStorage.getItem('id_token');
     if (!idToken) {
       throw new Error('No id_token available — user not authenticated');

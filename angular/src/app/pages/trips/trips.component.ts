@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { TripDetails } from '../../services/api.service';
 import { Router } from '@angular/router';
@@ -21,6 +21,7 @@ export class TripsComponent {
   constructor(private router: Router,
     private offlineData: OfflineDataService,
     private fishTrackerSettingsService: FishTrackerSettingsService,
+    private cdr: ChangeDetectorRef,
   ) {
     this.trips = [];
     this.relevantTrips = this.fishTrackerSettingsService.relevantTrips;
@@ -35,6 +36,7 @@ export class TripsComponent {
     this.offlineData.getTrips().subscribe({
       next: (data) => {
         this.trips = data as (TripDetails & { syncStatus?: SyncStatus })[];
+        this.cdr.detectChanges();
         console.log(`trips data ${JSON.stringify(this.trips)}`);
       },
       error: (error) => {

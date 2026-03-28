@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { ApiService, NewTrip, TripDetails, ProfileDetails } from '../../services/api.service';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
@@ -35,7 +35,8 @@ export class NewTripComponent implements OnInit {
               private router: Router,
               private dateFormatter: DateConversionService,
               private preferencesService: PreferencesService,
-              private settingsService: FishTrackerSettingsService) {}
+              private settingsService: FishTrackerSettingsService,
+              private cdr: ChangeDetectorRef) {}
 
   ngOnInit() {
     this.startTime = new Date();
@@ -43,13 +44,14 @@ export class NewTripComponent implements OnInit {
 
     // Load profile as fallback, then try to auto-populate from trip history
     this.settingsService.profile.subscribe((profile: ProfileDetails) => {
-      if (!profile || !profile.species || profile.species.length === 0) {
+      if (!profile) {
         // No profile available (first-time user offline)
         this.profileUnavailable = true;
         return;
       }
 
       this.speciesList = profile.species;
+      this.cdr.detectChanges();
 
       // Try to derive species from locally cached trips
       this.offlineData.getTrips().subscribe({
@@ -71,11 +73,13 @@ export class NewTripComponent implements OnInit {
       this.newTrip.species = frequent;
       this.newTrip.defaultSpecies = frequent[0];
     }
+    this.cdr.detectChanges();
   }
 
   private applyProfileFallback(profile: ProfileDetails): void {
     this.newTrip.species = profile.species;
     this.newTrip.defaultSpecies = profile.defaultSpecies;
+    this.cdr.detectChanges();
   }
 
   private getFrequentSpecies(trips: TripDetails[]): string[] {

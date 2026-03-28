@@ -1,7 +1,9 @@
-import { Injectable } from '@angular/core';
-import { BehaviorSubject, Observable, from, of } from 'rxjs';
-import { switchMap, tap, catchError } from 'rxjs/operators';
+import { Injectable, NgZone } from '@angular/core';
+import { BehaviorSubject, Observable } from 'rxjs';
+import { filter } from 'rxjs/operators';
+import { HttpClient } from '@angular/common/http';
 import { jwtDecode } from 'jwt-decode';
+import { environment } from '../../environments/environment';
 import { ProfileDetails, SettingsDetails, ApiService } from './api.service';
 import { IndexedDbService } from './offline/indexed-db.service';
 
@@ -10,12 +12,17 @@ import { IndexedDbService } from './offline/indexed-db.service';
 })
 export class FishTrackerSettingsService {
   private _relevantTrips: boolean = true;
-  private _profile: BehaviorSubject<ProfileDetails | null> = new BehaviorSubject<ProfileDetails | null>(null);
-  private _settings: BehaviorSubject<SettingsDetails | null> = new BehaviorSubject<SettingsDetails | null>(null);
-  private profileLoading = false;
-  private settingsLoading = false;
+  private _profile = new BehaviorSubject<ProfileDetails | null>(null);
+  private _settings = new BehaviorSubject<SettingsDetails | null>(null);
+  private profileInitStarted = false;
+  private settingsInitStarted = false;
 
-  constructor(private apiService: ApiService, private db: IndexedDbService) {}
+  constructor(
+    private apiService: ApiService,
+    private db: IndexedDbService,
+    private http: HttpClient,
+    private ngZone: NgZone,
+  ) {}
 
   get relevantTrips(): boolean {
     return this._relevantTrips;
@@ -26,96 +33,111 @@ export class FishTrackerSettingsService {
   }
 
   get profile(): Observable<ProfileDetails> {
+    if (!this.profileInitStarted) {
+      this.profileInitStarted = true;
+      this.initProfile();
+    }
     return this._profile.asObservable().pipe(
-      switchMap(profile => {
-        if (profile !== null) {
-          return of(profile);
-        }
-        if (this.profileLoading) {
-          return this._profile.asObservable();
-        }
-        this.profileLoading = true;
-
-        // Try IndexedDB first, then fall back to API
-        return from(this.loadProfileFromCache()).pipe(
-          switchMap(cached => {
-            if (cached) {
-              this._profile.next(cached);
-              // Background refresh from API (best-effort)
-              this.backgroundRefreshProfile();
-              return of(cached);
-            }
-            // No cache — must fetch from API
-            return this.apiService.getProfile().pipe(
-              tap(p => {
-                this._profile.next(p);
-                this.cacheProfile(p);
-                this.profileLoading = false;
-              }),
-              catchError(() => {
-                // Both IndexedDB and API unavailable (first-time offline user)
-                this.profileLoading = false;
-                return of(null as unknown as ProfileDetails);
-              }),
-            );
-          }),
-        );
-      }),
-    ) as Observable<ProfileDetails>;
+      filter((p): p is ProfileDetails => p !== null),
+    );
   }
 
   set profile(value: ProfileDetails) {
-    this._profile.next(value);
+    this.emitProfile(value);
     this.cacheProfile(value);
   }
 
   get settings(): Observable<SettingsDetails> {
+    if (!this.settingsInitStarted) {
+      this.settingsInitStarted = true;
+      this.initSettings();
+    }
     return this._settings.asObservable().pipe(
-      switchMap(settings => {
-        if (settings !== null) {
-          return of(settings);
-        }
-        if (this.settingsLoading) {
-          return this._settings.asObservable();
-        }
-        this.settingsLoading = true;
-
-        // Try IndexedDB first, then fall back to API
-        return from(this.loadSettingsFromCache()).pipe(
-          switchMap(cached => {
-            if (cached) {
-              this._settings.next(cached);
-              // Background refresh from API (best-effort)
-              this.backgroundRefreshSettings();
-              return of(cached);
-            }
-            // No cache — must fetch from API
-            return this.apiService.getSettings().pipe(
-              tap(s => {
-                this._settings.next(s);
-                this.cacheSettings(s);
-                this.settingsLoading = false;
-              }),
-              catchError(() => {
-                this.settingsLoading = false;
-                return of(null as unknown as SettingsDetails);
-              }),
-            );
-          }),
-        );
-      }),
-    ) as Observable<SettingsDetails>;
+      filter((s): s is SettingsDetails => s !== null),
+    );
   }
 
   set settings(value: SettingsDetails) {
-    this._settings.next(value);
+    this.emitSettings(value);
     this.cacheSettings(value);
   }
 
   /** Call after ApiService.addSpecies() to update the cached settings */
   updateSettingsCache(settings: SettingsDetails): void {
-    this._settings.next(settings);
+    this.emitSettings(settings);
     this.cacheSettings(settings);
+  }
+
+  // --- Zone-safe emitters ---
+  // All BehaviorSubject emissions go through ngZone.run() so that
+  // subscribers (components) always trigger change detection.
+
+  private emitProfile(p: ProfileDetails | null): void {
+    this.ngZone.run(() => this._profile.next(p));
+  }
+
+  private emitSettings(s: SettingsDetails | null): void {
+    this.ngZone.run(() => this._settings.next(s));
+  }
+
+  // --- Initialization ---
+
+  private initProfile(): void {
+    this.loadProfileFromCache().then(cached => {
+      if (cached) {
+        this.emitProfile(cached);
+        this.backgroundRefreshProfile();
+      } else {
+        this.apiService.getProfile().subscribe({
+          next: p => {
+            this.emitProfile(p);
+            this.cacheProfile(p);
+          },
+          error: () => {
+            this.emitProfile({ species: [], defaultSpecies: '' });
+          },
+        });
+      }
+    }).catch(() => {
+      this.apiService.getProfile().subscribe({
+        next: p => {
+          this.emitProfile(p);
+          this.cacheProfile(p);
+        },
+        error: () => {
+          this.emitProfile({ species: [], defaultSpecies: '' });
+        },
+      });
+    });
+  }
+
+  private initSettings(): void {
+    this.loadSettingsFromCache().then(cached => {
+      if (cached) {
+        this.emitSettings(cached);
+        this.backgroundRefreshSettings();
+      } else {
+        this.apiService.getSettings().subscribe({
+          next: s => {
+            this.emitSettings(s);
+            this.cacheSettings(s);
+          },
+          error: () => {
+            this.emitSettings({ species: [] });
+          },
+        });
+      }
+    }).catch(() => {
+      this.apiService.getSettings().subscribe({
+        next: s => {
+          this.emitSettings(s);
+          this.cacheSettings(s);
+        },
+        error: () => {
+          this.emitSettings({ species: [] });
+        },
+      });
+    });
   }
 
   // --- Private caching methods ---
@@ -143,7 +165,6 @@ export class FishTrackerSettingsService {
     const subject = this.getSubject();
     if (!subject) return;
     this.db.putProfile({ ...profile, subject }).catch(() => {
-      // Non-critical — log but don't surface
       console.warn('Failed to cache profile to IndexedDB');
     });
   }
@@ -155,33 +176,29 @@ export class FishTrackerSettingsService {
   }
 
   private backgroundRefreshProfile(): void {
-    this.apiService.getProfile().subscribe({
+    this.http.get<ProfileDetails>(`${environment.apiUrl}/profile`).subscribe({
       next: p => {
-        this._profile.next(p);
+        this.emitProfile(p);
         this.cacheProfile(p);
-        this.profileLoading = false;
       },
-      error: () => {
-        // Silent — cached version is fine
-        this.profileLoading = false;
-      },
+      error: () => {},
     });
   }
 
   private backgroundRefreshSettings(): void {
-    this.apiService.getSettings().subscribe({
+    this.http.get<SettingsDetails>(`${environment.apiUrl}/settings`).subscribe({
       next: s => {
-        this._settings.next(s);
+        this.emitSettings(s);
         this.cacheSettings(s);
-        this.settingsLoading = false;
       },
-      error: () => {
-        this.settingsLoading = false;
-      },
+      error: () => {},
     });
   }
 
   private getSubject(): string | null {
+    if (environment.bypassAuth) {
+      return 'user123';
+    }
     try {
       const idToken = localStorage.getItem('id_token');
       if (!idToken) return null;

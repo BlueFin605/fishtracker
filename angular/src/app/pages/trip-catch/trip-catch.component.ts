@@ -21,7 +21,9 @@ import { PreferencesService } from '../../services/preferences.service';
 })
 export class TripCatchComponent implements OnInit {
   currentPositionMapVisible = false;
+  currentPositionMapReady = false;
   catchHistoryMapVisible = false;
+  catchHistoryMapReady = false;
   tripDetails: TripDetails = {} as TripDetails;
   tripCatch: CatchDetails[];
   tripId: string = '';
@@ -107,6 +109,7 @@ export class TripCatchComponent implements OnInit {
       this.tripDetails = data;
       this.activeSpecies = data.defaultSpecies;
       this.isAdvancedMode = false;
+      this.cdr.detectChanges();
       console.log(`trip rating[${this.tripDetails.rating}]`);
     });
   }
@@ -127,7 +130,7 @@ export class TripCatchComponent implements OnInit {
           this.catchHistoryMapMarkerPosition.push(markerPosition);
         }
       });
-
+      this.cdr.detectChanges();
     });
   }
 
@@ -143,11 +146,10 @@ export class TripCatchComponent implements OnInit {
           lng: response.caughtLocation.longitude
         };
         this.catchHistoryMapMarkerPosition.push(markerPosition);
-
+        this.cdr.detectChanges();
       },
       error: (error) => {
         console.error('Error saving catch', error);
-        // Handle error, e.g., show an error message
       }
     });
   }
@@ -194,15 +196,20 @@ export class TripCatchComponent implements OnInit {
   toggleCurrentPositionMapVisibility(event: any) {
     event.preventDefault();
     if (this.currentPositionMapVisible) {
-      // If map is visible, close it
       this.currentPositionMapVisible = false;
+      this.currentPositionMapReady = false;
     } else {
-      // If map is hidden, load script and show it
       this.googleMapsLoader.loadScript().then(() => {
         this.ngZone.run(() => {
+          // Show container first, then init map after DOM renders
           this.currentPositionMapVisible = true;
           this.cdr.detectChanges();
-          console.log('Google Maps API script loaded');
+          requestAnimationFrame(() => {
+            this.ngZone.run(() => {
+              this.currentPositionMapReady = true;
+              this.cdr.detectChanges();
+            });
+          });
         });
       }).catch(error => {
         console.error('Error loading Google Maps:', error);
@@ -213,15 +220,20 @@ export class TripCatchComponent implements OnInit {
   togglecatchHistoryVisibility(event: any): void {
     event.preventDefault();
     if (this.catchHistoryMapVisible) {
-      // If map is visible, close it
       this.catchHistoryMapVisible = false;
+      this.catchHistoryMapReady = false;
     } else {
-      // If map is hidden, load script and show it
       this.googleMapsLoader.loadScript().then(() => {
         this.ngZone.run(() => {
+          // Show container first, then init map after DOM renders
           this.catchHistoryMapVisible = true;
           this.cdr.detectChanges();
-          console.log('Google Maps API script loaded');
+          requestAnimationFrame(() => {
+            this.ngZone.run(() => {
+              this.catchHistoryMapReady = true;
+              this.cdr.detectChanges();
+            });
+          });
         });
       }).catch(error => {
         console.error('Error loading Google Maps:', error);
@@ -259,6 +271,7 @@ export class TripCatchComponent implements OnInit {
          };
          this.catchHistoryMapMarkerPosition.push(markerPosition);
          this.activeSpecies = this.tripDetails.defaultSpecies;
+         this.cdr.detectChanges();
        },
        error: (error) => {
          console.error('Error saving catch', error);
@@ -272,6 +285,7 @@ export class TripCatchComponent implements OnInit {
   }
 
   endTrip() {
+    console.log('endTrip called', { tripId: this.tripDetails.tripId, endTripData: this.endTripData });
     const updatedTrip: EndTripDetails = {
       endTime: this.dateFormatter.createLocalDate(this.endTripData.endTime, this.newCatch.timeZone),
       timeZone: this.newCatch.timeZone,
@@ -279,17 +293,18 @@ export class TripCatchComponent implements OnInit {
       rating: this.endTripData.rating
       // tags: this.endTripData.tags.split(',').map(tag => tag.trim())
     };
+    console.log('endTrip updatedTrip', updatedTrip);
 
     this.offlineData.endTrip(this.tripDetails.tripId, updatedTrip).subscribe({
       next: (response) => {
         this.closeEndTripModal();
         console.log('Trip ended successfully', response);
         this.tripDetails = response;
+        this.cdr.detectChanges();
       },
       error: (error) => {
         this.closeEndTripModal();
         console.error('Error ending trip', error);
-        // Handle error, e.g., show an error message
       }
     });
   }
