@@ -252,15 +252,6 @@ public class FishTrackerStack : Stack
         }));
 
         // =====================================================================
-        // S3 Deployment Bucket
-        // =====================================================================
-
-        // Reference existing deployment bucket (managed outside CDK / by Terraform)
-        // Lambda zips are uploaded here by CI/CD pipeline
-        var deploymentBucket = Bucket.FromBucketName(this, "DeploymentBucket",
-            $"fishtracker-lambda-deploymentpackage-{env.ToLower()}");
-
-        // =====================================================================
         // Lambda Functions
         // =====================================================================
 
@@ -284,7 +275,7 @@ public class FishTrackerStack : Stack
             Handler = "FishTrackerLambda",
             Timeout = Duration.Seconds(20),
             Role = lambdaRole,
-            Code = Code.FromBucket(deploymentBucket, "lambda-deploymentpackage.zip")
+            Code = Code.FromAsset("../FishTrackerLambda/publish")
         });
 
         var nodejsLambda = new Function(this, "NodejsLambda", new FunctionProps
@@ -294,7 +285,10 @@ public class FishTrackerStack : Stack
             Handler = "index.handler",
             Timeout = Duration.Seconds(20),
             Role = lambdaRole,
-            Code = Code.FromBucket(deploymentBucket, "lambda-nodejs-deploymentpackage.zip"),
+            Code = Code.FromAsset("../FishTrackerLambdaNode/bundle", new Amazon.CDK.AWS.S3.Assets.AssetOptions
+            {
+                Exclude = new[] { "*.zip" }
+            }),
             Environment = lambdaEnvironment
         });
 
@@ -305,7 +299,10 @@ public class FishTrackerStack : Stack
             Handler = "index.handler",
             Timeout = Duration.Seconds(20),
             Role = lambdaRole,
-            Code = Code.FromBucket(deploymentBucket, "custom-authorizer.zip"),
+            Code = Code.FromAsset("../FishTrackerLambdaValidator", new Amazon.CDK.AWS.S3.Assets.AssetOptions
+            {
+                Exclude = new[] { "*.zip", "*.sample", "testjwt.js", "LICENSE", "README.md" }
+            }),
             Environment = new Dictionary<string, string>
             {
                 ["JWKS_URI"] = jwksUri,
@@ -513,12 +510,6 @@ public class FishTrackerStack : Stack
         {
             Value = api.Url,
             Description = "API Gateway URL"
-        });
-
-        _ = new CfnOutput(this, "DeploymentBucketName", new CfnOutputProps
-        {
-            Value = deploymentBucket.BucketName,
-            Description = "S3 bucket for Lambda deployment packages"
         });
 
         _ = new CfnOutput(this, "WebsiteBucketName", new CfnOutputProps
