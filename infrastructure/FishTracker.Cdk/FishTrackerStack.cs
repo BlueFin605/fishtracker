@@ -533,5 +533,11 @@ public class FishTrackerStack : Stack
             Value = userPool.UserPoolId,
             Description = "Cognito User Pool ID"
         });
+
+        _ = new CfnOutput(this, "CognitoClientId", new CfnOutputProps
+        {
+            Value = authCodeClient.UserPoolClientId,
+            Description = "Cognito Auth Code Client ID (for Angular frontend)"
+        });
     }
 }
