@@ -12,6 +12,7 @@
 
 # CDK
 cdk.out/
+cdk.context.json
 
 # User-specific files (MonoDevelop/Xamarin Studio)
 *.userprefs

@@ -1,7 +1,0 @@
-{
-  "ssm:account=083148603667:parameterName=/fishtracker/google-client-secret:region=eu-central-1": "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",
-  "hosted-zone:account=083148603667:domainName=bluefin605.com:region=eu-central-1": {
-    "Id": "/hostedzone/Z04497581WWRJC3O5J2F9",
-    "Name": "bluefin605.com."
-  }
-}

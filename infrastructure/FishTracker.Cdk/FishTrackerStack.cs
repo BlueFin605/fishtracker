@@ -10,6 +10,7 @@ using Amazon.CDK.AWS.Lambda;
 using Amazon.CDK.AWS.Route53;
 using Amazon.CDK.AWS.Route53.Targets;
 using Amazon.CDK.AWS.S3;
+using Amazon.CDK.AWS.SecretsManager;
 using Amazon.CDK.AWS.SSM;
 using Constructs;
 using Attribute = Amazon.CDK.AWS.DynamoDB.Attribute;
@@ -38,10 +39,13 @@ public class FishTrackerStack : Stack
         var apiDomain = $"api.{subdomainPrefix}.{props.DomainName}";
         var authDomain = $"auth.{subdomainPrefix}.{props.DomainName}";
 
-        // Look up secrets from SSM Parameter Store
+        // Certificate ARN from SSM Parameter Store
         var certificateArn = StringParameter.ValueForStringParameter(this, "/fishtracker/certificate-arn");
-        var googleClientId = StringParameter.ValueForStringParameter(this, "/fishtracker/google-client-id");
-        var googleClientSecret = StringParameter.ValueFromLookup(this, "/fishtracker/google-client-secret");
+
+        // Google OAuth credentials from Secrets Manager
+        // Secret JSON: { "clientId": "...", "clientSecret": "..." }
+        var googleSecretName = $"fishtracker/{env}/google-oauth";
+        var googleSecret = Secret.FromSecretNameV2(this, "GoogleOAuthSecret", googleSecretName);
 
         var hostedZone = HostedZone.FromLookup(this, "HostedZone", new HostedZoneProviderProps
         {
@@ -117,8 +121,8 @@ public class FishTrackerStack : Stack
         var googleProvider = new UserPoolIdentityProviderGoogle(this, "GoogleProvider", new UserPoolIdentityProviderGoogleProps
         {
             UserPool = userPool,
-            ClientId = googleClientId,
-            ClientSecretValue = SecretValue.UnsafePlainText(googleClientSecret),
+            ClientId = googleSecret.SecretValueFromJson("clientId").UnsafeUnwrap(),
+            ClientSecretValue = googleSecret.SecretValueFromJson("clientSecret"),
             Scopes = new[] { "openid", "profile", "email" },
             AttributeMapping = new AttributeMapping
             {
