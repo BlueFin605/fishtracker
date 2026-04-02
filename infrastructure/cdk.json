@@ -1,0 +1,6 @@
+{
+  "app": "dotnet run --project FishTracker.Cdk/FishTracker.Cdk.csproj",
+  "context": {
+    "acknowledged-issue:@aws-cdk/aws-lambda:codeFromBucketObjectVersionNotSpecified": true
+  }
+}

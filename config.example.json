@@ -1,0 +1,8 @@
+{
+  "fishtracker": {
+    "prefix": "fishtracker",
+    "region": "eu-central-1",
+    "environment": "Prod",
+    "domain": "yourdomain.com"
+  }
+}
