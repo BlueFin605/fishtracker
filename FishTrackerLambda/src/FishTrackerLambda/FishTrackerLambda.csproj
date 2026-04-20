@@ -13,7 +13,7 @@
     <RuntimeIdentifier>linux-arm64</RuntimeIdentifier>     -->
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="Amazon.Lambda.AspNetCoreServer.Hosting" Version="1.6.0" />
+    <PackageReference Include="Amazon.Lambda.AspNetCoreServer.Hosting" Version="1.10.0" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\FishTrackerLambda.Models\FishTrackerLambda.Models.csproj">

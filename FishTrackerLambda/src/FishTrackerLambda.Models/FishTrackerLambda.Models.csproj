@@ -20,7 +20,7 @@
     <Folder Include="Persistance\" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
-    <PackageReference Include="AWSSDK.DynamoDBv2" Version="3.7.304.7" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
+    <PackageReference Include="AWSSDK.DynamoDBv2" Version="4.0.17.9" />
   </ItemGroup>
 </Project>
