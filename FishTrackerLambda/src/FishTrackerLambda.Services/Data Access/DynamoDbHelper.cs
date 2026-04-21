@@ -20,7 +20,7 @@ namespace FishTrackerLambda.DataAccess
 
             var q = record;
 
-            var context = new DynamoDBContext(client);
+            var context = new DynamoDBContextBuilder().WithDynamoDBClient(() => client).Build();
             await context.SaveAsync<T>(q);
             return HttpWrapper<T>.Ok(q);
         }
@@ -31,7 +31,7 @@ namespace FishTrackerLambda.DataAccess
 
             var q = record;
 
-            var context = new DynamoDBContext(client);
+            var context = new DynamoDBContextBuilder().WithDynamoDBClient(() => client).Build();
             await context.SaveAsync<T>(q);
 
             return HttpWrapper<T>.Ok(q);
@@ -43,7 +43,7 @@ namespace FishTrackerLambda.DataAccess
 
             var q = record;
 
-            var context = new DynamoDBContext(client);
+            var context = new DynamoDBContextBuilder().WithDynamoDBClient(() => client).Build();
             await context.DeleteAsync<T>(q);
 
             return HttpWrapper<T>.Ok(q);
@@ -55,7 +55,7 @@ namespace FishTrackerLambda.DataAccess
 
             try
             {
-                var context = new DynamoDBContext(client);
+                var context = new DynamoDBContextBuilder().WithDynamoDBClient(() => client).Build();
                 var record = await context.LoadAsync<T>(part, sortKey);
                 return record == null ? HttpWrapper<T>.NotFound : HttpWrapper<T>.Ok(record);
             }
@@ -77,7 +77,7 @@ namespace FishTrackerLambda.DataAccess
 
             try
             {
-                var context = new DynamoDBContext(client);
+                var context = new DynamoDBContextBuilder().WithDynamoDBClient(() => client).Build();
                 var record = await context.LoadAsync<T>(part);
                 return record == null ? HttpWrapper<T>.NotFound : HttpWrapper<T>.Ok(record);
             }
@@ -99,7 +99,7 @@ namespace FishTrackerLambda.DataAccess
 
             try
             {
-                var context = new DynamoDBContext(client);
+                var context = new DynamoDBContextBuilder().WithDynamoDBClient(() => client).Build();
                 var conditions = new List<ScanCondition>();
                 var query = context.ScanAsync<T>(conditions);
                 var items = await query.GetRemainingAsync();
@@ -123,7 +123,7 @@ namespace FishTrackerLambda.DataAccess
 
             try
             {
-                var context = new DynamoDBContext(client);
+                var context = new DynamoDBContextBuilder().WithDynamoDBClient(() => client).Build();
                 var query = context.QueryAsync<T>(part /*queryOptions*/);
                 var items = await query.GetRemainingAsync();
                 logger.LogInformation($"items returned [{items.Count}]");
@@ -150,7 +150,7 @@ namespace FishTrackerLambda.DataAccess
 
             try
             {
-                var context = new DynamoDBContext(client);
+                var context = new DynamoDBContextBuilder().WithDynamoDBClient(() => client).Build();
                 QueryOperationConfig config = new QueryOperationConfig
                     {
                     KeyExpression = new Expression
