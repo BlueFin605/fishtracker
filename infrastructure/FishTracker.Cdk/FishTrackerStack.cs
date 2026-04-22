@@ -499,11 +499,17 @@ public class FishTrackerStack : Stack
             }
         });
 
+        // DeleteExisting = true so we can tolerate a pre-existing A record on the
+        // parent (fishtracker.bluefin605.com) -- Cognito requires the parent to
+        // have an A record before UserPoolDomain creation succeeds, which creates
+        // a chicken-and-egg on a fresh deploy. Operator pre-creates a placeholder,
+        // this CDK-managed record replaces it cleanly.
         new ARecord(this, "WebsiteDnsRecord", new ARecordProps
         {
             Zone = hostedZone,
             RecordName = websiteDomain,
-            Target = RecordTarget.FromAlias(new CloudFrontTarget(distribution))
+            Target = RecordTarget.FromAlias(new CloudFrontTarget(distribution)),
+            DeleteExisting = true
         });
 
         // =====================================================================
