@@ -3,10 +3,9 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "prebuild": "rm -rf bundle",
+    "prebuild": "node -e \"require('fs').rmSync('bundle',{recursive:true,force:true})\"",
     "compile": "tsc",
     "bundle": "esbuild dist/index.js --bundle --minify --sourcemap --platform=node --target=es2020 --outfile=bundle/index.js --keep-names --format=cjs",
-    "postbundle": "cd bundle && zip -r lambda-nodejs-deploymentpackage.zip index.js*",
     "build": "npm run compile && npm run bundle",
     "start": "ts-node src/index.ts"
   },
