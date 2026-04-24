@@ -356,6 +356,32 @@ You'll need to sign in to view. {{#if expiresAt}}Expires {{expiresAt}}. {{/if}}{
             Resources = new[] { $"arn:aws:dynamodb:*:{this.Account}:table/*/index/*" }
         }));
 
+        // SES — send share invite emails
+        lambdaRole.AddToPolicy(new PolicyStatement(new PolicyStatementProps
+        {
+            Actions = new[] { "ses:SendEmail", "ses:SendTemplatedEmail" },
+            Resources = new[]
+            {
+                $"arn:aws:ses:{this.Region}:{this.Account}:identity/{shareSenderDomain}",
+                $"arn:aws:ses:{this.Region}:{this.Account}:template/FishTracker-ShareInvite-{env}",
+                $"arn:aws:ses:{this.Region}:{this.Account}:configuration-set/*"
+            }
+        }));
+
+        // S3 — put/delete thumbnails
+        lambdaRole.AddToPolicy(new PolicyStatement(new PolicyStatementProps
+        {
+            Actions = new[] { "s3:PutObject", "s3:DeleteObject" },
+            Resources = new[] { $"{shareThumbnailsBucket.BucketArn}/*" }
+        }));
+
+        // Secrets Manager — read Static Maps API key
+        lambdaRole.AddToPolicy(new PolicyStatement(new PolicyStatementProps
+        {
+            Actions = new[] { "secretsmanager:GetSecretValue" },
+            Resources = new[] { staticMapsSecret.SecretArn }
+        }));
+
         var authLambdaRole = new Role(this, "AuthLambdaRole", new RoleProps
         {
             // RoleName intentionally omitted — CDK generates unique name to avoid conflict with Terraform
@@ -388,6 +414,12 @@ You'll need to sign in to view. {{#if expiresAt}}Expires {{expiresAt}}. {{/if}}{
             ["IS_LAMBDA"] = "true"
         };
 
+        lambdaEnvironment["SHARE_THUMBNAILS_BUCKET"] = shareThumbnailsBucket.BucketName;
+        lambdaEnvironment["SHARE_SENDER"] = shareSender;
+        lambdaEnvironment["SHARE_TEMPLATE_NAME"] = $"FishTracker-ShareInvite-{env}";
+        lambdaEnvironment["STATIC_MAPS_SECRET_NAME"] = staticMapsSecretName;
+        lambdaEnvironment["SHARE_VIEW_URL_BASE"] = $"https://{websiteDomain}/shared";
+
         var dotnetLambda = new Function(this, "DotnetLambda", new FunctionProps
         {
             FunctionName = $"FishTracker-Lambda-Function-{env}",
@@ -396,7 +428,8 @@ You'll need to sign in to view. {{#if expiresAt}}Expires {{expiresAt}}. {{/if}}{
             Handler = "FishTrackerLambda",
             Timeout = Duration.Seconds(20),
             Role = lambdaRole,
-            Code = Code.FromAsset("../FishTrackerLambda/publish")
+            Code = Code.FromAsset("../FishTrackerLambda/publish"),
+            Environment = lambdaEnvironment
         });
 
         var nodejsLambda = new Function(this, "NodejsLambda", new FunctionProps
