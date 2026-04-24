@@ -34,6 +34,11 @@
         {
             return new Results(200, obj);
         }
+
+        public static IResult InternalServerError(string message = "Internal Server Error")
+        {
+            return new Results(500, message);
+        }
     }
 }
 
