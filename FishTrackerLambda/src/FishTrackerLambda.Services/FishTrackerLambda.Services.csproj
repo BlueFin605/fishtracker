@@ -17,6 +17,7 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="AWSSDK.S3" Version="4.0.7.5" />
+    <PackageReference Include="AWSSDK.SimpleEmailV2" Version="4.0.8" />
     <PackageReference Include="Microsoft.Extensions.Logging" Version="10.0.6" />
     <PackageReference Include="Amazon.Lambda.APIGatewayEvents" Version="2.7.3" />
   </ItemGroup>
