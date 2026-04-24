@@ -3,6 +3,8 @@
     "prefix": "fishtracker",
     "region": "eu-central-1",
     "environment": "Prod",
-    "domain": "yourdomain.com"
+    "domain": "yourdomain.com",
+    "sesFromAddress": "",
+    "sesFromName": ""
   }
 }

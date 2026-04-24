@@ -22,6 +22,12 @@ var environment = TryGetConfigString(config, "environment")
     ?? app.Node.TryGetContext("environment")?.ToString()
     ?? "Prod";
 
+var sesFromAddress = TryGetConfigString(config, "sesFromAddress")
+    ?? app.Node.TryGetContext("sesFromAddress")?.ToString();
+
+var sesFromName = TryGetConfigString(config, "sesFromName")
+    ?? app.Node.TryGetContext("sesFromName")?.ToString();
+
 var env = new Amazon.CDK.Environment
 {
     Account = System.Environment.GetEnvironmentVariable("CDK_DEFAULT_ACCOUNT"),
@@ -32,7 +38,9 @@ new FishTrackerStack(app, $"FishTracker-{environment}", new FishTrackerStackProp
 {
     Env = env,
     Environment = environment,
-    DomainName = domainName
+    DomainName = domainName,
+    SesFromAddress = sesFromAddress,
+    SesFromName = sesFromName
 });
 
 Tags.Of(app).Add("Project", "FishTracker");

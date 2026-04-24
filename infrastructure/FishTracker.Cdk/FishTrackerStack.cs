@@ -23,6 +23,10 @@ public class FishTrackerStackProps : StackProps
 {
     public required string Environment { get; set; }
     public required string DomainName { get; set; }
+    /// <summary>From address for Cognito emails via SES (e.g. "noreply@yourdomain.com"). Leave empty to use Cognito default email (50/day cap).</summary>
+    public string? SesFromAddress { get; set; }
+    /// <summary>Optional display name for SES-sent emails.</summary>
+    public string? SesFromName { get; set; }
 }
 
 public class FishTrackerStack : Stack
@@ -103,7 +107,7 @@ public class FishTrackerStack : Stack
             SignInAliases = new SignInAliases { Email = true },
             AutoVerify = new AutoVerifiedAttrs { Email = true },
             PasswordPolicy = new PasswordPolicy { MinLength = 6 },
-            Email = UserPoolEmail.WithCognito(),
+            Email = BuildUserPoolEmail(props),
             UserVerification = new UserVerificationConfig
             {
                 EmailSubject = "Account Confirmation",
@@ -544,6 +548,25 @@ public class FishTrackerStack : Stack
         {
             Value = authCodeClient.UserPoolClientId,
             Description = "Cognito Auth Code Client ID (for Angular frontend)"
+        });
+    }
+
+    private static UserPoolEmail BuildUserPoolEmail(FishTrackerStackProps props)
+    {
+        if (string.IsNullOrWhiteSpace(props.SesFromAddress))
+            return UserPoolEmail.WithCognito();
+
+        var atIndex = props.SesFromAddress.IndexOf('@');
+        if (atIndex < 0 || atIndex == props.SesFromAddress.Length - 1)
+            throw new System.ArgumentException($"sesFromAddress '{props.SesFromAddress}' is not a valid email address.");
+
+        var verifiedDomain = props.SesFromAddress.Substring(atIndex + 1);
+
+        return UserPoolEmail.WithSES(new UserPoolSESOptions
+        {
+            FromEmail = props.SesFromAddress,
+            FromName = string.IsNullOrWhiteSpace(props.SesFromName) ? null : props.SesFromName,
+            SesVerifiedDomain = verifiedDomain
         });
     }
 }
