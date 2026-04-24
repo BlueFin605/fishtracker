@@ -1,0 +1,6 @@
+<div class="legend">
+  <span *ngFor="let it of items" class="chip">
+    <span class="dot" [style.background-color]="it.color"></span>
+    <span class="label">{{ it.label }}</span>
+  </span>
+</div>
