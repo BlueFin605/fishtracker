@@ -120,6 +120,37 @@ public class FishTrackerStack : Stack
             ProjectionType = ProjectionType.ALL
         });
 
+        var shareThumbnailsBucket = new Bucket(this, "ShareThumbnailsBucket", new BucketProps
+        {
+            BucketName = $"fishtracker-share-thumbnails-{env.ToLower()}",
+            BlockPublicAccess = new BlockPublicAccess(new BlockPublicAccessOptions
+            {
+                BlockPublicAcls = true,
+                IgnorePublicAcls = true,
+                BlockPublicPolicy = false,
+                RestrictPublicBuckets = false
+            }),
+            RemovalPolicy = RemovalPolicy.RETAIN,
+            LifecycleRules = new[]
+            {
+                new LifecycleRule
+                {
+                    Id = "ExpireOld",
+                    Enabled = true,
+                    Expiration = Duration.Days(730)   // 2-year backstop
+                }
+            }
+        });
+
+        shareThumbnailsBucket.AddToResourcePolicy(new PolicyStatement(new PolicyStatementProps
+        {
+            Sid = "PublicReadPngs",
+            Effect = Effect.ALLOW,
+            Principals = new IPrincipal[] { new AnyPrincipal() },
+            Actions = new[] { "s3:GetObject" },
+            Resources = new[] { $"{shareThumbnailsBucket.BucketArn}/*.png" }
+        }));
+
         // =====================================================================
         // Cognito
         // =====================================================================
