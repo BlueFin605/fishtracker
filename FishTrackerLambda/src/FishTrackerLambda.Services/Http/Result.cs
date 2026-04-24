@@ -1,4 +1,4 @@
-﻿namespace FishTrackerLambda.Services.Http
+namespace FishTrackerLambda.Services.Http
 {
     public class Results : IResult
     {
@@ -39,6 +39,30 @@
         {
             return new Results(500, message);
         }
+
+        public static IResult Forbidden(string message = "Forbidden")
+        {
+            return new Results(403, message);
+        }
+
+        public static IResult Gone(string message = "Gone")
+        {
+            return new Results(410, message);
+        }
+
+        public static IResult PayloadTooLarge(string message = "Payload Too Large")
+        {
+            return new Results(413, message);
+        }
+
+        public static IResult TooManyRequests(string message = "Too Many Requests")
+        {
+            return new Results(429, message);
+        }
+
+        public static IResult StatusCodeResult(int statusCode, string message = "")
+        {
+            return new Results(statusCode, message);
+        }
     }
 }
-
