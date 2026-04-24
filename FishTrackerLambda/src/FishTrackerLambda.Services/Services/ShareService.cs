@@ -1,5 +1,4 @@
 using System.Text.RegularExpressions;
-using Amazon.DynamoDBv2;
 using FishTrackerLambda.DataAccess;
 using FishTrackerLambda.Functional;
 using FishTrackerLambda.Models.Lambda;
@@ -18,35 +17,32 @@ namespace FishTrackerLambda.Services
             @"^[^@\s]+@[^@\s]+\.[^@\s]+$", RegexOptions.Compiled);
 
         private readonly ILogger<ShareService> _log;
-        private readonly IAmazonDynamoDB _ddb;
+        private readonly IShareRepository _shares;
         private readonly ILocationFuzzer _fuzzer;
         private readonly IStaticMapRenderer _renderer;
         private readonly IThumbnailStorage _thumbs;
         private readonly IShareEmailer _emailer;
         private readonly ITripLookup _tripLookup;
         private readonly string _viewUrlBase;
-        private readonly string _sharesTableName;
 
         public ShareService(
             ILogger<ShareService> log,
-            IAmazonDynamoDB ddb,
+            IShareRepository shares,
             ILocationFuzzer fuzzer,
             IStaticMapRenderer renderer,
             IThumbnailStorage thumbs,
             IShareEmailer emailer,
             ITripLookup tripLookup,
-            string viewUrlBase,
-            string sharesTableName)
+            string viewUrlBase)
         {
             _log = log;
-            _ddb = ddb;
+            _shares = shares;
             _fuzzer = fuzzer;
             _renderer = renderer;
             _thumbs = thumbs;
             _emailer = emailer;
             _tripLookup = tripLookup;
             _viewUrlBase = viewUrlBase;
-            _sharesTableName = sharesTableName;
         }
 
         public async Task<HttpWrapper<CreateShareResponse>> NewShare(
@@ -69,9 +65,8 @@ namespace FishTrackerLambda.Services
                 return HttpWrapper<CreateShareResponse>.FromResult(Results.Forbidden());
             }
 
-            var activeWrap = await ShareDbTable.ReadSharesByOwner(ownerSubject, _ddb, _log);
-            if (activeWrap.Result.StatusCode == 200
-                && (activeWrap.Value?.Count(s => s.RevokedAt == null) ?? 0) >= MaxActiveSharesPerOwner)
+            var activeShares = await _shares.ListByOwner(ownerSubject);
+            if (activeShares.Count(s => s.RevokedAt == null) >= MaxActiveSharesPerOwner)
                 return HttpWrapper<CreateShareResponse>.FromResult(Results.TooManyRequests());
 
             var shareId = Guid.NewGuid().ToString();
@@ -118,9 +113,7 @@ namespace FishTrackerLambda.Services
                 ViewCount = 0
             };
 
-            var saveWrap = await share.WriteShareToDynamoDb(_ddb, _log);
-            if (saveWrap.Result.StatusCode != 200)
-                return HttpWrapper<CreateShareResponse>.FromResult(Results.StatusCodeResult(saveWrap.Result.StatusCode));
+            share = await _shares.Save(share);
 
             var thumbnailGenerated = await TryRenderThumbnail(share, frozenTrips);
             var emailSent = await TrySendEmail(share, frozenTrips);
@@ -128,6 +121,44 @@ namespace FishTrackerLambda.Services
             return HttpWrapper<CreateShareResponse>.Ok(
                 new CreateShareResponse(shareId, emailSent, thumbnailGenerated));
         }
+
+        public async Task<HttpWrapper<IEnumerable<ShareSummary>>> GetShares(
+            string subject, string verifiedEmail, string direction)
+        {
+            List<DynamoDbShare> rows;
+            switch (direction)
+            {
+                case "outbox":
+                case null:
+                case "":
+                    rows = await _shares.ListByOwner(subject);
+                    break;
+                case "inbox":
+                    var byRecipient = await _shares.ListByRecipientEmail((verifiedEmail ?? "").ToLowerInvariant());
+                    rows = byRecipient
+                        .Where(s => s.RecipientSubject == subject
+                                 || (s.RecipientSubject == null && !string.IsNullOrEmpty(verifiedEmail)))
+                        .ToList();
+                    break;
+                default:
+                    return HttpWrapper<IEnumerable<ShareSummary>>.FromResult(Results.BadRequest());
+            }
+
+            var summaries = rows.Select(ToSummary).ToList();
+            return HttpWrapper<IEnumerable<ShareSummary>>.Ok(summaries);
+        }
+
+        private static ShareSummary ToSummary(DynamoDbShare s) => new ShareSummary(
+            ShareId: s.ShareId,
+            OwnerDisplayName: s.OwnerDisplayName,
+            RecipientEmail: s.RecipientEmail,
+            CreatedAt: DateTimeOffset.Parse(s.CreatedAt),
+            ExpiresAt: string.IsNullOrEmpty(s.ExpiresAt) ? null : DateTimeOffset.Parse(s.ExpiresAt),
+            RevokedAt: string.IsNullOrEmpty(s.RevokedAt) ? null : DateTimeOffset.Parse(s.RevokedAt),
+            TripCount: s.Trips.Count,
+            CatchCount: s.Trips.Sum(t => t.Catches.Count),
+            ViewCount: s.ViewCount,
+            LastViewedAt: string.IsNullOrEmpty(s.LastViewedAt) ? null : DateTimeOffset.Parse(s.LastViewedAt));
 
         private async Task<bool> TryRenderThumbnail(DynamoDbShare share, List<FrozenTrip> trips)
         {
@@ -142,7 +173,7 @@ namespace FishTrackerLambda.Services
                 var key = await _thumbs.PutAsync(share.ShareId, png, CancellationToken.None);
 
                 share.ThumbnailS3Key = key;
-                await share.UpdateShareInDynamoDb(_ddb, _log);
+                await _shares.Update(share);
                 return true;
             }
             catch (Exception ex)
