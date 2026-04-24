@@ -201,6 +201,14 @@ You'll need to sign in to view. {{#if expiresAt}}Expires {{expiresAt}}. {{/if}}{
             }
         });
 
+        var staticMapsSecretName = $"fishtracker/{env}/static-maps-key";
+        var staticMapsSecret = new Secret(this, "StaticMapsKeySecret", new SecretProps
+        {
+            SecretName = staticMapsSecretName,
+            Description = "Google Static Maps API key used server-side for share thumbnails",
+            RemovalPolicy = RemovalPolicy.RETAIN
+        });
+
         // =====================================================================
         // Cognito
         // =====================================================================
