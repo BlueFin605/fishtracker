@@ -119,6 +119,38 @@ public static class MapHttpRoutes
         {
             return await ExecuteService(app.Logger, $"Fix", async () => await tripService.FixTrips());
         });
+
+        app.MapPost("api/share", async (IClaimHandler claimHandler, IShareService shareService, ClaimsPrincipal user, NewShare req) =>
+        {
+            string subjectClaim = claimHandler.ExtractSubject(user.Claims);
+            string displayName = claimHandler.ExtractDisplayName(user.Claims);
+            return await ExecuteService(app.Logger, $"NewShare subject:[{subjectClaim}]",
+                async () => await shareService.NewShare(subjectClaim, displayName, req));
+        });
+
+        app.MapGet("api/share", async (IClaimHandler claimHandler, IShareService shareService, ClaimsPrincipal user, string? direction) =>
+        {
+            string subjectClaim = claimHandler.ExtractSubject(user.Claims);
+            string email = claimHandler.ExtractEmail(user.Claims);
+            return await ExecuteService(app.Logger, $"GetShares subject:[{subjectClaim}] direction:[{direction}]",
+                async () => await shareService.GetShares(subjectClaim, email, direction ?? "outbox"));
+        });
+
+        app.MapGet("api/share/{shareId}", async (IClaimHandler claimHandler, IShareService shareService, ClaimsPrincipal user, string shareId) =>
+        {
+            string subjectClaim = claimHandler.ExtractSubject(user.Claims);
+            string email = claimHandler.ExtractEmail(user.Claims);
+            bool emailVerified = claimHandler.ExtractEmailVerified(user.Claims);
+            return await ExecuteService(app.Logger, $"GetShare shareId:[{shareId}]",
+                async () => await shareService.GetShare(subjectClaim, email, emailVerified, shareId));
+        });
+
+        app.MapDelete("api/share/{shareId}", async (IClaimHandler claimHandler, IShareService shareService, ClaimsPrincipal user, string shareId) =>
+        {
+            string subjectClaim = claimHandler.ExtractSubject(user.Claims);
+            return await ExecuteService(app.Logger, $"RevokeShare shareId:[{shareId}]",
+                async () => await shareService.RevokeShare(subjectClaim, shareId));
+        });
     }
 
     private static async Task<IResult> ExecuteService<T>(ILogger logger, string logDesc, Func<Task<HttpWrapper<T>>> func)
