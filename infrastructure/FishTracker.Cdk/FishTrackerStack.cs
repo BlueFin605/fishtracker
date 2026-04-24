@@ -596,6 +596,23 @@ You'll need to sign in to view. {{#if expiresAt}}Expires {{expiresAt}}. {{/if}}{
         var fixup = apiResource.AddResource("fixup");
         fixup.AddMethod("PATCH", lambdaIntegration, authMethodOptions);
 
+        var share = apiResource.AddResource("share");
+        share.AddMethod("GET", lambdaIntegration, new MethodOptions
+        {
+            AuthorizationType = AuthorizationType.CUSTOM,
+            Authorizer = authorizer,
+            RequestValidator = queryValidator,
+            RequestParameters = new Dictionary<string, bool>
+            {
+                ["method.request.querystring.direction"] = false
+            }
+        });
+        share.AddMethod("POST", lambdaIntegration, authMethodOptions);
+
+        var shareProxy = share.AddResource("{shareId}");
+        shareProxy.AddMethod("GET", lambdaIntegration, authMethodOptions);
+        shareProxy.AddMethod("DELETE", lambdaIntegration, authMethodOptions);
+
         // =====================================================================
         // Website (S3 + CloudFront)
         // =====================================================================
