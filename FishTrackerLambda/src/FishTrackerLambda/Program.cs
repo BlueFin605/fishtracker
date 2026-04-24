@@ -2,7 +2,12 @@ using System.Security.Claims;
 using System.Text.Json.Serialization;
 using Amazon.DynamoDBv2;
 using Amazon.Runtime;
+using Amazon.S3;
+using Amazon.SecretsManager;
+using Amazon.SecretsManager.Model;
+using Amazon.SimpleEmailV2;
 using FishTrackerLambda.ClaimHandler;
+using FishTrackerLambda.DataAccess;
 using FishTrackerLambda.Services;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -10,6 +15,69 @@ builder.Services.AddSingleton<ICatchService, CatchService>();
 builder.Services.AddSingleton<ITripService, TripService>();
 builder.Services.AddSingleton<ISettingsService, SettingsService>();
 builder.Services.AddSingleton<IProfileService, ProfileService>();
+
+// --- Shares feature ---
+var sharesTableName   = $"FishTracker-Shares-{Environment.GetEnvironmentVariable("FISHTRACKER_ENV") ?? "Prod"}";
+var thumbBucket       = Environment.GetEnvironmentVariable("SHARE_THUMBNAILS_BUCKET") ?? "";
+var shareSender       = Environment.GetEnvironmentVariable("SHARE_SENDER") ?? "";
+var shareTemplateName = Environment.GetEnvironmentVariable("SHARE_TEMPLATE_NAME") ?? "";
+var staticMapsSecret  = Environment.GetEnvironmentVariable("STATIC_MAPS_SECRET_NAME") ?? "";
+var shareViewUrlBase  = Environment.GetEnvironmentVariable("SHARE_VIEW_URL_BASE") ?? "";
+var awsRegion         = Environment.GetEnvironmentVariable("AWS_REGION") ?? "ap-southeast-2";
+
+builder.Services.AddSingleton<IAmazonS3, AmazonS3Client>();
+builder.Services.AddSingleton<IAmazonSimpleEmailServiceV2, AmazonSimpleEmailServiceV2Client>();
+builder.Services.AddSingleton<IAmazonSecretsManager, AmazonSecretsManagerClient>();
+builder.Services.AddHttpClient<IStaticMapRenderer, GoogleStaticMapRenderer>()
+                .ConfigureHttpClient(c => c.Timeout = TimeSpan.FromSeconds(8));
+
+builder.Services.AddSingleton<ILocationFuzzer, LocationFuzzer>();
+
+builder.Services.AddSingleton<IShareRepository>(sp =>
+    new DynamoShareRepository(
+        sp.GetRequiredService<IAmazonDynamoDB>(),
+        sharesTableName,
+        sp.GetRequiredService<ILogger<DynamoShareRepository>>()));
+
+builder.Services.AddSingleton<IThumbnailStorage>(sp =>
+    new S3ThumbnailStorage(
+        sp.GetRequiredService<IAmazonS3>(),
+        thumbBucket,
+        awsRegion,
+        sp.GetRequiredService<ILogger<S3ThumbnailStorage>>()));
+
+builder.Services.AddSingleton<IShareEmailer>(sp =>
+    new SesShareEmailer(
+        sp.GetRequiredService<IAmazonSimpleEmailServiceV2>(),
+        shareSender,
+        shareTemplateName,
+        sp.GetRequiredService<ILogger<SesShareEmailer>>()));
+
+builder.Services.AddSingleton<ITripLookup, DynamoTripLookup>();
+
+// Static Maps key provider - cached per Lambda cold-start
+string? cachedKey = null;
+builder.Services.AddSingleton<Func<Task<string>>>(sp => async () =>
+{
+    if (cachedKey is not null) return cachedKey;
+    var sm = sp.GetRequiredService<IAmazonSecretsManager>();
+    var resp = await sm.GetSecretValueAsync(new GetSecretValueRequest { SecretId = staticMapsSecret });
+    cachedKey = resp.SecretString;
+    return cachedKey!;
+});
+
+builder.Services.AddSingleton<IShareService>(sp =>
+    new ShareService(
+        sp.GetRequiredService<ILogger<ShareService>>(),
+        sp.GetRequiredService<IShareRepository>(),
+        sp.GetRequiredService<ILocationFuzzer>(),
+        sp.GetRequiredService<IStaticMapRenderer>(),
+        sp.GetRequiredService<IThumbnailStorage>(),
+        sp.GetRequiredService<IShareEmailer>(),
+        sp.GetRequiredService<ITripLookup>(),
+        shareViewUrlBase));
+// --- end Shares ---
+
 builder.Services.AddLogging(logging => SetupLogger(false, logging, builder.Configuration));
 
 builder.Services.ConfigureHttpJsonOptions(options =>

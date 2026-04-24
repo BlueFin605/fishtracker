@@ -419,6 +419,7 @@ You'll need to sign in to view. {{#if expiresAt}}Expires {{expiresAt}}. {{/if}}{
         lambdaEnvironment["SHARE_TEMPLATE_NAME"] = $"FishTracker-ShareInvite-{env}";
         lambdaEnvironment["STATIC_MAPS_SECRET_NAME"] = staticMapsSecretName;
         lambdaEnvironment["SHARE_VIEW_URL_BASE"] = $"https://{websiteDomain}/shared";
+        lambdaEnvironment["FISHTRACKER_ENV"] = env;
 
         var dotnetLambda = new Function(this, "DotnetLambda", new FunctionProps
         {
