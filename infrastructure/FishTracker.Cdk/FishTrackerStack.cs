@@ -96,6 +96,30 @@ public class FishTrackerStack : Stack
             RemovalPolicy = RemovalPolicy.RETAIN
         });
 
+        var sharesTable = new Table(this, "SharesTable", new TableProps
+        {
+            TableName = $"FishTracker-Shares-{env}",
+            BillingMode = BillingMode.PAY_PER_REQUEST,
+            PartitionKey = new Attribute { Name = "OwnerSubject", Type = AttributeType.STRING },
+            SortKey = new Attribute { Name = "ShareId", Type = AttributeType.STRING },
+            RemovalPolicy = RemovalPolicy.RETAIN
+        });
+
+        sharesTable.AddGlobalSecondaryIndex(new GlobalSecondaryIndexProps
+        {
+            IndexName = "ShareId-Index",
+            PartitionKey = new Attribute { Name = "ShareId", Type = AttributeType.STRING },
+            ProjectionType = ProjectionType.ALL
+        });
+
+        sharesTable.AddGlobalSecondaryIndex(new GlobalSecondaryIndexProps
+        {
+            IndexName = "RecipientEmail-Index",
+            PartitionKey = new Attribute { Name = "RecipientEmail", Type = AttributeType.STRING },
+            SortKey = new Attribute { Name = "ShareId", Type = AttributeType.STRING },
+            ProjectionType = ProjectionType.ALL
+        });
+
         // =====================================================================
         // Cognito
         // =====================================================================
