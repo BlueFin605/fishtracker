@@ -148,6 +148,53 @@ namespace FishTrackerLambda.Services
             return HttpWrapper<IEnumerable<ShareSummary>>.Ok(summaries);
         }
 
+        public async Task<HttpWrapper<ShareDetails>> GetShare(
+            string subject, string verifiedEmail, bool emailVerified, string shareId)
+        {
+            var share = await _shares.GetByShareId(shareId);
+            if (share is null)
+                return HttpWrapper<ShareDetails>.FromResult(Results.NotFound());
+
+            if (!string.IsNullOrEmpty(share.RevokedAt))
+                return HttpWrapper<ShareDetails>.FromResult(Results.Gone());
+
+            if (!string.IsNullOrEmpty(share.ExpiresAt)
+                && DateTimeOffset.Parse(share.ExpiresAt) < DateTimeOffset.UtcNow)
+                return HttpWrapper<ShareDetails>.FromResult(Results.Gone());
+
+            var isOwner = share.OwnerSubject == subject;
+            var isClaimedRecipient = share.RecipientSubject == subject;
+            var canAutoClaim = share.RecipientSubject is null
+                && emailVerified
+                && !string.IsNullOrEmpty(verifiedEmail)
+                && share.RecipientEmail.Equals(verifiedEmail.Trim(), StringComparison.OrdinalIgnoreCase);
+
+            if (!isOwner && !isClaimedRecipient && !canAutoClaim)
+                return HttpWrapper<ShareDetails>.FromResult(Results.NotFound());
+
+            if (!isOwner)
+            {
+                if (canAutoClaim)
+                {
+                    share.RecipientSubject = subject;
+                    share.ClaimedAt = DateTimeOffset.UtcNow.ToString("o");
+                }
+                share.ViewCount++;
+                share.LastViewedAt = DateTimeOffset.UtcNow.ToString("o");
+                share.LastViewedBySubject = subject;
+                share = await _shares.Update(share);
+            }
+
+            return HttpWrapper<ShareDetails>.Ok(new ShareDetails(
+                ShareId: share.ShareId,
+                OwnerDisplayName: share.OwnerDisplayName,
+                CreatedAt: DateTimeOffset.Parse(share.CreatedAt),
+                ExpiresAt: string.IsNullOrEmpty(share.ExpiresAt) ? null : DateTimeOffset.Parse(share.ExpiresAt),
+                FuzzLocation: share.FuzzLocation,
+                Message: share.Message,
+                Trips: share.Trips.Select(t => t.ToDto()).ToList()));
+        }
+
         private static ShareSummary ToSummary(DynamoDbShare s) => new ShareSummary(
             ShareId: s.ShareId,
             OwnerDisplayName: s.OwnerDisplayName,

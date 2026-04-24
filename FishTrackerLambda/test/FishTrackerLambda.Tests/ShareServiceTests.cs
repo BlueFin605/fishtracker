@@ -205,4 +205,111 @@ namespace FishTrackerLambda.Tests
             Assert.Equal(400, result.Result.StatusCode);
         }
     }
+
+    public class ShareServiceTests_GetShare
+    {
+        private static ShareService Make(out Mock<IShareRepository> repo)
+        {
+            repo = new Mock<IShareRepository>();
+            return new ShareService(
+                NullLogger<ShareService>.Instance,
+                repo.Object,
+                Mock.Of<ILocationFuzzer>(),
+                Mock.Of<IStaticMapRenderer>(),
+                Mock.Of<IThumbnailStorage>(),
+                Mock.Of<IShareEmailer>(),
+                Mock.Of<ITripLookup>(),
+                viewUrlBase: "x");
+        }
+
+        [Fact]
+        public async Task OwnerPreview_ReturnsWithoutTickingViewCount()
+        {
+            var sut = Make(out var repo);
+            var s = Seed(repo, owner: "alice", recipient: "bob@x.com");
+            var res = await sut.GetShare("alice", "alice@x.com", true, s.ShareId);
+            Assert.Equal(200, res.Result.StatusCode);
+            repo.Verify(r => r.Update(It.Is<DynamoDbShare>(x => x.ViewCount == 1)), Times.Never());
+        }
+
+        [Fact]
+        public async Task ClaimedRecipient_TicksViewCount()
+        {
+            var sut = Make(out var repo);
+            var s = Seed(repo, owner: "alice", recipient: "bob@x.com", recipientSubject: "bob");
+            var res = await sut.GetShare("bob", "bob@x.com", true, s.ShareId);
+            Assert.Equal(200, res.Result.StatusCode);
+            repo.Verify(r => r.Update(It.Is<DynamoDbShare>(x => x.ViewCount == 1)), Times.Once());
+        }
+
+        [Fact]
+        public async Task PendingMatchingVerifiedEmail_AutoClaims()
+        {
+            var sut = Make(out var repo);
+            var s = Seed(repo, owner: "alice", recipient: "bob@x.com", recipientSubject: null);
+            var res = await sut.GetShare("bob", "BOB@x.com", true, s.ShareId);
+            Assert.Equal(200, res.Result.StatusCode);
+            repo.Verify(r => r.Update(It.Is<DynamoDbShare>(x =>
+                x.RecipientSubject == "bob" && x.ClaimedAt != null && x.ViewCount == 1)), Times.Once());
+        }
+
+        [Fact]
+        public async Task UnverifiedEmail_DoesNotClaim()
+        {
+            var sut = Make(out var repo);
+            var s = Seed(repo, owner: "alice", recipient: "bob@x.com", recipientSubject: null);
+            var res = await sut.GetShare("bob", "bob@x.com", emailVerified: false, s.ShareId);
+            Assert.Equal(404, res.Result.StatusCode);
+            repo.Verify(r => r.Update(It.IsAny<DynamoDbShare>()), Times.Never());
+        }
+
+        [Fact]
+        public async Task NonRecipient_Returns404()
+        {
+            var sut = Make(out var repo);
+            var s = Seed(repo, owner: "alice", recipient: "bob@x.com");
+            var res = await sut.GetShare("carol", "carol@x.com", true, s.ShareId);
+            Assert.Equal(404, res.Result.StatusCode);
+        }
+
+        [Fact]
+        public async Task Revoked_Returns410()
+        {
+            var sut = Make(out var repo);
+            var s = Seed(repo, owner: "alice", recipient: "bob@x.com", recipientSubject: "bob",
+                         revokedAt: DateTimeOffset.UtcNow.ToString("o"));
+            var res = await sut.GetShare("bob", "bob@x.com", true, s.ShareId);
+            Assert.Equal(410, res.Result.StatusCode);
+        }
+
+        [Fact]
+        public async Task Expired_Returns410()
+        {
+            var sut = Make(out var repo);
+            var s = Seed(repo, owner: "alice", recipient: "bob@x.com", recipientSubject: "bob",
+                         expiresAt: DateTimeOffset.UtcNow.AddDays(-1).ToString("o"));
+            var res = await sut.GetShare("bob", "bob@x.com", true, s.ShareId);
+            Assert.Equal(410, res.Result.StatusCode);
+        }
+
+        private static DynamoDbShare Seed(Mock<IShareRepository> repo, string owner, string recipient,
+            string? recipientSubject = null, string? revokedAt = null, string? expiresAt = null)
+        {
+            var s = new DynamoDbShare
+            {
+                ShareId = "s-" + Guid.NewGuid().ToString("N").Substring(0, 6),
+                OwnerSubject = owner,
+                OwnerDisplayName = owner,
+                RecipientEmail = recipient.ToLowerInvariant(),
+                RecipientSubject = recipientSubject,
+                CreatedAt = DateTimeOffset.UtcNow.ToString("o"),
+                RevokedAt = revokedAt,
+                ExpiresAt = expiresAt,
+                Trips = new List<FrozenTrip>()
+            };
+            repo.Setup(r => r.GetByShareId(s.ShareId)).ReturnsAsync(s);
+            repo.Setup(r => r.Update(It.IsAny<DynamoDbShare>())).ReturnsAsync((DynamoDbShare x) => x);
+            return s;
+        }
+    }
 }
