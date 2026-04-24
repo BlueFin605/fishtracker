@@ -11,6 +11,7 @@ using Amazon.CDK.AWS.Route53;
 using Amazon.CDK.AWS.Route53.Targets;
 using Amazon.CDK.AWS.S3;
 using Amazon.CDK.AWS.SecretsManager;
+using Amazon.CDK.AWS.SES;
 using Amazon.CDK.AWS.SSM;
 using Constructs;
 using Attribute = Amazon.CDK.AWS.DynamoDB.Attribute;
@@ -150,6 +151,55 @@ public class FishTrackerStack : Stack
             Actions = new[] { "s3:GetObject" },
             Resources = new[] { $"{shareThumbnailsBucket.BucketArn}/*.png" }
         }));
+
+        // Sender address for share invites — reuse Cognito SES sender domain if set,
+        // else noreply@<websiteDomain>. Identity creation is idempotent; CDK will skip
+        // if the domain is already a verified SES identity in this account/region.
+        var shareSender = !string.IsNullOrWhiteSpace(props.SesFromAddress)
+            ? props.SesFromAddress!
+            : $"noreply@{websiteDomain}";
+
+        var shareSenderDomain = shareSender.Substring(shareSender.IndexOf('@') + 1);
+
+        // Only create the domain identity if we're using our own domain (not an
+        // external sender). If the existing Cognito SES setup already created it,
+        // this is a no-op because SES identity names are globally unique per account.
+        var shareEmailIdentity = new EmailIdentity(this, "ShareSenderIdentity", new EmailIdentityProps
+        {
+            Identity = Identity.Domain(shareSenderDomain)
+        });
+
+        var shareInviteTemplate = new CfnTemplate(this, "ShareInviteTemplate", new CfnTemplateProps
+        {
+            Template = new CfnTemplate.TemplateProperty
+            {
+                TemplateName = $"FishTracker-ShareInvite-{env}",
+                SubjectPart = "{{ownerDisplayName}} shared some fishing spots with you",
+                HtmlPart = @"<html><body style='font-family:sans-serif;max-width:600px;margin:auto'>
+<p>Hi,</p>
+<p><strong>{{ownerDisplayName}}</strong> has shared {{tripCount}} fishing trip(s)
+with you on FishTracker — {{catchCount}} catches in total.</p>
+{{#if message}}<blockquote style='border-left:3px solid #ccc;padding-left:12px;color:#555'>{{message}}</blockquote>{{/if}}
+{{#if thumbnailUrl}}<p><a href='{{viewUrl}}'><img src='{{thumbnailUrl}}' width='600' height='300' alt='Map preview' style='display:block;border:0'/></a></p>{{/if}}
+<p><a href='{{viewUrl}}' style='display:inline-block;background:#2563eb;color:#fff;padding:12px 24px;border-radius:4px;text-decoration:none'>View full map</a></p>
+<p style='color:#666;font-size:13px'>You'll need to sign in (or sign up if you're new) to view the map.
+{{#if expiresAt}}This share expires on {{expiresAt}}.{{/if}}
+{{ownerDisplayName}} can revoke this share at any time.</p>
+<p style='color:#999;font-size:12px'>— FishTracker</p>
+</body></html>",
+                TextPart = @"{{ownerDisplayName}} shared some fishing spots with you on FishTracker.
+
+{{tripCount}} trip(s), {{catchCount}} catches.
+
+{{#if message}}""{{message}}""
+
+{{/if}}View the map: {{viewUrl}}
+
+You'll need to sign in to view. {{#if expiresAt}}Expires {{expiresAt}}. {{/if}}{{ownerDisplayName}} can revoke at any time.
+
+— FishTracker"
+            }
+        });
 
         // =====================================================================
         // Cognito
