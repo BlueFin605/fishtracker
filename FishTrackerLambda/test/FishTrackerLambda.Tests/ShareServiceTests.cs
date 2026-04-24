@@ -312,4 +312,46 @@ namespace FishTrackerLambda.Tests
             return s;
         }
     }
+
+    public class ShareServiceTests_Revoke
+    {
+        [Fact]
+        public async Task Owner_Succeeds_DeletesThumbnail()
+        {
+            var repo = new Mock<IShareRepository>();
+            var thumbs = new Mock<IThumbnailStorage>();
+            var share = new DynamoDbShare
+            {
+                ShareId = "s1",
+                OwnerSubject = "alice",
+                ThumbnailS3Key = "s1.png",
+                Trips = new()
+            };
+            repo.Setup(r => r.GetByOwner("alice", "s1")).ReturnsAsync(share);
+            repo.Setup(r => r.Update(It.IsAny<DynamoDbShare>())).ReturnsAsync((DynamoDbShare s) => s);
+
+            var sut = new ShareService(NullLogger<ShareService>.Instance, repo.Object,
+                Mock.Of<ILocationFuzzer>(), Mock.Of<IStaticMapRenderer>(),
+                thumbs.Object, Mock.Of<IShareEmailer>(), Mock.Of<ITripLookup>(), "x");
+
+            var res = await sut.RevokeShare("alice", "s1");
+
+            Assert.Equal(200, res.Result.StatusCode);
+            thumbs.Verify(t => t.DeleteAsync("s1.png", It.IsAny<CancellationToken>()), Times.Once());
+            repo.Verify(r => r.Update(It.Is<DynamoDbShare>(s => s.RevokedAt != null)), Times.Once());
+        }
+
+        [Fact]
+        public async Task NonOwner_Returns404()
+        {
+            var repo = new Mock<IShareRepository>();
+            repo.Setup(r => r.GetByOwner("bob", "s1")).ReturnsAsync((DynamoDbShare?)null);
+            var sut = new ShareService(NullLogger<ShareService>.Instance, repo.Object,
+                Mock.Of<ILocationFuzzer>(), Mock.Of<IStaticMapRenderer>(),
+                Mock.Of<IThumbnailStorage>(), Mock.Of<IShareEmailer>(),
+                Mock.Of<ITripLookup>(), "x");
+            var res = await sut.RevokeShare("bob", "s1");
+            Assert.Equal(404, res.Result.StatusCode);
+        }
+    }
 }

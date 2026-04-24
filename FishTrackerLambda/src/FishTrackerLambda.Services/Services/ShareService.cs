@@ -207,6 +207,24 @@ namespace FishTrackerLambda.Services
             ViewCount: s.ViewCount,
             LastViewedAt: string.IsNullOrEmpty(s.LastViewedAt) ? null : DateTimeOffset.Parse(s.LastViewedAt));
 
+        public async Task<HttpWrapper<Unit>> RevokeShare(string ownerSubject, string shareId)
+        {
+            var share = await _shares.GetByOwner(ownerSubject, shareId);
+            if (share is null)
+                return HttpWrapper<Unit>.FromResult(Results.NotFound());
+
+            if (!string.IsNullOrEmpty(share.ThumbnailS3Key))
+            {
+                try { await _thumbs.DeleteAsync(share.ThumbnailS3Key, CancellationToken.None); }
+                catch (Exception ex) { _log.LogWarning(ex, "Thumbnail delete failed for {ShareId}", share.ShareId); }
+            }
+
+            share.RevokedAt = DateTimeOffset.UtcNow.ToString("o");
+            await _shares.Update(share);
+
+            return HttpWrapper<Unit>.Ok(Unit.Value);
+        }
+
         private async Task<bool> TryRenderThumbnail(DynamoDbShare share, List<FrozenTrip> trips)
         {
             try
