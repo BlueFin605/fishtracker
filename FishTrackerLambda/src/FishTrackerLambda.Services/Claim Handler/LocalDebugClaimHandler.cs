@@ -1,4 +1,4 @@
-﻿using System.Security.Claims;
+using System.Security.Claims;
 using Amazon.Lambda.APIGatewayEvents;
 
 namespace FishTrackerLambda.ClaimHandler;
@@ -14,5 +14,11 @@ public class LocalDebugClaimHandler : IClaimHandler
     {
         return "myprincipal";
     }
+
+    public string ExtractEmail(IEnumerable<Claim> claims) => "dev@example.com";
+
+    public bool ExtractEmailVerified(IEnumerable<Claim> claims) => true;
+
+    public string ExtractDisplayName(IEnumerable<Claim> claims) => "Dev User";
 }
 
