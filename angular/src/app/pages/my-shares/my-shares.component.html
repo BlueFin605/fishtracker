@@ -1,0 +1,43 @@
+<div class="container">
+  <h2>My shares</h2>
+  <nav class="tabs">
+    <button [class.active]="tab==='sent'"     (click)="switchTo('sent')">Sent</button>
+    <button [class.active]="tab==='received'" (click)="switchTo('received')">Received</button>
+  </nav>
+
+  <div *ngIf="loading">Loading...</div>
+
+  <table *ngIf="tab==='sent' && !loading">
+    <thead><tr><th>Recipient</th><th>Created</th><th>Expires</th><th>Trips</th><th>Catches</th><th>Views</th><th>Status</th><th></th></tr></thead>
+    <tbody>
+      <tr *ngFor="let s of sent">
+        <td>{{ s.recipientEmail }}</td>
+        <td>{{ s.createdAt | date:'mediumDate' }}</td>
+        <td>{{ s.expiresAt ? (s.expiresAt | date:'mediumDate') : '-' }}</td>
+        <td>{{ s.tripCount }}</td>
+        <td>{{ s.catchCount }}</td>
+        <td>{{ s.viewCount }}{{ s.lastViewedAt ? ' &middot; ' + (s.lastViewedAt | date:'shortDate') : '' }}</td>
+        <td>{{ statusLabel(s) }}</td>
+        <td>
+          <button (click)="copyLink(s)">Copy link</button>
+          <button (click)="revoke(s)" *ngIf="!s.revokedAt">Revoke</button>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <table *ngIf="tab==='received' && !loading">
+    <thead><tr><th>Sender</th><th>Created</th><th>Expires</th><th>Trips</th><th>Catches</th><th>Status</th><th></th></tr></thead>
+    <tbody>
+      <tr *ngFor="let s of received">
+        <td>{{ s.ownerDisplayName }}</td>
+        <td>{{ s.createdAt | date:'mediumDate' }}</td>
+        <td>{{ s.expiresAt ? (s.expiresAt | date:'mediumDate') : '-' }}</td>
+        <td>{{ s.tripCount }}</td>
+        <td>{{ s.catchCount }}</td>
+        <td>{{ statusLabel(s) }}</td>
+        <td><a [routerLink]="['/shared', s.shareId]">Open</a></td>
+      </tr>
+    </tbody>
+  </table>
+</div>
