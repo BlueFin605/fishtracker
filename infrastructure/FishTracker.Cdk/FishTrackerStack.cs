@@ -161,13 +161,9 @@ public class FishTrackerStack : Stack
 
         var shareSenderDomain = shareSender.Substring(shareSender.IndexOf('@') + 1);
 
-        // Only create the domain identity if we're using our own domain (not an
-        // external sender). If the existing Cognito SES setup already created it,
-        // this is a no-op because SES identity names are globally unique per account.
-        var shareEmailIdentity = new EmailIdentity(this, "ShareSenderIdentity", new EmailIdentityProps
-        {
-            Identity = Identity.Domain(shareSenderDomain)
-        });
+        // SES domain identity for bluefin605.com is owned by the Home stack
+        // (cross-project shared resource). This stack only creates the per-project
+        // template + IAM policy; the IAM policy below references the identity by ARN.
 
         var shareInviteTemplate = new CfnTemplate(this, "ShareInviteTemplate", new CfnTemplateProps
         {
