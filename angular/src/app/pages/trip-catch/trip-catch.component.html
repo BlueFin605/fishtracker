@@ -9,10 +9,16 @@
         </div>
         <div class="right-section">
             <button *ngIf="tripIsOpen" class="end-trip-button" (click)="openEndTripModal()">End Trip</button>
+            <button type="button" class="share-trip-button" [disabled]="!canOpenShareDialog" (click)="openShareDialog()">Share this trip</button>
             <button class="back-button" (click)="onCancel()">Back</button>
         </div>
     </div>
 </div>
+
+<app-share-dialog *ngIf="shareDialogOpen"
+                  [availableTrips]="availableTripsForDialog"
+                  [preselectedTripIds]="[tripId]"
+                  (closed)="onShareDialogClosed($event)"></app-share-dialog>
 
 <!-- End Trip Modal — outside showAdvancedMode so it's always available -->
 <div *ngIf="showEndTripModal" class="modal">
