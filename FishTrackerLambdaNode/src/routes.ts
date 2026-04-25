@@ -6,6 +6,7 @@ import { TripService } from './Services/TripService';
 import { SettingsService } from './Services/SettingsService';
 import { ProfileService } from './Services/ProfileService';
 import { ShareService } from './Services/ShareService';
+import { CognitoUserService } from './Services/CognitoUserService';
 import { HttpWrapper } from './Functional/HttpWrapper';
 import { IProfileDetails, ISettingsDetails, INewTrip, ITripDetails, IUpdateTripDetails, IEndTripDetails, INewCatch, ICatchDetails, IUpdateCatchDetails, INewShare } from './Models/lambda';
 import { Logger } from '@aws-lambda-powertools/logger';
@@ -20,6 +21,7 @@ export class Routes {
         @inject(SettingsService) private settingsService: SettingsService,
         @inject(ProfileService) private profileService: ProfileService,
         @inject(ShareService) private shareService: ShareService,
+        @inject(CognitoUserService) private cognitoUserService: CognitoUserService,
         @inject(Logger) private logger: Logger
     ) {
         this.router = Router();
@@ -257,10 +259,10 @@ export class Routes {
     private async newShare(req: Request, res: Response) {
         const newShare = req.body as INewShare;
         const subjectClaim = this.getClaimSubjectFromHeader(req);
-        const displayName = this.getClaimDisplayNameFromHeader(req);
+        const user = await this.cognitoUserService.getUser(subjectClaim);
         await this.executeService(
             `NewShare subject:[${subjectClaim}]`,
-            () => this.shareService.newShare(subjectClaim, displayName, newShare),
+            () => this.shareService.newShare(subjectClaim, user.displayName, newShare),
             res
         );
     }
@@ -268,10 +270,10 @@ export class Routes {
     private async getShares(req: Request, res: Response) {
         const direction = req.query.direction as string | undefined;
         const subjectClaim = this.getClaimSubjectFromHeader(req);
-        const email = this.getClaimEmailFromHeader(req);
+        const user = await this.cognitoUserService.getUser(subjectClaim);
         await this.executeService(
             `GetShares subject:[${subjectClaim}] direction:[${direction ?? ''}]`,
-            () => this.shareService.getShares(subjectClaim, email, direction),
+            () => this.shareService.getShares(subjectClaim, user.email, direction),
             res
         );
     }
@@ -279,11 +281,10 @@ export class Routes {
     private async getShare(req: Request, res: Response) {
         const { shareId } = req.params;
         const subjectClaim = this.getClaimSubjectFromHeader(req);
-        const email = this.getClaimEmailFromHeader(req);
-        const emailVerified = this.getClaimEmailVerifiedFromHeader(req);
+        const user = await this.cognitoUserService.getUser(subjectClaim);
         await this.executeService(
             `GetShare subject:[${subjectClaim}] shareId:[${shareId}]`,
-            () => this.shareService.getShare(subjectClaim, email, emailVerified, shareId),
+            () => this.shareService.getShare(subjectClaim, user.email, user.emailVerified, shareId),
             res
         );
     }

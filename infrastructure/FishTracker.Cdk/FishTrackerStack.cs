@@ -378,6 +378,13 @@ You'll need to sign in to view. {{#if expiresAt}}Expires {{expiresAt}}. {{/if}}{
             Resources = new[] { staticMapsSecret.SecretArn }
         }));
 
+        // Cognito — read user attributes (email, email_verified, name) for share endpoints
+        lambdaRole.AddToPolicy(new PolicyStatement(new PolicyStatementProps
+        {
+            Actions = new[] { "cognito-idp:AdminGetUser" },
+            Resources = new[] { userPool.UserPoolArn }
+        }));
+
         var authLambdaRole = new Role(this, "AuthLambdaRole", new RoleProps
         {
             // RoleName intentionally omitted — CDK generates unique name to avoid conflict with Terraform
@@ -416,6 +423,7 @@ You'll need to sign in to view. {{#if expiresAt}}Expires {{expiresAt}}. {{/if}}{
         lambdaEnvironment["STATIC_MAPS_SECRET_NAME"] = staticMapsSecretName;
         lambdaEnvironment["SHARE_VIEW_URL_BASE"] = $"https://{websiteDomain}/shared";
         lambdaEnvironment["FISHTRACKER_ENV"] = env;
+        lambdaEnvironment["USER_POOL_ID"] = userPool.UserPoolId;
 
         var nodejsLambda = new Function(this, "NodejsLambda", new FunctionProps
         {
