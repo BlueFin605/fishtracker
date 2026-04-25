@@ -7,9 +7,18 @@
         </label>
         <span class="switch-label">Relevant Trips Only</span>
     </div>
+    <div class="trips-toolbar">
+        <button type="button"
+                class="share-selected-button"
+                [disabled]="selectedTripIds.size === 0"
+                (click)="openShareDialog()">
+            Share selected ({{ selectedTripIds.size }})
+        </button>
+    </div>
     <table>
         <thead>
             <tr>
+                <th></th>
                 <th>Start</th>
                 <th>End</th>
                 <th>Notes</th>
@@ -22,6 +31,11 @@
         </thead>
         <tbody>
             <tr *ngFor="let trip of trips" (click)="navigateToTripCatch(trip.tripId)">
+                <td (click)="$event.stopPropagation()">
+                    <input type="checkbox"
+                           [checked]="isTripSelected(trip.tripId)"
+                           (change)="toggleTripSelection(trip.tripId, $event)">
+                </td>
                 <td>
                     {{ trip.startTime | dateFormat}}
                     <i *ngIf="isPending(trip)" class="fas fa-cloud-upload-alt sync-pending-icon" title="Waiting to sync"></i>
@@ -39,3 +53,8 @@
         </tbody>
     </table>
 </section>
+
+<app-share-dialog *ngIf="shareDialogOpen"
+                  [availableTrips]="availableTripsForDialog"
+                  [preselectedTripIds]="selectedTripIdsArr"
+                  (closed)="onShareDialogClosed($event)"></app-share-dialog>
