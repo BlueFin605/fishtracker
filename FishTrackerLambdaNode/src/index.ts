@@ -42,6 +42,7 @@ container.registerInstance(Logger, logger);
 
 // Initialize Express App
 const app = express();
+app.disable('etag');
 app.use(express.json());
 
 if (!process.env.IS_LAMBDA) {

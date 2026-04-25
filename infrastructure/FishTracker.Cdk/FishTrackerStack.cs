@@ -287,7 +287,7 @@ You'll need to sign in to view. {{#if expiresAt}}Expires {{expiresAt}}. {{/if}}{
         {
             UserPoolClientName = $"fishtracker-client-auth-code-{env.ToLower()}",
             GenerateSecret = false,
-            AccessTokenValidity = Duration.Minutes(5),
+            AccessTokenValidity = Duration.Hours(1),
             IdTokenValidity = Duration.Hours(1),
             RefreshTokenValidity = Duration.Days(30),
             SupportedIdentityProviders = identityProviders,
