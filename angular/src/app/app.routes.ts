@@ -8,6 +8,8 @@ import { ProfileComponent} from './pages/profile/profile.component';
 import { CallbackComponent } from './pages/callback/callback.component';
 import { SetupComponent } from './pages/setup/setup.component';
 import { SettingsComponent } from './pages/settings/settings.component';
+import { SharedMapPageComponent } from './pages/shared-map/shared-map.component';
+import { MySharesPageComponent } from './pages/my-shares/my-shares.component';
 import { AuthGuard } from './auth.guard';
 import { SetupGuard } from './setup.guard';
 import { LoginComponent } from './pages/login/login.component';
@@ -21,6 +23,8 @@ export const routes: Routes = [
     { path: 'debug', component: DebugDisplayComponent, canActivate: [AuthGuard]  },
     { path: 'profile', component: ProfileComponent, canActivate: [AuthGuard]  },
     { path: 'settings', component: SettingsComponent, canActivate: [AuthGuard]  },
+    { path: 'shared/:shareId', component: SharedMapPageComponent, canActivate: [AuthGuard] },
+    { path: 'shares', component: MySharesPageComponent, canActivate: [AuthGuard] },
     { path: 'login', component: LoginComponent },
     { path: '', redirectTo: '/login', pathMatch: 'full' },
     { path: '**', redirectTo: '/login' }
