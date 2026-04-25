@@ -5,8 +5,9 @@ import { CatchService } from './Services/CatchService';
 import { TripService } from './Services/TripService';
 import { SettingsService } from './Services/SettingsService';
 import { ProfileService } from './Services/ProfileService';
+import { ShareService } from './Services/ShareService';
 import { HttpWrapper } from './Functional/HttpWrapper';
-import { IProfileDetails, ISettingsDetails, INewTrip, ITripDetails, IUpdateTripDetails, IEndTripDetails, INewCatch, ICatchDetails, IUpdateCatchDetails } from './Models/lambda';
+import { IProfileDetails, ISettingsDetails, INewTrip, ITripDetails, IUpdateTripDetails, IEndTripDetails, INewCatch, ICatchDetails, IUpdateCatchDetails, INewShare } from './Models/lambda';
 import { Logger } from '@aws-lambda-powertools/logger';
 
 @injectable()
@@ -18,6 +19,7 @@ export class Routes {
         @inject(CatchService) private catchService: CatchService,
         @inject(SettingsService) private settingsService: SettingsService,
         @inject(ProfileService) private profileService: ProfileService,
+        @inject(ShareService) private shareService: ShareService,
         @inject(Logger) private logger: Logger
     ) {
         this.router = Router();
@@ -43,6 +45,10 @@ export class Routes {
         this.router.put('/trip/:tripId/catch/:catchId', this.updateCatch.bind(this));
         this.router.patch('/trip/:tripId/catch/:catchId', this.patchCatch.bind(this));
         this.router.patch('/fixup', this.patchFixup.bind(this));
+        this.router.post('/share', this.newShare.bind(this));
+        this.router.get('/share', this.getShares.bind(this));
+        this.router.get('/share/:shareId', this.getShare.bind(this));
+        this.router.delete('/share/:shareId', this.revokeShare.bind(this));
     }
 
     private getClaimSubject(authorizer: APIGatewayEventDefaultAuthorizerContext): string
@@ -60,16 +66,61 @@ export class Routes {
         return authorizer?.principalId;
     }
     
-    private getClaimSubjectFromHeader(request: Request): string 
+    private getClaimSubjectFromHeader(request: Request): string
     {
         const contextHeader = request.headers['x-apigateway-event'];
         if (typeof contextHeader !== 'string') {
             throw new Error('Invalid x-apigateway-event header');
         }
-        const decodedContextHeader = decodeURIComponent(contextHeader);        
+        const decodedContextHeader = decodeURIComponent(contextHeader);
         const event: APIGatewayProxyEvent = JSON.parse(decodedContextHeader);
         return this.getClaimSubject(event.requestContext?.authorizer);
-    }    
+    }
+
+    private findClaim(authorizer: APIGatewayEventDefaultAuthorizerContext, type: string): string | undefined {
+        if (authorizer?.claims) {
+            const claim = (authorizer.claims as any[]).find((c: any) => c.Type === type);
+            if (claim) return claim.Value as string;
+        }
+        // Fallback: flat claim bag (Cognito JWT authorizer puts claims at the root of authorizer).
+        if (authorizer && typeof authorizer === 'object') {
+            const val = (authorizer as any)[type];
+            if (typeof val === 'string') return val;
+        }
+        return undefined;
+    }
+
+    private getClaimEmailFromHeader(request: Request): string {
+        const event = this.parseEvent(request);
+        const authorizer = event.requestContext?.authorizer;
+        return this.findClaim(authorizer, 'email') ?? '';
+    }
+
+    private getClaimEmailVerifiedFromHeader(request: Request): boolean {
+        const event = this.parseEvent(request);
+        const authorizer = event.requestContext?.authorizer;
+        const raw = this.findClaim(authorizer, 'email_verified');
+        if (raw === undefined) return false;
+        return raw === 'true' || raw === '1' || (raw as any) === true;
+    }
+
+    private getClaimDisplayNameFromHeader(request: Request): string {
+        const event = this.parseEvent(request);
+        const authorizer = event.requestContext?.authorizer;
+        return this.findClaim(authorizer, 'name')
+            ?? this.findClaim(authorizer, 'preferred_username')
+            ?? this.findClaim(authorizer, 'given_name')
+            ?? this.findClaim(authorizer, 'email')
+            ?? '';
+    }
+
+    private parseEvent(request: Request): APIGatewayProxyEvent {
+        const contextHeader = request.headers['x-apigateway-event'];
+        if (typeof contextHeader !== 'string') {
+            throw new Error('Invalid x-apigateway-event header');
+        }
+        return JSON.parse(decodeURIComponent(contextHeader));
+    }
 
     private async executeService<T>(logDesc: string, func: () => Promise<HttpWrapper<T>>, res: Response) {
         try {
@@ -201,4 +252,49 @@ export class Routes {
         const option:string = req.query.option as string;
         const subjectClaim = this.getClaimSubjectFromHeader(req);
         await this.executeService(`PatchFixup subject:[${subjectClaim}] action:[${action}] option:[${option}]`, () => this.catchService.patchFixup(subjectClaim, action, option), res);
-    }}
+    }
+
+    private async newShare(req: Request, res: Response) {
+        const newShare = req.body as INewShare;
+        const subjectClaim = this.getClaimSubjectFromHeader(req);
+        const displayName = this.getClaimDisplayNameFromHeader(req);
+        await this.executeService(
+            `NewShare subject:[${subjectClaim}]`,
+            () => this.shareService.newShare(subjectClaim, displayName, newShare),
+            res
+        );
+    }
+
+    private async getShares(req: Request, res: Response) {
+        const direction = req.query.direction as string | undefined;
+        const subjectClaim = this.getClaimSubjectFromHeader(req);
+        const email = this.getClaimEmailFromHeader(req);
+        await this.executeService(
+            `GetShares subject:[${subjectClaim}] direction:[${direction ?? ''}]`,
+            () => this.shareService.getShares(subjectClaim, email, direction),
+            res
+        );
+    }
+
+    private async getShare(req: Request, res: Response) {
+        const { shareId } = req.params;
+        const subjectClaim = this.getClaimSubjectFromHeader(req);
+        const email = this.getClaimEmailFromHeader(req);
+        const emailVerified = this.getClaimEmailVerifiedFromHeader(req);
+        await this.executeService(
+            `GetShare subject:[${subjectClaim}] shareId:[${shareId}]`,
+            () => this.shareService.getShare(subjectClaim, email, emailVerified, shareId),
+            res
+        );
+    }
+
+    private async revokeShare(req: Request, res: Response) {
+        const { shareId } = req.params;
+        const subjectClaim = this.getClaimSubjectFromHeader(req);
+        await this.executeService(
+            `RevokeShare subject:[${subjectClaim}] shareId:[${shareId}]`,
+            () => this.shareService.revokeShare(subjectClaim, shareId),
+            res
+        );
+    }
+}

@@ -417,18 +417,6 @@ You'll need to sign in to view. {{#if expiresAt}}Expires {{expiresAt}}. {{/if}}{
         lambdaEnvironment["SHARE_VIEW_URL_BASE"] = $"https://{websiteDomain}/shared";
         lambdaEnvironment["FISHTRACKER_ENV"] = env;
 
-        var dotnetLambda = new Function(this, "DotnetLambda", new FunctionProps
-        {
-            FunctionName = $"FishTracker-Lambda-Function-{env}",
-            Runtime = Runtime.DOTNET_8,
-            Architecture = Architecture.ARM_64,
-            Handler = "FishTrackerLambda",
-            Timeout = Duration.Seconds(20),
-            Role = lambdaRole,
-            Code = Code.FromAsset("../FishTrackerLambda/publish"),
-            Environment = lambdaEnvironment
-        });
-
         var nodejsLambda = new Function(this, "NodejsLambda", new FunctionProps
         {
             FunctionName = $"FishTracker-Lambda-NodeJs-{env}",
