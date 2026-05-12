@@ -6,6 +6,7 @@
               <img src="favicon.png" alt="Trips" class="favicon-icon">
             </button>             
             <a *ngIf="showStartTrip" class="nav-link button-link" [routerLink]="['/newtrip']">Start Trip</a>
+            <a class="nav-link" [routerLink]="['/shares']">My shares</a>
             <span class="sync-indicator" *ngIf="(syncState$ | async) as syncState">
                 <i *ngIf="syncState === 'syncing'" class="fas fa-sync fa-spin" title="Syncing..."></i>
                 <span *ngIf="syncState === 'pending'" class="sync-pending" title="Items waiting to sync">

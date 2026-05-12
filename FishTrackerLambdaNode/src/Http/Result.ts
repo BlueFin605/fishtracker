@@ -35,4 +35,28 @@ export class Results {
     static Ok(obj: any = null): Results {
         return new Results(200, obj);
     }
+
+    static Forbidden(message: string = "Forbidden"): Results {
+        return new Results(403, message);
+    }
+
+    static Gone(message: string = "Gone"): Results {
+        return new Results(410, message);
+    }
+
+    static PayloadTooLarge(message: string = "Payload Too Large"): Results {
+        return new Results(413, message);
+    }
+
+    static TooManyRequests(message: string = "Too Many Requests"): Results {
+        return new Results(429, message);
+    }
+
+    static InternalServerError(message: string = "Internal Server Error"): Results {
+        return new Results(500, message);
+    }
+
+    static StatusCode(code: number, message: string = ""): Results {
+        return new Results(code, message);
+    }
 }

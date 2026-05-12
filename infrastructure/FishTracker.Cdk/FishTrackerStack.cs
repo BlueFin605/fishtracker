@@ -10,6 +10,8 @@ using Amazon.CDK.AWS.Lambda;
 using Amazon.CDK.AWS.Route53;
 using Amazon.CDK.AWS.Route53.Targets;
 using Amazon.CDK.AWS.S3;
+using Amazon.CDK.AWS.SecretsManager;
+using Amazon.CDK.AWS.SES;
 using Amazon.CDK.AWS.SSM;
 using Constructs;
 using Attribute = Amazon.CDK.AWS.DynamoDB.Attribute;
@@ -93,6 +95,114 @@ public class FishTrackerStack : Stack
             TableName = $"FishTracker-Settings-{env}",
             BillingMode = BillingMode.PAY_PER_REQUEST,
             PartitionKey = new Attribute { Name = "Settings", Type = AttributeType.STRING },
+            RemovalPolicy = RemovalPolicy.RETAIN
+        });
+
+        var sharesTable = new Table(this, "SharesTable", new TableProps
+        {
+            TableName = $"FishTracker-Shares-{env}",
+            BillingMode = BillingMode.PAY_PER_REQUEST,
+            PartitionKey = new Attribute { Name = "OwnerSubject", Type = AttributeType.STRING },
+            SortKey = new Attribute { Name = "ShareId", Type = AttributeType.STRING },
+            RemovalPolicy = RemovalPolicy.RETAIN
+        });
+
+        sharesTable.AddGlobalSecondaryIndex(new GlobalSecondaryIndexProps
+        {
+            IndexName = "ShareId-Index",
+            PartitionKey = new Attribute { Name = "ShareId", Type = AttributeType.STRING },
+            ProjectionType = ProjectionType.ALL
+        });
+
+        sharesTable.AddGlobalSecondaryIndex(new GlobalSecondaryIndexProps
+        {
+            IndexName = "RecipientEmail-Index",
+            PartitionKey = new Attribute { Name = "RecipientEmail", Type = AttributeType.STRING },
+            SortKey = new Attribute { Name = "ShareId", Type = AttributeType.STRING },
+            ProjectionType = ProjectionType.ALL
+        });
+
+        var shareThumbnailsBucket = new Bucket(this, "ShareThumbnailsBucket", new BucketProps
+        {
+            BucketName = $"fishtracker-share-thumbnails-{env.ToLower()}",
+            BlockPublicAccess = new BlockPublicAccess(new BlockPublicAccessOptions
+            {
+                BlockPublicAcls = true,
+                IgnorePublicAcls = true,
+                BlockPublicPolicy = false,
+                RestrictPublicBuckets = false
+            }),
+            RemovalPolicy = RemovalPolicy.RETAIN,
+            LifecycleRules = new[]
+            {
+                new LifecycleRule
+                {
+                    Id = "ExpireOld",
+                    Enabled = true,
+                    Expiration = Duration.Days(730)   // 2-year backstop
+                }
+            }
+        });
+
+        shareThumbnailsBucket.AddToResourcePolicy(new PolicyStatement(new PolicyStatementProps
+        {
+            Sid = "PublicReadPngs",
+            Effect = Effect.ALLOW,
+            Principals = new IPrincipal[] { new AnyPrincipal() },
+            Actions = new[] { "s3:GetObject" },
+            Resources = new[] { $"{shareThumbnailsBucket.BucketArn}/*.png" }
+        }));
+
+        // Sender address for share invites — reuse Cognito SES sender domain if set,
+        // else noreply@<websiteDomain>. Identity creation is idempotent; CDK will skip
+        // if the domain is already a verified SES identity in this account/region.
+        var shareSender = !string.IsNullOrWhiteSpace(props.SesFromAddress)
+            ? props.SesFromAddress!
+            : $"noreply@{websiteDomain}";
+
+        var shareSenderDomain = shareSender.Substring(shareSender.IndexOf('@') + 1);
+
+        // SES domain identity for bluefin605.com is owned by the Home stack
+        // (cross-project shared resource). This stack only creates the per-project
+        // template + IAM policy; the IAM policy below references the identity by ARN.
+
+        var shareInviteTemplate = new CfnTemplate(this, "ShareInviteTemplate", new CfnTemplateProps
+        {
+            Template = new CfnTemplate.TemplateProperty
+            {
+                TemplateName = $"FishTracker-ShareInvite-{env}",
+                SubjectPart = "{{ownerDisplayName}} shared some fishing spots with you",
+                HtmlPart = @"<html><body style='font-family:sans-serif;max-width:600px;margin:auto'>
+<p>Hi,</p>
+<p><strong>{{ownerDisplayName}}</strong> has shared {{tripCount}} fishing trip(s)
+with you on FishTracker — {{catchCount}} catches in total.</p>
+{{#if message}}<blockquote style='border-left:3px solid #ccc;padding-left:12px;color:#555'>{{message}}</blockquote>{{/if}}
+{{#if thumbnailUrl}}<p><a href='{{viewUrl}}'><img src='{{thumbnailUrl}}' width='600' height='300' alt='Map preview' style='display:block;border:0'/></a></p>{{/if}}
+<p><a href='{{viewUrl}}' style='display:inline-block;background:#2563eb;color:#fff;padding:12px 24px;border-radius:4px;text-decoration:none'>View full map</a></p>
+<p style='color:#666;font-size:13px'>You'll need to sign in (or sign up if you're new) to view the map.
+{{#if expiresAt}}This share expires on {{expiresAt}}.{{/if}}
+{{ownerDisplayName}} can revoke this share at any time.</p>
+<p style='color:#999;font-size:12px'>— FishTracker</p>
+</body></html>",
+                TextPart = @"{{ownerDisplayName}} shared some fishing spots with you on FishTracker.
+
+{{tripCount}} trip(s), {{catchCount}} catches.
+
+{{#if message}}""{{message}}""
+
+{{/if}}View the map: {{viewUrl}}
+
+You'll need to sign in to view. {{#if expiresAt}}Expires {{expiresAt}}. {{/if}}{{ownerDisplayName}} can revoke at any time.
+
+— FishTracker"
+            }
+        });
+
+        var staticMapsSecretName = $"fishtracker/{env}/static-maps-key";
+        var staticMapsSecret = new Secret(this, "StaticMapsKeySecret", new SecretProps
+        {
+            SecretName = staticMapsSecretName,
+            Description = "Google Static Maps API key used server-side for share thumbnails",
             RemovalPolicy = RemovalPolicy.RETAIN
         });
 
@@ -243,6 +353,39 @@ public class FishTrackerStack : Stack
             Resources = new[] { $"arn:aws:dynamodb:*:{this.Account}:table/*/index/*" }
         }));
 
+        // SES — send share invite emails
+        lambdaRole.AddToPolicy(new PolicyStatement(new PolicyStatementProps
+        {
+            Actions = new[] { "ses:SendEmail", "ses:SendTemplatedEmail" },
+            Resources = new[]
+            {
+                $"arn:aws:ses:{this.Region}:{this.Account}:identity/{shareSenderDomain}",
+                $"arn:aws:ses:{this.Region}:{this.Account}:template/FishTracker-ShareInvite-{env}",
+                $"arn:aws:ses:{this.Region}:{this.Account}:configuration-set/*"
+            }
+        }));
+
+        // S3 — put/delete thumbnails
+        lambdaRole.AddToPolicy(new PolicyStatement(new PolicyStatementProps
+        {
+            Actions = new[] { "s3:PutObject", "s3:DeleteObject" },
+            Resources = new[] { $"{shareThumbnailsBucket.BucketArn}/*" }
+        }));
+
+        // Secrets Manager — read Static Maps API key
+        lambdaRole.AddToPolicy(new PolicyStatement(new PolicyStatementProps
+        {
+            Actions = new[] { "secretsmanager:GetSecretValue" },
+            Resources = new[] { staticMapsSecret.SecretArn }
+        }));
+
+        // Cognito — read user attributes (email, email_verified, name) for share endpoints
+        lambdaRole.AddToPolicy(new PolicyStatement(new PolicyStatementProps
+        {
+            Actions = new[] { "cognito-idp:AdminGetUser" },
+            Resources = new[] { userPool.UserPoolArn }
+        }));
+
         var authLambdaRole = new Role(this, "AuthLambdaRole", new RoleProps
         {
             // RoleName intentionally omitted — CDK generates unique name to avoid conflict with Terraform
@@ -275,16 +418,13 @@ public class FishTrackerStack : Stack
             ["IS_LAMBDA"] = "true"
         };
 
-        var dotnetLambda = new Function(this, "DotnetLambda", new FunctionProps
-        {
-            FunctionName = $"FishTracker-Lambda-Function-{env}",
-            Runtime = Runtime.DOTNET_8,
-            Architecture = Architecture.ARM_64,
-            Handler = "FishTrackerLambda",
-            Timeout = Duration.Seconds(20),
-            Role = lambdaRole,
-            Code = Code.FromAsset("../FishTrackerLambda/publish")
-        });
+        lambdaEnvironment["SHARE_THUMBNAILS_BUCKET"] = shareThumbnailsBucket.BucketName;
+        lambdaEnvironment["SHARE_SENDER"] = shareSender;
+        lambdaEnvironment["SHARE_TEMPLATE_NAME"] = $"FishTracker-ShareInvite-{env}";
+        lambdaEnvironment["STATIC_MAPS_SECRET_NAME"] = staticMapsSecretName;
+        lambdaEnvironment["SHARE_VIEW_URL_BASE"] = $"https://{websiteDomain}/shared";
+        lambdaEnvironment["FISHTRACKER_ENV"] = env;
+        lambdaEnvironment["USER_POOL_ID"] = userPool.UserPoolId;
 
         var nodejsLambda = new Function(this, "NodejsLambda", new FunctionProps
         {
@@ -449,6 +589,23 @@ public class FishTrackerStack : Stack
 
         var fixup = apiResource.AddResource("fixup");
         fixup.AddMethod("PATCH", lambdaIntegration, authMethodOptions);
+
+        var share = apiResource.AddResource("share");
+        share.AddMethod("GET", lambdaIntegration, new MethodOptions
+        {
+            AuthorizationType = AuthorizationType.CUSTOM,
+            Authorizer = authorizer,
+            RequestValidator = queryValidator,
+            RequestParameters = new Dictionary<string, bool>
+            {
+                ["method.request.querystring.direction"] = false
+            }
+        });
+        share.AddMethod("POST", lambdaIntegration, authMethodOptions);
+
+        var shareProxy = share.AddResource("{shareId}");
+        shareProxy.AddMethod("GET", lambdaIntegration, authMethodOptions);
+        shareProxy.AddMethod("DELETE", lambdaIntegration, authMethodOptions);
 
         // =====================================================================
         // Website (S3 + CloudFront)
