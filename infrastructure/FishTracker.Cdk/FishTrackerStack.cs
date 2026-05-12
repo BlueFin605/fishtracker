@@ -10,7 +10,6 @@ using Amazon.CDK.AWS.Lambda;
 using Amazon.CDK.AWS.Route53;
 using Amazon.CDK.AWS.Route53.Targets;
 using Amazon.CDK.AWS.S3;
-using Amazon.CDK.AWS.SecretsManager;
 using Amazon.CDK.AWS.SSM;
 using Constructs;
 using Attribute = Amazon.CDK.AWS.DynamoDB.Attribute;
@@ -46,10 +45,11 @@ public class FishTrackerStack : Stack
         // Certificate ARN from SSM Parameter Store
         var certificateArn = StringParameter.ValueForStringParameter(this, "/fishtracker/certificate-arn");
 
-        // Google OAuth credentials from Secrets Manager
-        // Secret JSON: { "clientId": "...", "clientSecret": "..." }
-        var googleSecretName = $"fishtracker/{env}/google-oauth";
-        var googleSecret = Secret.FromSecretNameV2(this, "GoogleOAuthSecret", googleSecretName);
+        // Google OAuth credentials live in SSM SecureString at /fishtracker/{env}/google-oauth
+        // ({ "clientId": "...", "clientSecret": "..." }). CDK creates the IdP with placeholders;
+        // deploy-infra.ps1 runs `aws cognito-idp update-identity-provider` post-deploy to inject
+        // the live values. Avoids CFN SecureString version pinning and lets rotation happen
+        // without a CDK redeploy.
 
         var hostedZone = HostedZone.FromLookup(this, "HostedZone", new HostedZoneProviderProps
         {
@@ -125,8 +125,8 @@ public class FishTrackerStack : Stack
         var googleProvider = new UserPoolIdentityProviderGoogle(this, "GoogleProvider", new UserPoolIdentityProviderGoogleProps
         {
             UserPool = userPool,
-            ClientId = googleSecret.SecretValueFromJson("clientId").UnsafeUnwrap(),
-            ClientSecretValue = googleSecret.SecretValueFromJson("clientSecret"),
+            ClientId = "PLACEHOLDER_SYNCED_POST_DEPLOY",
+            ClientSecretValue = SecretValue.UnsafePlainText("PLACEHOLDER_SYNCED_POST_DEPLOY"),
             Scopes = new[] { "openid", "profile", "email" },
             AttributeMapping = new AttributeMapping
             {
