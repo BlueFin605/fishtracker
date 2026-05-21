@@ -6,17 +6,22 @@ import { FishTrackerSettingsService } from '../../services/fish-tracker-settings
 import { OfflineDataService } from '../../services/offline/offline-data.service';
 import { DateFormatModule } from '../../components/date-format/date-format.module';
 import { SyncStatus } from '../../services/offline/offline.types';
+import { ShareDialogComponent, ShareDialogTripOption } from '../share-dialog/share-dialog.component';
 
 @Component({
   selector: 'app-trips',
   standalone: true,
-  imports: [CommonModule, DateFormatModule],
+  imports: [CommonModule, DateFormatModule, ShareDialogComponent],
   templateUrl: './trips.component.html',
   styleUrl: './trips.component.css'
 })
 export class TripsComponent {
   trips: (TripDetails & { syncStatus?: SyncStatus })[];
   relevantTrips: boolean;
+
+  selectedTripIds = new Set<string>();
+  shareDialogOpen = false;
+  availableTripsForDialog: ShareDialogTripOption[] = [];
 
   constructor(private router: Router,
     private offlineData: OfflineDataService,
@@ -78,5 +83,42 @@ export class TripsComponent {
 
   isPending(trip: TripDetails & { syncStatus?: SyncStatus }): boolean {
     return trip.syncStatus === 'pending' || trip.syncStatus === 'modified';
+  }
+
+  toggleTripSelection(tripId: string, event: Event): void {
+    event.stopPropagation();
+    const checkbox = event.target as HTMLInputElement;
+    if (checkbox.checked) {
+      this.selectedTripIds.add(tripId);
+    } else {
+      this.selectedTripIds.delete(tripId);
+    }
+  }
+
+  isTripSelected(tripId: string): boolean {
+    return this.selectedTripIds.has(tripId);
+  }
+
+  get selectedTripIdsArr(): string[] {
+    return Array.from(this.selectedTripIds);
+  }
+
+  openShareDialog(): void {
+    if (this.selectedTripIds.size === 0) return;
+    this.availableTripsForDialog = this.trips
+      .filter((t) => this.selectedTripIds.has(t.tripId))
+      .map((t) => ({
+        tripId: t.tripId,
+        startTime: t.startTime as unknown as string,
+        catchCount: t.catchSize ?? 0,
+      }));
+    this.shareDialogOpen = true;
+  }
+
+  onShareDialogClosed(ev: { shareId?: string }): void {
+    this.shareDialogOpen = false;
+    if (ev.shareId) {
+      alert('Share sent. View in My Shares.');
+    }
   }
 }

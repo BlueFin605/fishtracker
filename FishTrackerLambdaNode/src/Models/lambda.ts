@@ -383,6 +383,111 @@ export class DynamoDbCatch implements IDynamoDbCatch {
     }
 }
 
+//--------------------------------------------
+// share-spots
+//--------------------------------------------
+
+export interface INewShare {
+    tripIds: string[];
+    recipientEmail: string;
+    fuzzLocation: boolean;
+    expiresInDays?: number;
+    message?: string;
+}
+
+export interface ICreateShareResponse {
+    shareId: string;
+    emailSent: boolean;
+    thumbnailGenerated: boolean;
+}
+
+export interface IShareSummary {
+    shareId: string;
+    ownerDisplayName: string;
+    recipientEmail: string;
+    createdAt: string;
+    expiresAt?: string;
+    revokedAt?: string;
+    tripCount: number;
+    catchCount: number;
+    viewCount: number;
+    lastViewedAt?: string;
+}
+
+export interface IFrozenCatchDto {
+    catchId: string;
+    speciesId: string;
+    displayLocation: ILocation;
+    caughtWhen: string;
+    caughtSize: string;
+    caughtLength: number;
+    biteInfo?: IBiteTimesDetails;
+}
+
+export interface IFrozenTripDto {
+    tripId: string;
+    startTime: string;
+    endTime?: string;
+    notes: string;
+    rating: string;
+    tags: ITripTags[];
+    species: string[];
+    defaultSpecies: string;
+    catches: IFrozenCatchDto[];
+}
+
+export interface IShareDetails {
+    shareId: string;
+    ownerDisplayName: string;
+    createdAt: string;
+    expiresAt?: string;
+    fuzzLocation: boolean;
+    message?: string;
+    trips: IFrozenTripDto[];
+}
+
+// Persistence shapes (embedded in DynamoDB share row).
+export interface IFrozenCatch {
+    CatchId: string;
+    SpeciesId: string;
+    DisplayLocation: ILocation;
+    CaughtWhen: string;            // ISO-8601
+    CaughtSize: FishSize | undefined;
+    CaughtLength: number;
+    BiteInfo?: IBiteTimesDetails;
+}
+
+export interface IFrozenTrip {
+    TripId: string;
+    StartTime: string;              // ISO-8601
+    EndTime?: string;
+    Notes: string;
+    Rating: TripRating;
+    Tags: ITripTags[];
+    Species: string[];
+    DefaultSpecies: string;
+    Catches: IFrozenCatch[];
+}
+
+export interface IDynamoDbShare extends IVersionedRecord {
+    OwnerSubject: string;
+    ShareId: string;
+    OwnerDisplayName: string;
+    RecipientEmail: string;         // lower-cased
+    RecipientSubject?: string;
+    CreatedAt: string;              // ISO-8601
+    ClaimedAt?: string;
+    RevokedAt?: string;
+    ExpiresAt?: string;
+    FuzzLocation: boolean;
+    Message?: string;
+    ThumbnailS3Key?: string;
+    ViewCount: number;
+    LastViewedAt?: string;
+    LastViewedBySubject?: string;
+    Trips: IFrozenTrip[];
+}
+
 export interface IDynamoDbTrip extends IVersionedRecord {
     Subject: string;
     TripId: string;

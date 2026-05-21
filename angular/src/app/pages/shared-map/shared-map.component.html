@@ -1,0 +1,43 @@
+<div *ngIf="state === 'loading'" class="center">Loading...</div>
+
+<div *ngIf="state === 'gone'" class="center">
+  <h2>This share is no longer available</h2>
+  <p>The sender may have revoked it or it has expired.</p>
+</div>
+
+<div *ngIf="state === 'error'" class="center">
+  <h2>Couldn't load share</h2>
+  <p>{{ errorMessage }}</p>
+</div>
+
+<div *ngIf="state === 'ready' && share" class="container">
+  <header>
+    <h2>Shared by {{ share.ownerDisplayName }}</h2>
+    <div class="meta">{{ share.createdAt | date:'mediumDate' }}
+      <span *ngIf="share.fuzzLocation"> &middot; Locations approximate (&plusmn;200m)</span>
+      <span *ngIf="share.expiresAt"> &middot; Expires {{ share.expiresAt | date:'mediumDate' }}</span>
+    </div>
+    <p class="message" *ngIf="share.message">"{{ share.message }}"</p>
+  </header>
+
+  <div class="split">
+    <div class="map-wrap">
+      <div #mapEl class="map"></div>
+      <app-share-watermark
+        [recipientEmail]="viewerEmail"
+        [senderName]="share.ownerDisplayName">
+      </app-share-watermark>
+    </div>
+
+    <aside>
+      <h3>Trips</h3>
+      <ul>
+        <li *ngFor="let t of share.trips">
+          {{ t.startTime | date:'mediumDate' }} ({{ t.catches.length }} catches)
+        </li>
+      </ul>
+      <h3>Size legend</h3>
+      <app-size-legend></app-size-legend>
+    </aside>
+  </div>
+</div>

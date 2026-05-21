@@ -11,13 +11,14 @@ import { DateConversionService } from '../../services/date-conversion.service';
 // import * as moment from 'moment-timezone';
 import { DateFormatModule } from '../../components/date-format/date-format.module';
 import { PreferencesService } from '../../services/preferences.service';
+import { ShareDialogComponent, ShareDialogTripOption } from '../share-dialog/share-dialog.component';
 
 @Component({
   standalone: true,
   selector: 'app-trip-catch',
   templateUrl: './trip-catch.component.html',
   styleUrls: ['./trip-catch.component.css'],
-  imports: [CommonModule, FormsModule, GoogleMapsModule, DateFormatModule]
+  imports: [CommonModule, FormsModule, GoogleMapsModule, DateFormatModule, ShareDialogComponent]
 })
 export class TripCatchComponent implements OnInit {
   currentPositionMapVisible = false;
@@ -56,6 +57,9 @@ export class TripCatchComponent implements OnInit {
   isAdvancedMode: boolean = true;
   fishSizes = Object.values(FishSize);
   activeSpecies: string = '';
+
+  shareDialogOpen = false;
+  availableTripsForDialog: ShareDialogTripOption[] = [];
 
   constructor(private route: ActivatedRoute,
               private apiService: ApiService,
@@ -345,5 +349,28 @@ export class TripCatchComponent implements OnInit {
 
   onCancel() {
     this.router.navigate(['/trips']);
+  }
+
+  get canOpenShareDialog(): boolean {
+    return !!this.tripDetails?.tripId;
+  }
+
+  openShareDialog() {
+    if (!this.canOpenShareDialog) return;
+    this.availableTripsForDialog = [
+      {
+        tripId: this.tripId,
+        startTime: this.tripDetails.startTime as unknown as string,
+        catchCount: this.tripCatch?.length ?? 0,
+      },
+    ];
+    this.shareDialogOpen = true;
+  }
+
+  onShareDialogClosed(ev: { shareId?: string }) {
+    this.shareDialogOpen = false;
+    if (ev.shareId) {
+      alert('Share sent. View in My Shares.');
+    }
   }
 }

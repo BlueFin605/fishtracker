@@ -1,0 +1,11 @@
+.watermark {
+  position: absolute;
+  right: 8px; bottom: 8px;
+  padding: 4px 10px;
+  background: rgba(255,255,255,0.78);
+  color: #333;
+  font-size: 11px;
+  border-radius: 3px;
+  pointer-events: none;
+  user-select: none;
+}

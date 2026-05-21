@@ -1,0 +1,54 @@
+<div class="backdrop" (click)="cancel()"></div>
+<div class="dialog">
+  <h2>Share fishing spots</h2>
+
+  <section>
+    <label>Trips ({{ selectedTripIds.size }} selected, {{ catchCount }} catches)</label>
+    <div class="trip-list">
+      <label *ngFor="let t of availableTrips" class="trip-row">
+        <input type="checkbox"
+               [checked]="selectedTripIds.has(t.tripId)"
+               (change)="toggle(t.tripId)" />
+        <span>{{ t.startTime | date:'mediumDate' }} &mdash; {{ t.catchCount }} catch(es)</span>
+      </label>
+    </div>
+    <button type="button" (click)="selectAll()">Select all</button>
+    <button type="button" (click)="clearAll()">Clear</button>
+  </section>
+
+  <section>
+    <label for="recipient">Recipient email</label>
+    <input id="recipient" type="email" [(ngModel)]="recipientEmail" placeholder="friend&#64;example.com" />
+  </section>
+
+  <section>
+    <label><input type="checkbox" [(ngModel)]="fuzzLocation" /> Fuzz locations (&plusmn;200m)</label>
+    <p class="hint">Offsets pin positions slightly to protect exact spots.</p>
+  </section>
+
+  <section>
+    <label for="expires">Expires</label>
+    <select id="expires" [(ngModel)]="expiresInDays">
+      <option [ngValue]="7">7 days</option>
+      <option [ngValue]="30">30 days</option>
+      <option [ngValue]="90">90 days</option>
+      <option [ngValue]="null">Never</option>
+    </select>
+  </section>
+
+  <section>
+    <label for="message">Message (optional)</label>
+    <textarea id="message" [(ngModel)]="message" maxlength="280" rows="3"></textarea>
+  </section>
+
+  <p class="error" *ngIf="error">{{ error }}</p>
+
+  <app-size-legend></app-size-legend>
+
+  <footer>
+    <button type="button" (click)="cancel()">Cancel</button>
+    <button type="button" [disabled]="!canSubmit" (click)="send()">
+      {{ submitting ? 'Sending...' : 'Send share' }}
+    </button>
+  </footer>
+</div>
