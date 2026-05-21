@@ -10,11 +10,11 @@
     "start": "ts-node src/index.ts"
   },
   "devDependencies": {
-    "@types/aws-lambda": "^8.10.145",
+    "@types/aws-lambda": "^8.10.161",
     "@types/aws-serverless-express": "^3.3.9",
     "@types/body-parser": "^1.19.5",
     "@types/express": "^5.0.0",
-    "@types/luxon": "^3.4.2",
+    "@types/luxon": "^3.7.1",
     "@types/node": "^22.15.21",
     "@types/suncalc": "^1.9.2",
     "esbuild": "^0.27.4",
@@ -22,12 +22,12 @@
     "typescript": "^5.9.3"
   },
   "dependencies": {
-    "@aws-lambda-powertools/logger": "^2.32.0",
-    "@aws-sdk/client-cognito-identity-provider": "^3.1037.0",
-    "@aws-sdk/client-dynamodb": "^3.1016.0",
-    "@aws-sdk/client-s3": "^3.1016.0",
-    "@aws-sdk/client-secrets-manager": "^3.1016.0",
-    "@aws-sdk/client-sesv2": "^3.1016.0",
+    "@aws-lambda-powertools/logger": "^2.33.0",
+    "@aws-sdk/client-cognito-identity-provider": "^3.1051.0",
+    "@aws-sdk/client-dynamodb": "^3.1051.0",
+    "@aws-sdk/client-s3": "^3.1051.0",
+    "@aws-sdk/client-secrets-manager": "^3.1051.0",
+    "@aws-sdk/client-sesv2": "^3.1051.0",
     "@aws-sdk/util-dynamodb": "^3.996.2",
     "astronomy-engine": "^2.1.19",
     "aws-serverless-express": "^3.4.0",
