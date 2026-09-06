@@ -10,16 +10,16 @@
   "author": "Jason Haines",
   "license": "Apache-2.0",
   "dependencies": {
-    "auth0": "^2.5.0",
-    "aws-jwt-verify": "^4.0.1",
+    "auth0": "^6.4.0",
+    "aws-jwt-verify": "^5.2.1",
     "bluebird": "^3.7.2",
-    "dotenv": "^5.0.1",
+    "dotenv": "^17.4.2",
     "jsonwebtoken": "^9.0.3",
-    "jwks-rsa": "^1.1.1"
+    "jwks-rsa": "^4.1.0"
   },
   "devDependencies": {
     "aws-sdk": "^2.1693.0",
-    "lambda-local": "^1.7.4"
+    "lambda-local": "^2.2.0"
   },
   "repository": {
     "type": "git",
