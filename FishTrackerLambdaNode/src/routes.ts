@@ -178,13 +178,13 @@ export class Routes {
     }
 
     private async getTrip(req: Request, res: Response) {
-        const { tripId } = req.params;
+        const { tripId } = req.params as { tripId: string };
         const subjectClaim = this.getClaimSubjectFromHeader(req);
         await this.executeService(`GetTrip subject:[${subjectClaim}] tripId:[${tripId}]`, () => this.tripService.getTrip(subjectClaim, tripId), res);
     }
 
     private async deleteTrip(req: Request, res: Response) {
-        const { tripId } = req.params;
+        const { tripId } = req.params as { tripId: string };
         const subjectClaim = this.getClaimSubjectFromHeader(req);
         await this.executeService(`DeleteTrip subject:[${subjectClaim}] tripId:[${tripId}]`, () => this.tripService.deleteTrip(subjectClaim, tripId), res);
     }
@@ -196,54 +196,54 @@ export class Routes {
     }
 
     private async updateTrip(req: Request, res: Response) {
-        const { tripId } = req.params;
+        const { tripId } = req.params as { tripId: string };
         const trip = req.body as ITripDetails;
         const subjectClaim = this.getClaimSubjectFromHeader(req);
         await this.executeService(`UpdateTrip subject:[${subjectClaim}] tripId:[${tripId}]`, () => this.tripService.updateTrip(subjectClaim, tripId, trip), res);
     }
 
     private async patchTrip(req: Request, res: Response) {
-        const { tripId } = req.params;
+        const { tripId } = req.params as { tripId: string };
         const trip = req.body as IUpdateTripDetails;
         const subjectClaim = this.getClaimSubjectFromHeader(req);
         await this.executeService(`PatchTrip subject:[${subjectClaim}] tripId:[${tripId}]`, () => this.tripService.patchTrip(subjectClaim, tripId, trip), res);
     }
 
     private async endTrip(req: Request, res: Response) {
-        const { tripId } = req.params;
+        const { tripId } = req.params as { tripId: string };
         const trip = req.body as IEndTripDetails;
         const subjectClaim = this.getClaimSubjectFromHeader(req);
         await this.executeService(`EndTrip subject:[${subjectClaim}] tripId:[${tripId}]`, () => this.tripService.endTrip(subjectClaim, tripId, trip), res);
     }
 
     private async getTripCatch(req: Request, res: Response) {
-        const { tripId } = req.params;
+        const { tripId } = req.params as { tripId: string };
         const subjectClaim = this.getClaimSubjectFromHeader(req);
         await this.executeService(`GetTripCatch subject:[${subjectClaim}] tripId:[${tripId}]`, () => this.catchService.getTripCatch(subjectClaim, tripId), res);
     }
 
     private async getCatch(req: Request, res: Response) {
-        const { tripId, catchId } = req.params;
+        const { tripId, catchId } = req.params as { tripId: string; catchId: string };
         const subjectClaim = this.getClaimSubjectFromHeader(req);
         await this.executeService(`GetCatch subject:[${subjectClaim}] tripId:[${tripId}] catchId:[${catchId}]`, () => this.catchService.getCatch(subjectClaim, tripId, catchId), res);
     }
 
     private async newCatch(req: Request, res: Response) {
-        const { tripId } = req.params;
+        const { tripId } = req.params as { tripId: string };
         const newCatch = req.body as INewCatch;
         const subjectClaim = this.getClaimSubjectFromHeader(req);
         await this.executeService(`NewCatch subject:[${subjectClaim}] tripId:[${tripId}]`, () => this.catchService.newCatch(subjectClaim, tripId, newCatch), res);
     }
 
     private async updateCatch(req: Request, res: Response) {
-        const { tripId, catchId } = req.params;
+        const { tripId, catchId } = req.params as { tripId: string; catchId: string };
         const updateCatch = req.body as ICatchDetails;
         const subjectClaim = this.getClaimSubjectFromHeader(req);
         await this.executeService(`UpdateCatch subject:[${subjectClaim}] tripId:[${tripId}] catchId:[${catchId}]`, () => this.catchService.updateCatch(subjectClaim, tripId, catchId, updateCatch), res);
     }
 
     private async patchCatch(req: Request, res: Response) {
-        const { tripId, catchId } = req.params;
+        const { tripId, catchId } = req.params as { tripId: string; catchId: string };
         const updateCatch = req.body as IUpdateCatchDetails;
         const subjectClaim = this.getClaimSubjectFromHeader(req);
         await this.executeService(`PatchCatch subject:[${subjectClaim}] tripId:[${tripId}] catchId:[${catchId}]`, () => this.catchService.patchCatch(subjectClaim, tripId, catchId, updateCatch), res);
@@ -279,7 +279,7 @@ export class Routes {
     }
 
     private async getShare(req: Request, res: Response) {
-        const { shareId } = req.params;
+        const { shareId } = req.params as { shareId: string };
         const subjectClaim = this.getClaimSubjectFromHeader(req);
         const user = await this.cognitoUserService.getUser(subjectClaim);
         await this.executeService(
@@ -290,7 +290,7 @@ export class Routes {
     }
 
     private async revokeShare(req: Request, res: Response) {
-        const { shareId } = req.params;
+        const { shareId } = req.params as { shareId: string };
         const subjectClaim = this.getClaimSubjectFromHeader(req);
         await this.executeService(
             `RevokeShare subject:[${subjectClaim}] shareId:[${shareId}]`,
