@@ -1,6 +1,6 @@
 # Fishtracker
 
-This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 18.0.5.
+This project was originally generated with [Angular CLI](https://github.com/angular/angular-cli) version 18.0.5 — since upgraded to Angular 21, see `SYSDOC.md` for the current stack.
 
 ## Development server
 
