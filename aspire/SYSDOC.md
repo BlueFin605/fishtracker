@@ -8,14 +8,14 @@ Built with: .NET Aspire (AppHost + ServiceDefaults), LocalStack.
 
 ## Architecture
 
-```
-Aspire AppHost
-├── LocalStack (container)
-│   └── DynamoDB (4 tables auto-created on startup)
-├── Node.js Lambda (Express, local mode)
-│   └── connects to LocalStack DynamoDB @ localhost:8000
-└── Angular frontend (ng serve --configuration local)
-    └── connects to Node.js API @ localhost:3000
+```mermaid
+flowchart TD
+    AppHost["Aspire AppHost"] --> LocalStack["LocalStack (container)"]
+    AppHost --> Lambda["Node.js Lambda<br/>(Express, local mode)"]
+    AppHost --> Frontend["Angular frontend<br/>(ng serve --configuration local)"]
+    LocalStack --> DynamoDB["DynamoDB<br/>4 tables auto-created on startup"]
+    Lambda -.->|"connects @ localhost:8000"| DynamoDB
+    Frontend -.->|"connects @ localhost:3000"| Lambda
 ```
 
 ## Where things are
