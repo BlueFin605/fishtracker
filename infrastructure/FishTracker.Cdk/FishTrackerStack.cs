@@ -10,7 +10,6 @@ using Amazon.CDK.AWS.Lambda;
 using Amazon.CDK.AWS.Route53;
 using Amazon.CDK.AWS.Route53.Targets;
 using Amazon.CDK.AWS.S3;
-using Amazon.CDK.AWS.SecretsManager;
 using Amazon.CDK.AWS.SES;
 using Amazon.CDK.AWS.SSM;
 using Constructs;
@@ -198,13 +197,13 @@ You'll need to sign in to view. {{#if expiresAt}}Expires {{expiresAt}}. {{/if}}{
             }
         });
 
-        var staticMapsSecretName = $"fishtracker/{env}/static-maps-key";
-        var staticMapsSecret = new Secret(this, "StaticMapsKeySecret", new SecretProps
-        {
-            SecretName = staticMapsSecretName,
-            Description = "Google Static Maps API key used server-side for share thumbnails",
-            RemovalPolicy = RemovalPolicy.RETAIN
-        });
+        // Google Static Maps API key, used server-side for share thumbnails.
+        // Stored as an SSM SecureString rather than a Secrets Manager secret (cost —
+        // see docs/secrets-rotation.md in the Home repo). CloudFormation cannot create
+        // SecureString parameters, so the parameter is created out of band and CDK only
+        // grants read access to it. Same pattern as AlwaysNear's VAPID keys and
+        // BluefinWiki's JWT secret.
+        var staticMapsParameterName = $"/fishtracker/{env}/static-maps-key";
 
         // =====================================================================
         // Cognito
@@ -372,11 +371,11 @@ You'll need to sign in to view. {{#if expiresAt}}Expires {{expiresAt}}. {{/if}}{
             Resources = new[] { $"{shareThumbnailsBucket.BucketArn}/*" }
         }));
 
-        // Secrets Manager — read Static Maps API key
+        // SSM Parameter Store — read Static Maps API key
         lambdaRole.AddToPolicy(new PolicyStatement(new PolicyStatementProps
         {
-            Actions = new[] { "secretsmanager:GetSecretValue" },
-            Resources = new[] { staticMapsSecret.SecretArn }
+            Actions = new[] { "ssm:GetParameter" },
+            Resources = new[] { $"arn:aws:ssm:{this.Region}:{this.Account}:parameter{staticMapsParameterName}" }
         }));
 
         // Cognito — read user attributes (email, email_verified, name) for share endpoints
@@ -421,7 +420,7 @@ You'll need to sign in to view. {{#if expiresAt}}Expires {{expiresAt}}. {{/if}}{
         lambdaEnvironment["SHARE_THUMBNAILS_BUCKET"] = shareThumbnailsBucket.BucketName;
         lambdaEnvironment["SHARE_SENDER"] = shareSender;
         lambdaEnvironment["SHARE_TEMPLATE_NAME"] = $"FishTracker-ShareInvite-{env}";
-        lambdaEnvironment["STATIC_MAPS_SECRET_NAME"] = staticMapsSecretName;
+        lambdaEnvironment["STATIC_MAPS_PARAMETER_NAME"] = staticMapsParameterName;
         lambdaEnvironment["SHARE_VIEW_URL_BASE"] = $"https://{websiteDomain}/shared";
         lambdaEnvironment["FISHTRACKER_ENV"] = env;
         lambdaEnvironment["USER_POOL_ID"] = userPool.UserPoolId;

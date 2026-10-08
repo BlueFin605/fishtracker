@@ -6,7 +6,7 @@ sharing, profile, settings, and share emails. Reads/writes DynamoDB
 directly.
 
 Built with: Node.js + TypeScript, Express, AWS SDK v3 clients (DynamoDB,
-S3, SES v2, Cognito Identity Provider, Secrets Manager), `tsyringe` for DI,
+S3, SES v2, Cognito Identity Provider, SSM Parameter Store), `tsyringe` for DI,
 `luxon` / `astronomy-engine` for bite-time calculations.
 
 ## Where things are
