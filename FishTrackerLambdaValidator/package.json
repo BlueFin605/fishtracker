@@ -18,7 +18,6 @@
     "jwks-rsa": "^4.1.0"
   },
   "devDependencies": {
-    "aws-sdk": "^2.1693.0",
     "lambda-local": "^2.2.0"
   },
   "repository": {
