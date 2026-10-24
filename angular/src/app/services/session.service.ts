@@ -9,7 +9,6 @@ import { IndexedDbService } from './offline/indexed-db.service';
 import { LocalUsersRegistry } from './local-users-registry.service';
 
 const PROXY_KEY = 'proxy_sub';
-const LAST_PROXY_KEY = 'last_proxy_sub';
 
 export type SessionState = 'valid' | 'stale' | 'none';
 
@@ -71,17 +70,7 @@ export class SessionService {
     this.db.setProxySubject(sub);
   }
 
-  /** Sub of a proxied user whose offline work is still unsynced under another sign-in. */
-  get lastProxySub(): string | null {
-    try {
-      return localStorage.getItem(LAST_PROXY_KEY);
-    } catch {
-      return null;
-    }
-  }
-
   exitProxy(): void {
-    const leaving = this.proxySub;
     this.proxySub = null;
     try {
       sessionStorage.removeItem(PROXY_KEY);
@@ -89,36 +78,12 @@ export class SessionService {
       // storage unavailable
     }
     this.db.setProxySubject(null);
-    if (leaving) this.trackLastProxy(leaving);
-  }
-
-  private trackLastProxy(proxied: string): void {
-    const current = this.db.currentSubjectId();
-    try {
-      if (current === 'anonymous') return;
-      if (current === proxied) localStorage.removeItem(LAST_PROXY_KEY);
-      else localStorage.setItem(LAST_PROXY_KEY, proxied);
-    } catch {
-      // storage unavailable
-    }
   }
 
   recompute(): void {
     const state = this.state;
     if (state !== 'none' && this.isProxy) this.exitProxy();
-    this.clearLastProxyIfCurrent();
     this.subject.next(state);
-  }
-
-  private clearLastProxyIfCurrent(): void {
-    const last = this.lastProxySub;
-    if (last && last === this.db.currentSubjectId()) {
-      try {
-        localStorage.removeItem(LAST_PROXY_KEY);
-      } catch {
-        // storage unavailable
-      }
-    }
   }
 
   private restoreProxy(): void {

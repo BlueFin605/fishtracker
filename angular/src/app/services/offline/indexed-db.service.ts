@@ -275,13 +275,31 @@ export class IndexedDbService {
   }
 
   /**
+   * Opens an existing per-user database without ever creating one: the
+   * upgrade callback aborts when the database is new (oldVersion 0).
+   */
+  private openExistingDatabase(dbName: string): Promise<IDBPDatabase<FishTrackerDB>> {
+    return openDB<FishTrackerDB>(dbName, DB_VERSION, {
+      upgrade(_db, oldVersion, _newVersion, tx) {
+        if (oldVersion === 0) tx.abort();
+      },
+    });
+  }
+
+  /**
    * Size of another user's sync queue, read from their own database without
-   * touching the active one. Returns 0 on any error.
+   * touching the active one. Never creates a database for an unseen sub.
+   * Returns 0 on any error.
    */
   async getSyncQueueCountFor(sub: string): Promise<number> {
+    const dbName = `fishtracker-${sub}`;
     let db: IDBPDatabase<FishTrackerDB> | undefined;
     try {
-      db = await this.openDatabase(`fishtracker-${sub}`);
+      if (typeof indexedDB.databases === 'function') {
+        const known = await indexedDB.databases();
+        if (!known.some(d => d.name === dbName)) return 0;
+      }
+      db = await this.openExistingDatabase(dbName);
       return await db.count('syncQueue');
     } catch {
       return 0;

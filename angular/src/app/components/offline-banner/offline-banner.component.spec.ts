@@ -11,9 +11,9 @@ import { LocalUsersRegistry } from '../../services/local-users-registry.service'
 describe('OfflineBannerComponent', () => {
   let isProxy: boolean;
   let online: boolean;
-  let lastProxySub: string | null;
+  let users: { sub: string; name: string; email: string }[];
+  let counts: Record<string, number>;
   let currentSub: string;
-  let queueCount: number;
   let state$: BehaviorSubject<string>;
   let signIn: jasmine.Spy;
   let countFor: jasmine.Spy;
@@ -29,12 +29,12 @@ describe('OfflineBannerComponent', () => {
   beforeEach(() => {
     isProxy = true;
     online = false;
-    lastProxySub = null;
+    users = [];
+    counts = {};
     currentSub = 'me';
-    queueCount = 2;
     state$ = new BehaviorSubject<string>('valid');
     signIn = jasmine.createSpy('signIn');
-    countFor = jasmine.createSpy('getSyncQueueCountFor').and.callFake(async () => queueCount);
+    countFor = jasmine.createSpy('getSyncQueueCountFor').and.callFake(async (sub: string) => counts[sub] ?? 0);
     TestBed.configureTestingModule({
       imports: [OfflineBannerComponent],
       providers: [
@@ -42,7 +42,6 @@ describe('OfflineBannerComponent', () => {
           provide: SessionService,
           useValue: {
             get isProxy() { return isProxy; },
-            get lastProxySub() { return lastProxySub; },
             state$,
             displayName: 'Ann',
           },
@@ -50,7 +49,7 @@ describe('OfflineBannerComponent', () => {
         { provide: AuthenticationService, useValue: { signIn } },
         { provide: ConnectivityService, useValue: { isOnline: () => online } },
         { provide: IndexedDbService, useValue: { getSyncQueueCountFor: countFor, currentSubjectId: () => currentSub } },
-        { provide: LocalUsersRegistry, useValue: { find: (sub: string) => (sub === 'other' ? { sub, name: 'Bob', email: 'b@x' } : undefined) } },
+        { provide: LocalUsersRegistry, useValue: { list: () => users } },
       ],
     });
   });
@@ -79,37 +78,48 @@ describe('OfflineBannerComponent', () => {
   });
 
   describe('another user has unsynced changes', () => {
+    const bob = { sub: 'other', name: 'Bob', email: 'b@x' };
+    const me = { sub: 'me', name: 'Me', email: 'm@x' };
+
     beforeEach(() => {
       isProxy = false;
-      lastProxySub = 'other';
+      users = [me, bob];
+      counts = { other: 2 };
     });
 
-    it('shows the warning with the registry name', async () => {
+    it('shows the warning for a registry user with queued work, with no remembered sub', async () => {
       const text = (await create()).nativeElement.textContent;
       expect(text).toContain('Bob has unsynced offline changes — sign in as them to sync');
       expect(countFor).toHaveBeenCalledWith('other');
     });
 
-    it('is hidden when there is no lastProxySub', async () => {
-      lastProxySub = null;
+    it('never checks the current user', async () => {
+      counts = { me: 5 };
+      expect((await create()).nativeElement.textContent.trim()).toBe('');
+      expect(countFor).not.toHaveBeenCalledWith('me');
+    });
+
+    it('is hidden when no registry user has queued work', async () => {
+      counts = {};
       expect((await create()).nativeElement.textContent.trim()).toBe('');
     });
 
-    it('is hidden when lastProxySub is the current user', async () => {
-      currentSub = 'other';
+    it('is hidden when the registry is empty', async () => {
+      users = [];
       expect((await create()).nativeElement.textContent.trim()).toBe('');
     });
 
-    it('is hidden when the other queue is empty', async () => {
-      queueCount = 0;
-      expect((await create()).nativeElement.textContent.trim()).toBe('');
+    it('shows the first user with a non-zero count', async () => {
+      users = [me, { sub: 'cat', name: 'Cat', email: 'c@x' }, bob];
+      counts = { cat: 0, other: 1 };
+      expect((await create()).nativeElement.textContent).toContain('Bob has unsynced');
     });
 
-    it('hides when the same user signs back in', async () => {
+    it('hides after the queue drains and state re-emits', async () => {
       const fixture = await create();
       expect(fixture.nativeElement.textContent).toContain('Bob has unsynced');
-      lastProxySub = null;
-      state$.next('valid');
+      counts = {};
+      state$.next('stale');
       await fixture.whenStable();
       fixture.detectChanges();
       expect(fixture.nativeElement.textContent.trim()).toBe('');

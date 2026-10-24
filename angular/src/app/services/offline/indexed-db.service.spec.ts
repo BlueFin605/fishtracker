@@ -53,27 +53,70 @@ describe('IndexedDbService subject resolution', () => {
 describe('IndexedDbService getSyncQueueCountFor', () => {
   let service: IndexedDbService;
 
+  const created: string[] = [];
+
+  async function dbNames(): Promise<string[]> {
+    return ((await indexedDB.databases()) ?? []).map(d => d.name ?? '');
+  }
+
+  const uniq = (p: string) => {
+    const n = `${p}-${Math.random().toString(36).slice(2)}`;
+    created.push(`fishtracker-${n}`);
+    return n;
+  };
+
   beforeEach(() => {
     service = TestBed.inject(IndexedDbService);
   });
 
+  afterEach(() => {
+    for (const n of created.splice(0)) indexedDB.deleteDatabase(n);
+  });
+
   it('returns the queue size of the other user DB and closes it', async () => {
     const fake = { count: jasmine.createSpy('count').and.resolveTo(3), close: jasmine.createSpy('close') };
-    const open = spyOn<any>(service, 'openDatabase').and.resolveTo(fake);
+    spyOn(indexedDB, 'databases').and.resolveTo([{ name: 'fishtracker-other' }]);
+    spyOn<any>(service, 'openExistingDatabase').and.resolveTo(fake);
     expect(await service.getSyncQueueCountFor('other')).toBe(3);
-    expect(open).toHaveBeenCalledWith('fishtracker-other');
     expect(fake.count).toHaveBeenCalledWith('syncQueue');
     expect(fake.close).toHaveBeenCalled();
   });
 
   it('returns 0 when the DB cannot be opened', async () => {
-    spyOn<any>(service, 'openDatabase').and.rejectWith(new Error('missing'));
+    spyOn<any>(service, 'openExistingDatabase').and.rejectWith(new Error('missing'));
     expect(await service.getSyncQueueCountFor('nobody')).toBe(0);
   });
 
   it('returns 0 when counting fails', async () => {
     const fake = { count: jasmine.createSpy('count').and.rejectWith(new Error('x')), close: jasmine.createSpy('close') };
-    spyOn<any>(service, 'openDatabase').and.resolveTo(fake);
+    spyOn(indexedDB, 'databases').and.resolveTo([{ name: 'fishtracker-other' }]);
+    spyOn<any>(service, 'openExistingDatabase').and.resolveTo(fake);
     expect(await service.getSyncQueueCountFor('other')).toBe(0);
+  });
+
+  it('does not create a database for an unseen sub', async () => {
+    const sub = uniq('unseen');
+    expect(await service.getSyncQueueCountFor(sub)).toBe(0);
+    expect(await dbNames()).not.toContain(`fishtracker-${sub}`);
+  });
+
+  it('does not create a database when indexedDB.databases() is unavailable', async () => {
+    const sub = uniq('nodbs');
+    const original = Object.getOwnPropertyDescriptor(IDBFactory.prototype, 'databases')!;
+    Object.defineProperty(IDBFactory.prototype, 'databases', { value: undefined, configurable: true });
+    try {
+      expect(await service.getSyncQueueCountFor(sub)).toBe(0);
+    } finally {
+      Object.defineProperty(IDBFactory.prototype, 'databases', original);
+    }
+    expect(await dbNames()).not.toContain(`fishtracker-${sub}`);
+  });
+
+  it('counts an existing database', async () => {
+    const sub = uniq('seen');
+    const db = await (service as any).openDatabase(`fishtracker-${sub}`);
+    await db.add('syncQueue', { operation: 'createTrip', entityId: 't', status: 'queued', retryCount: 0, createdAt: 1 });
+    db.close();
+    expect(await service.getSyncQueueCountFor(sub)).toBe(1);
   });
 });

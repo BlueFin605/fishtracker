@@ -45,14 +45,25 @@ export class OfflineBannerComponent implements OnInit {
     this.session.state$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => void this.refreshOtherUser());
   }
 
+  private refreshSeq = 0;
+
   private async refreshOtherUser(): Promise<void> {
-    const last = this.session.lastProxySub;
-    if (this.session.isProxy || !last || last === this.db.currentSubjectId()) {
+    const seq = ++this.refreshSeq;
+    if (this.session.isProxy) {
       this.otherUserName.set(null);
       return;
     }
-    const count = await this.db.getSyncQueueCountFor(last);
-    if (this.session.lastProxySub !== last) return;
-    this.otherUserName.set(count > 0 ? (this.registry.find(last)?.name || 'Another user') : null);
+    const current = this.db.currentSubjectId();
+    let name: string | null = null;
+    for (const user of this.registry.list()) {
+      if (user.sub === current) continue;
+      const count = await this.db.getSyncQueueCountFor(user.sub);
+      if (count > 0) {
+        name = user.name || 'Another user';
+        break;
+      }
+    }
+    if (seq !== this.refreshSeq) return;
+    this.otherUserName.set(name);
   }
 }
