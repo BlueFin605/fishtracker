@@ -3,6 +3,7 @@ import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { OfflineDataService } from './offline-data.service';
 import { IndexedDbService } from './indexed-db.service';
 import { SyncService } from './sync.service';
+import { ConnectivityService } from '../connectivity.service';
 import { ApiService, NewTrip, NewCatch, FishSize, TripRating } from '../api.service';
 import { LocalTripRecord, LocalCatchRecord } from './offline.types';
 
@@ -11,6 +12,7 @@ describe('OfflineDataService', () => {
   let dbSpy: jasmine.SpyObj<IndexedDbService>;
   let syncSpy: jasmine.SpyObj<SyncService>;
   let apiSpy: jasmine.SpyObj<ApiService>;
+  let online: boolean;
 
   beforeEach(() => {
     dbSpy = jasmine.createSpyObj('IndexedDbService', [
@@ -40,6 +42,7 @@ describe('OfflineDataService', () => {
       return null;
     });
 
+    online = true;
     TestBed.configureTestingModule({
       imports: [HttpClientTestingModule],
       providers: [
@@ -47,6 +50,7 @@ describe('OfflineDataService', () => {
         { provide: IndexedDbService, useValue: dbSpy },
         { provide: SyncService, useValue: syncSpy },
         { provide: ApiService, useValue: apiSpy },
+        { provide: ConnectivityService, useValue: { isOnline: () => online } },
       ],
     });
     service = TestBed.inject(OfflineDataService);
@@ -254,6 +258,49 @@ describe('OfflineDataService', () => {
       service.getTrips().subscribe(result => {
         expect(result.length).toBe(2);
         expect(dbSpy.getAllTrips).toHaveBeenCalled();
+        done();
+      });
+    });
+  });
+
+  describe('when ConnectivityService reports offline', () => {
+    beforeEach(() => {
+      online = false;
+    });
+
+    it('getTrips returns cached trips without calling the API', (done) => {
+      dbSpy.getAllTrips.and.resolveTo([{ tripId: 't1', syncStatus: 'synced' } as LocalTripRecord]);
+      service.getTrips().subscribe(trips => {
+        expect(trips.length).toBe(1);
+        expect(apiSpy.getAllTrips).not.toHaveBeenCalled();
+        done();
+      });
+    });
+
+    it('getTrips returns empty without calling the API when nothing cached', (done) => {
+      dbSpy.getAllTrips.and.resolveTo([]);
+      service.getTrips().subscribe(trips => {
+        expect(trips).toEqual([]);
+        expect(apiSpy.getAllTrips).not.toHaveBeenCalled();
+        done();
+      });
+    });
+
+    it('getTrip errors without calling the API when not cached', (done) => {
+      dbSpy.getTrip.and.resolveTo(undefined);
+      service.getTrip('missing').subscribe({
+        error: () => {
+          expect(apiSpy.getTrip).not.toHaveBeenCalled();
+          done();
+        },
+      });
+    });
+
+    it('getCatches returns empty without calling the API when not cached', (done) => {
+      dbSpy.getCatchesByTripId.and.resolveTo([]);
+      service.getCatches('t1').subscribe(catches => {
+        expect(catches).toEqual([]);
+        expect(apiSpy.getTripCatch).not.toHaveBeenCalled();
         done();
       });
     });

@@ -3,6 +3,8 @@ import { BehaviorSubject, Observable, Subscription } from 'rxjs';
 import { IndexedDbService } from './indexed-db.service';
 import { ApiService, NewTrip, NewCatch, EndTripDetails } from '../api.service';
 import { SyncState, SyncQueueEntry } from './offline.types';
+import { ConnectivityService } from '../connectivity.service';
+import { SessionService } from '../session.service';
 
 const RETRY_DELAYS = [0, 5000, 30000, 120000]; // immediate, 5s, 30s, 2min cap
 
@@ -26,6 +28,8 @@ export class SyncService implements OnDestroy {
     private db: IndexedDbService,
     private apiService: ApiService,
     private ngZone: NgZone,
+    private connectivity: ConnectivityService,
+    private session: SessionService,
   ) {
     this.setupTriggers();
     this.updatePendingCount();
@@ -56,10 +60,19 @@ export class SyncService implements OnDestroy {
       }
     });
 
-    // Connectivity change
-    window.addEventListener('online', () => {
-      this.attemptSync();
-    });
+    // Connectivity change (real reachability, not navigator.onLine)
+    this.subscriptions.push(
+      this.connectivity.online$.subscribe(online => {
+        if (online) this.attemptSync();
+      }),
+    );
+
+    // Session refreshed / re-login: lift any auth block
+    this.subscriptions.push(
+      this.session.state$.subscribe(state => {
+        if (state === 'valid') this.clearAuthBlock();
+      }),
+    );
 
     // Periodic foreground check (30s) — fallback for iOS
     // Only attempts sync if there are pending items (no unnecessary API calls)
@@ -80,7 +93,7 @@ export class SyncService implements OnDestroy {
   private async attemptSync(): Promise<void> {
     if (this.syncing) return;
     if (this.authBlocked) return;
-    if (!navigator.onLine) {
+    if (!this.connectivity.isOnline() || this.session.state === 'none') {
       await this.updatePendingCount();
       return;
     }

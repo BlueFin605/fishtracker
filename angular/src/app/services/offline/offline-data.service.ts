@@ -6,6 +6,7 @@ import { jwtDecode } from 'jwt-decode';
 import { environment } from '../../../environments/environment';
 import { IndexedDbService } from './indexed-db.service';
 import { SyncService } from './sync.service';
+import { ConnectivityService } from '../connectivity.service';
 import {
   ApiService,
   TripDetails,
@@ -34,6 +35,7 @@ export class OfflineDataService {
     private http: HttpClient,
     @Inject(forwardRef(() => SyncService)) private syncService: SyncService,
     private ngZone: NgZone,
+    private connectivity: ConnectivityService,
   ) {}
 
   /** Called by SyncService after a deleteTrip sync succeeds */
@@ -82,7 +84,7 @@ export class OfflineDataService {
       switchMap(localTrips => {
         const local$ = of(localTrips as TripDetails[]);
 
-        if (!navigator.onLine) {
+        if (!this.connectivity.isOnline()) {
           return localTrips.length > 0 ? local$ : of([] as TripDetails[]);
         }
 
@@ -128,7 +130,7 @@ export class OfflineDataService {
         if (trip) {
           return of(trip as TripDetails);
         }
-        if (!navigator.onLine) {
+        if (!this.connectivity.isOnline()) {
           throw new Error(`Trip ${tripId} not available offline`);
         }
         // Fallback to API
@@ -145,7 +147,7 @@ export class OfflineDataService {
         if (catches.length > 0) {
           return of(catches as CatchDetails[]);
         }
-        if (!navigator.onLine) {
+        if (!this.connectivity.isOnline()) {
           return of([] as CatchDetails[]);
         }
         // Fallback to API
