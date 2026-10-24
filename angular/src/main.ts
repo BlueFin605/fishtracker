@@ -2,7 +2,7 @@ import { bootstrapApplication } from '@angular/platform-browser';
 import { AppComponent } from './app/app.component';
 import { provideRouter } from '@angular/router'; // Import RouterModule
 import { routes } from './app/app.routes'; // Import the app.routes file
-import { provideHttpClient, withInterceptors, HTTP_INTERCEPTORS, withInterceptorsFromDi} from "@angular/common/http";
+import { provideHttpClient, withInterceptors, HTTP_INTERCEPTORS, withInterceptorsFromDi, withXhr } from "@angular/common/http";
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { provideServiceWorker } from '@angular/service-worker';
 import { isDevMode } from '@angular/core';
@@ -10,7 +10,7 @@ import { AuthInterceptor } from './app/services/auth.interceptor';
 
 bootstrapApplication(AppComponent, {
   providers: [
-    provideHttpClient(
+    provideHttpClient(withXhr(), 
       // registering interceptors
         withInterceptorsFromDi()
       ),

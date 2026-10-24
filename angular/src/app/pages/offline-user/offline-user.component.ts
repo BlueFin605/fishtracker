@@ -1,4 +1,4 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, inject, ChangeDetectionStrategy } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { KnownUser, LocalUsersRegistry } from '../../services/local-users-registry.service';
 import { SessionService } from '../../services/session.service';
@@ -19,6 +19,7 @@ import { SessionService } from '../../services/session.service';
       </div>
     }
   `,
+  changeDetection: ChangeDetectionStrategy.Eager,
   styles: [`
     .offline-user { padding: 2rem; text-align: center; }
     .user-choice { display: block; width: 100%; max-width: 20rem; margin: 0.5rem auto; padding: 0.75rem; }

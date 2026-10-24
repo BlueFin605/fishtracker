@@ -1,4 +1,4 @@
-import { Component, DestroyRef, OnInit, inject, signal } from '@angular/core';
+import { Component, DestroyRef, OnInit, inject, signal, ChangeDetectionStrategy } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { AuthenticationService } from '../../services/authentication.service';
 import { ConnectivityService } from '../../services/connectivity.service';
@@ -24,6 +24,7 @@ import { LocalUsersRegistry } from '../../services/local-users-registry.service'
       </div>
     }
   `,
+  changeDetection: ChangeDetectionStrategy.Eager,
   styles: [`
     .offline-banner { display: flex; gap: 1rem; align-items: center; justify-content: center;
       padding: 0.5rem 1rem; background: #fff3cd; color: #664d03; }

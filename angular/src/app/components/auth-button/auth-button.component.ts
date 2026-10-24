@@ -1,4 +1,4 @@
-import { Component, Inject } from '@angular/core';
+import { Component, Inject, ChangeDetectionStrategy } from '@angular/core';
 import { DOCUMENT } from '@angular/common';
 import { CommonModule } from '@angular/common'; // Import CommonModule
 import {AuthenticationService} from '../../services/authentication.service';
@@ -9,6 +9,7 @@ import { SessionService } from '../../services/session.service';
   selector: 'app-auth-button',
   templateUrl: './auth-button.component.html',
   styleUrls: ['./auth-button.component.css'],
+  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [CommonModule] // Add CommonModule to the imports array
 })
 export class AuthButtonComponent {

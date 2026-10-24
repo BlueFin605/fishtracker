@@ -1,5 +1,5 @@
 // src/app/components/token-display/token-display.component.ts
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ClipboardModule, Clipboard } from '@angular/cdk/clipboard';
 import { AuthenticationService } from '../../services/authentication.service';
@@ -14,6 +14,7 @@ import { jwtDecode } from "jwt-decode";
     ClipboardModule
   ],
   templateUrl: './token-display.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrls: ['./token-display.component.css']
 })
 export class TokenDisplayComponent implements OnInit {

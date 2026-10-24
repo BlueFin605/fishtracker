@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
+import { Component, EventEmitter, Input, OnInit, Output, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ShareService } from '../../services/share.service';
@@ -15,6 +15,7 @@ export interface ShareDialogTripOption {
   standalone: true,
   imports: [CommonModule, FormsModule, SizeLegendComponent],
   templateUrl: './share-dialog.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrls: ['./share-dialog.component.css'],
 })
 export class ShareDialogComponent implements OnInit {

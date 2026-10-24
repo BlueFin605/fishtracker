@@ -1,6 +1,6 @@
 import { TestBed } from '@angular/core/testing';
 import { Router, UrlTree, provideRouter } from '@angular/router';
-import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClient, withXhr } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 
 import { AuthGuard } from './auth.guard';
@@ -18,7 +18,7 @@ describe('AuthGuard', () => {
     online = true;
     TestBed.configureTestingModule({
       providers: [
-        provideHttpClient(), provideHttpClientTesting(), provideRouter([]),
+        provideHttpClient(withXhr()), provideHttpClientTesting(), provideRouter([]),
         { provide: SessionService, useValue: { get state() { return state; }, get isProxy() { return proxy; } } },
         { provide: ConnectivityService, useValue: { isOnline: () => true, whenProbed: () => Promise.resolve(online) } },
       ]

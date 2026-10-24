@@ -1,4 +1,4 @@
-import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef, ChangeDetectionStrategy } from '@angular/core';
 import { ApiService, NewTrip, TripDetails, ProfileDetails } from '../../services/api.service';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
@@ -14,6 +14,7 @@ import { SpeciesSelector} from '../../components/species-selector-component/spec
   selector: 'app-new-trip',
   templateUrl: './new-trip.component.html',
   styleUrls: ['./new-trip.component.css'],
+  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [CommonModule, FormsModule, SpeciesSelector]
 })
 export class NewTripComponent implements OnInit {

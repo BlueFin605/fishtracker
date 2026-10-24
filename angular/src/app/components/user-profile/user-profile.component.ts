@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { AuthenticationService, UserProfile } from '../../services/authentication.service';
 
@@ -7,6 +7,7 @@ import { AuthenticationService, UserProfile } from '../../services/authenticatio
   standalone: true,
   imports: [CommonModule],
   templateUrl: './user-profile.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './user-profile.component.css'
 })
 export class UserProfileComponent {

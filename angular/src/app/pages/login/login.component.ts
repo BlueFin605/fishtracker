@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, ChangeDetectionStrategy } from '@angular/core';
 import { Router } from '@angular/router';
 import { AuthButtonComponent } from '../../components/auth-button/auth-button.component';
 import { SessionService } from '../../services/session.service';
@@ -9,6 +9,7 @@ import { ConnectivityService } from '../../services/connectivity.service';
   selector: 'app-login',
   templateUrl: './login.component.html',
   styleUrls: ['./login.component.css'],
+  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [AuthButtonComponent]
 })
 export class LoginComponent {

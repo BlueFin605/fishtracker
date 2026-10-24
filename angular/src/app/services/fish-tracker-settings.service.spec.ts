@@ -1,5 +1,5 @@
 import { TestBed } from '@angular/core/testing';
-import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClient, withXhr } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { ApiService } from './api.service';
 import { FishTrackerSettingsService } from './fish-tracker-settings.service';
@@ -17,7 +17,7 @@ describe('FishTrackerSettingsService proxy mode', () => {
     };
     TestBed.configureTestingModule({
       providers: [
-        provideHttpClient(),
+        provideHttpClient(withXhr()),
         provideHttpClientTesting(),
         { provide: IndexedDbService, useValue: db },
         { provide: ApiService, useValue: {} },
@@ -39,7 +39,7 @@ describe('FishTrackerSettingsService while proxying online', () => {
     const api = jasmine.createSpyObj('ApiService', ['getProfile', 'getSettings']);
     TestBed.configureTestingModule({
       providers: [
-        provideHttpClient(),
+        provideHttpClient(withXhr()),
         provideHttpClientTesting(),
         { provide: IndexedDbService, useValue: db },
         { provide: ApiService, useValue: api },

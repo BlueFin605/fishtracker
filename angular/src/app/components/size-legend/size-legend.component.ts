@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FishSize, FISH_SIZE_COLORS } from '../../services/share.types';
 
@@ -7,6 +7,7 @@ import { FishSize, FISH_SIZE_COLORS } from '../../services/share.types';
   standalone: true,
   imports: [CommonModule],
   templateUrl: './size-legend.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrls: ['./size-legend.component.css'],
 })
 export class SizeLegendComponent {

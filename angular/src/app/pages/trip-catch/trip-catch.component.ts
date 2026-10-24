@@ -1,4 +1,4 @@
-import { Component, OnInit, ChangeDetectorRef, NgZone } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef, NgZone, ChangeDetectionStrategy } from '@angular/core';
 import { ApiService, CatchDetails, TripDetails, NewCatch, EndTripDetails, TripRating, FishSize } from '../../services/api.service';
 import { OfflineDataService } from '../../services/offline/offline-data.service';
 import { SyncStatus, LocalTripRecord, LocalCatchRecord } from '../../services/offline/offline.types';
@@ -18,6 +18,7 @@ import { ShareDialogComponent, ShareDialogTripOption } from '../share-dialog/sha
   selector: 'app-trip-catch',
   templateUrl: './trip-catch.component.html',
   styleUrls: ['./trip-catch.component.css'],
+  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [CommonModule, FormsModule, GoogleMapsModule, DateFormatModule, ShareDialogComponent]
 })
 export class TripCatchComponent implements OnInit {

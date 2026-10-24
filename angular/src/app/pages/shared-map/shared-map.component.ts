@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, ElementRef, OnInit, ViewChild } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, OnInit, ViewChild, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute } from '@angular/router';
 import { ShareService } from '../../services/share.service';
@@ -13,6 +13,7 @@ import { ShareWatermarkComponent } from '../../components/share-watermark/share-
   standalone: true,
   imports: [CommonModule, SizeLegendComponent, ShareWatermarkComponent],
   templateUrl: './shared-map.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrls: ['./shared-map.component.css'],
 })
 export class SharedMapPageComponent implements OnInit, AfterViewInit {
