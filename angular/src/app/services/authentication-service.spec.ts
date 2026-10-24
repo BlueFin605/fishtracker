@@ -4,6 +4,7 @@ import { HttpTestingController, provideHttpClientTesting } from '@angular/common
 import { provideRouter } from '@angular/router';
 
 import { AuthenticationService, isRefreshRejected } from './authentication.service';
+import { LocalUsersRegistry } from './local-users-registry.service';
 
 describe('AuthenticationService', () => {
   let service: AuthenticationService;
@@ -59,6 +60,15 @@ describe('AuthenticationService', () => {
     service.refreshToken().subscribe({ error: () => (errored = true) });
     expect(errored).toBeTrue();
     expect(signOutSpy).toHaveBeenCalled();
+  });
+
+  it('records the user in the registry after a successful refresh', () => {
+    const enc = (o: object) => btoa(JSON.stringify(o)).replace(/=+$/, '');
+    const idToken = `${enc({ alg: 'none' })}.${enc({ sub: 'u1', name: 'Una', email: 'u@x' })}.sig`;
+    localStorage.setItem('refresh_token', 'r');
+    service.refreshToken().subscribe();
+    http.expectOne(r => r.url.includes('/oauth2/token')).flush({ access_token: 'a2', id_token: idToken });
+    expect(TestBed.inject(LocalUsersRegistry).find('u1')).toEqual({ sub: 'u1', name: 'Una', email: 'u@x' });
   });
 
   it('isAuthenticated returns false for a malformed id token', () => {

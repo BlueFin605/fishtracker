@@ -6,6 +6,7 @@ import { BehaviorSubject, Observable, throwError } from 'rxjs';
 import { map, catchError, share, finalize } from 'rxjs/operators';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { PkceService } from './pkce.service';
+import { LocalUsersRegistry } from './local-users-registry.service';
 import { jwtDecode } from "jwt-decode";
 // import * as jwt_decode from "jwt-decode";
 // import jwt_decode from 'jwt-decode';
@@ -29,7 +30,7 @@ export class AuthenticationService {
   private userInfoUrl = `${environment.domain}/oauth2/userInfo`;
   private logoutUrl = `${environment.domain}/logout?client_id=${environment.clientId}&logout_uri=${encodeURIComponent(environment.logoutRedirectUri)}`;
 
-  constructor(private router: Router, private http: HttpClient, private pkceService: PkceService) {}
+  constructor(private router: Router, private http: HttpClient, private pkceService: PkceService, private localUsers: LocalUsersRegistry) {}
 
   async signIn() {
     const codeVerifier = this.pkceService.generateCodeVerifier();
@@ -74,6 +75,7 @@ export class AuthenticationService {
         localStorage.setItem('refresh_token', refreshToken);
   
         this.accessTokenSubject.next(accessToken);
+        this.localUsers.recordFromIdToken(idToken);
   
         return response;
       }),
@@ -117,6 +119,7 @@ export class AuthenticationService {
         localStorage.setItem('refresh_token', newRefreshToken);
 
         this.accessTokenSubject.next(newAccessToken);
+        this.localUsers.recordFromIdToken(newIdToken);
 
         return newAccessToken;
       }),
