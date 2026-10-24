@@ -2,7 +2,6 @@ import { Injectable, Inject, forwardRef, NgZone } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, from, of, switchMap, catchError, concat } from 'rxjs';
 import { toZonedTime } from 'date-fns-tz';
-import { jwtDecode } from 'jwt-decode';
 import { environment } from '../../../environments/environment';
 import { IndexedDbService } from './indexed-db.service';
 import { SyncService } from './sync.service';
@@ -340,14 +339,6 @@ export class OfflineDataService {
   }
 
   private getSubject(): string {
-    if (environment.bypassAuth) {
-      return 'user123';
-    }
-    const idToken = localStorage.getItem('id_token');
-    if (!idToken) {
-      throw new Error('No id_token available — user not authenticated');
-    }
-    const decoded: { sub: string } = jwtDecode(idToken);
-    return decoded.sub;
+    return this.db.currentSubjectId();
   }
 }

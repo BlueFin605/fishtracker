@@ -18,7 +18,7 @@ describe('OfflineDataService', () => {
     dbSpy = jasmine.createSpyObj('IndexedDbService', [
       'putTrip', 'getTrip', 'getAllTrips', 'deleteTrip',
       'putCatch', 'getCatch', 'getCatchesByTripId', 'deleteCatchesByTripId',
-      'addToSyncQueue', 'deleteSyncQueueEntriesByEntityId',
+      'addToSyncQueue', 'deleteSyncQueueEntriesByEntityId', 'currentSubjectId',
     ]);
     syncSpy = jasmine.createSpyObj('SyncService', ['notifyNewEntry']);
     apiSpy = jasmine.createSpyObj('ApiService', ['getAllTrips', 'getTrip', 'getTripCatch']);
@@ -30,6 +30,7 @@ describe('OfflineDataService', () => {
     dbSpy.deleteCatchesByTripId.and.resolveTo();
     dbSpy.deleteSyncQueueEntriesByEntityId.and.resolveTo();
     dbSpy.deleteTrip.and.resolveTo();
+    dbSpy.currentSubjectId.and.returnValue('test-user-123');
 
     // Mock localStorage for getSubject
     spyOn(localStorage, 'getItem').and.callFake((key: string) => {
@@ -57,6 +58,15 @@ describe('OfflineDataService', () => {
   });
 
   describe('createTrip', () => {
+    it('writes under the proxy subject when there are no tokens', (done) => {
+      (localStorage.getItem as jasmine.Spy).and.returnValue(null);
+      dbSpy.currentSubjectId.and.returnValue('proxy-sub');
+      service.createTrip({ timeZone: 'Pacific/Auckland', notes: '', tags: [], species: [], defaultSpecies: '' } as NewTrip).subscribe(trip => {
+        expect(trip.subject).toBe('proxy-sub');
+        done();
+      });
+    });
+
     it('should write trip to IndexedDB with pending status', (done) => {
       const newTrip: NewTrip = {
         timeZone: 'Pacific/Auckland',
