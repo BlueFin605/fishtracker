@@ -1,5 +1,5 @@
 import { Component, OnInit, inject } from '@angular/core';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { KnownUser, LocalUsersRegistry } from '../../services/local-users-registry.service';
 import { SessionService } from '../../services/session.service';
 
@@ -7,7 +7,7 @@ import { SessionService } from '../../services/session.service';
   standalone: true,
   selector: 'app-offline-user',
   template: `
-    @if (users.length > 1) {
+    @if (users.length > 1 || exited) {
       <div class="offline-user">
         <h2>Who's fishing?</h2>
         @for (u of users; track u.sub) {
@@ -30,14 +30,18 @@ export class OfflineUserComponent implements OnInit {
   private registry = inject(LocalUsersRegistry);
   private session = inject(SessionService);
   private router = inject(Router);
+  private route = inject(ActivatedRoute);
 
   users: KnownUser[] = [];
+  /** Arrived via an explicit proxy log out: never auto-re-enter. */
+  exited = false;
 
   ngOnInit(): void {
     this.users = this.registry.list();
+    this.exited = this.route.snapshot.queryParamMap.has('exited');
     if (this.users.length === 0) {
       this.router.navigate(['/login']);
-    } else if (this.users.length === 1) {
+    } else if (this.users.length === 1 && !this.exited) {
       this.choose(this.users[0]);
     }
   }

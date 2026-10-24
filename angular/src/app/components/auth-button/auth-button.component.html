@@ -1,4 +1,4 @@
-<ng-container *ngIf="auth.isAuthenticated(); else loggedOut">
+<ng-container *ngIf="session.signedIn; else loggedOut">
     <button mat-menu-item class="login-button" (click)="auth.signOut()">
       Log out
     </button>

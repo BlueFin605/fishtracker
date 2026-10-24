@@ -2,6 +2,9 @@
     <div class="login-card">
       <h1>Welcome to FishTracker</h1>
       <p>Track your catches and become a master angler!</p>
+      @if (!connectivity.isOnline()) {
+        <p class="offline-message">This page needs an internet connection. Reconnect to sign in.</p>
+      }
       <app-auth-button></app-auth-button>      
       <!-- <button (click)="navigateToLogin()" class="login-button">Log In</button> -->
     </div>

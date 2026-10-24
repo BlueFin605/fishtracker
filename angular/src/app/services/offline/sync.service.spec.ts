@@ -46,7 +46,7 @@ describe('SyncService', () => {
     dbSpy = jasmine.createSpyObj('IndexedDbService', [
       'getSyncQueueCount', 'getAllSyncQueueEntries', 'getSyncQueueEntries',
       'updateSyncQueueEntry', 'deleteSyncQueueEntry',
-      'putTrip', 'getTrip', 'putCatch',
+      'putTrip', 'getTrip', 'putCatch', 'getSyncQueueCountFor',
     ]);
     apiSpy = jasmine.createSpyObj('ApiService', [
       'postTrip', 'postCatch', 'patchTrip', 'endTrip', 'deleteTrip',
@@ -195,6 +195,21 @@ describe('SyncService', () => {
       await new Promise(resolve => setTimeout(resolve, 200));
 
       expect(states).toContain('authExpired');
+    });
+  });
+
+  describe('database scope', () => {
+    it("a sync pass only reads the signed-in user's database, never another user's", async () => {
+      const entry = makeQueueEntry({ operation: 'createTrip', entityId: 'trip123' });
+      dbSpy.getSyncQueueCount.and.resolveTo(1);
+      dbSpy.getAllSyncQueueEntries.and.resolveTo([entry]);
+      apiSpy.postTrip.and.returnValue(of(makeServerTrip('trip123')));
+
+      service.notifyNewEntry();
+      await new Promise(resolve => setTimeout(resolve, 100));
+
+      expect(apiSpy.postTrip).toHaveBeenCalled();
+      expect(dbSpy.getSyncQueueCountFor).not.toHaveBeenCalled();
     });
   });
 

@@ -200,11 +200,6 @@ export class AuthenticationService {
     }
   }
 
-  get userInitial(): string {
-    const name = this.userDisplayName || this.userEmail;
-    return name ? name.charAt(0).toUpperCase() : '?';
-  }
-
   get id_token(): string | null {
     return localStorage.getItem('id_token');
   }

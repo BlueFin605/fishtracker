@@ -34,7 +34,7 @@ describe('HeaderComponent', () => {
           provide: AuthenticationService,
           useValue: {
             isAuthenticated: () => false, // expired id token
-            userDisplayName: 'Dean', userEmail: 'd@x.com', userInitial: 'D',
+            userDisplayName: 'Dean', userEmail: 'd@x.com',
             signIn, signOut,
           },
         },
@@ -78,7 +78,7 @@ describe('HeaderComponent', () => {
     fixture.detectChanges();
     fixture.componentInstance.onLogout();
     expect(exitProxy).toHaveBeenCalled();
-    expect(navigate).toHaveBeenCalledWith(['/offline-user']);
+    expect(navigate).toHaveBeenCalledWith(['/offline-user'], { queryParams: { exited: 1 } });
     expect(signOut).not.toHaveBeenCalled();
   });
 });

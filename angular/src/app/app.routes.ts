@@ -11,6 +11,7 @@ import { SharedMapPageComponent } from './pages/shared-map/shared-map.component'
 import { MySharesPageComponent } from './pages/my-shares/my-shares.component';
 import { AuthGuard } from './auth.guard';
 import { OnlineOnlyGuard } from './online-only.guard';
+import { OfflineUserGuard } from './offline-user.guard';
 import { SetupGuard } from './setup.guard';
 import { LoginComponent } from './pages/login/login.component';
 import { OfflineNoticeComponent } from './pages/offline-notice/offline-notice.component';
@@ -23,13 +24,13 @@ export const routes: Routes = [
     { path: 'trips', component: TripsComponent, canActivate: [AuthGuard, SetupGuard]  },
     { path: 'newtrip', component: NewTripComponent, canActivate: [AuthGuard, SetupGuard]  },
     { path: 'debug', component: DebugDisplayComponent, canActivate: [AuthGuard]  },
-    { path: 'profile', component: ProfileComponent, canActivate: [AuthGuard]  },
+    { path: 'profile', component: ProfileComponent, canActivate: [AuthGuard, OnlineOnlyGuard]  },
     { path: 'settings', component: SettingsComponent, canActivate: [AuthGuard]  },
     { path: 'shared/:shareId', component: SharedMapPageComponent, canActivate: [AuthGuard, OnlineOnlyGuard] },
     { path: 'shares', component: MySharesPageComponent, canActivate: [AuthGuard, OnlineOnlyGuard] },
     { path: 'login', component: LoginComponent },
     { path: 'offline', component: OfflineNoticeComponent },
-    { path: 'offline-user', component: OfflineUserComponent },
+    { path: 'offline-user', component: OfflineUserComponent, canActivate: [OfflineUserGuard] },
     { path: '', redirectTo: '/trips', pathMatch: 'full' },
     { path: '**', redirectTo: '/trips' }
 ];

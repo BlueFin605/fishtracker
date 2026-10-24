@@ -2,6 +2,7 @@ import { Component, Inject } from '@angular/core';
 import { DOCUMENT } from '@angular/common';
 import { CommonModule } from '@angular/common'; // Import CommonModule
 import {AuthenticationService} from '../../services/authentication.service';
+import { SessionService } from '../../services/session.service';
 
 @Component({
   standalone: true,
@@ -11,5 +12,5 @@ import {AuthenticationService} from '../../services/authentication.service';
   imports: [CommonModule] // Add CommonModule to the imports array
 })
 export class AuthButtonComponent {
-  constructor(public auth: AuthenticationService) {}
+  constructor(public auth: AuthenticationService, public session: SessionService) {}
 }

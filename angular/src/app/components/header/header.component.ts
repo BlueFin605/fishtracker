@@ -80,7 +80,7 @@ export class HeaderComponent {
     if (this.session.isProxy) {
       // Cognito logout is unreachable offline; just leave the proxied user.
       this.session.exitProxy();
-      this.router.navigate(['/offline-user']);
+      this.router.navigate(['/offline-user'], { queryParams: { exited: 1 } });
       return;
     }
     this.authService.signOut();

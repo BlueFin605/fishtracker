@@ -2,6 +2,7 @@ import { Component } from '@angular/core';
 import { Router } from '@angular/router';
 import { AuthButtonComponent } from '../../components/auth-button/auth-button.component';
 import { SessionService } from '../../services/session.service';
+import { ConnectivityService } from '../../services/connectivity.service';
 
 @Component({
   standalone: true,
@@ -12,7 +13,7 @@ import { SessionService } from '../../services/session.service';
 })
 export class LoginComponent {
 
-  constructor(private router: Router, private session: SessionService ) {
+  constructor(private router: Router, private session: SessionService, public connectivity: ConnectivityService) {
   }
 
   ngOnInit() {
