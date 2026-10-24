@@ -142,6 +142,10 @@ export class FishTrackerSettingsService {
 
   // --- Private caching methods ---
 
+  getCachedProfile(): Promise<ProfileDetails | null> {
+    return this.loadProfileFromCache();
+  }
+
   private async loadProfileFromCache(): Promise<ProfileDetails | null> {
     try {
       const subject = this.getSubject();

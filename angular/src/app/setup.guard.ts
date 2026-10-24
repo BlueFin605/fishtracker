@@ -1,8 +1,9 @@
 import { Injectable } from '@angular/core';
-import { CanActivate, Router } from '@angular/router';
-import { Observable, of } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { CanActivate, Router, UrlTree } from '@angular/router';
+import { firstValueFrom } from 'rxjs';
 import { ApiService } from './services/api.service';
+import { ConnectivityService } from './services/connectivity.service';
+import { FishTrackerSettingsService } from './services/fish-tracker-settings.service';
 
 @Injectable({
   providedIn: 'root'
@@ -10,22 +11,43 @@ import { ApiService } from './services/api.service';
 export class SetupGuard implements CanActivate {
   private setupComplete: boolean = false;
 
-  constructor(private apiService: ApiService, private router: Router) {}
+  constructor(
+    private settings: FishTrackerSettingsService,
+    private apiService: ApiService,
+    private connectivity: ConnectivityService,
+    private router: Router,
+  ) {}
 
-  canActivate(): Observable<boolean> | boolean {
+  canActivate(): Promise<boolean | UrlTree> | boolean {
     if (this.setupComplete) {
       return true;
     }
+    return this.check();
+  }
 
-    return this.apiService.getProfile().pipe(
-      map(profile => {
-        if (!profile.species || profile.species.length === 0) {
-          this.router.navigate(['/setup']);
-          return false;
-        }
-        this.setupComplete = true;
-        return true;
-      })
-    );
+  private async check(): Promise<boolean | UrlTree> {
+    const cached = await this.settings.getCachedProfile();
+    if (cached?.species?.length) {
+      this.setupComplete = true;
+      return true;
+    }
+
+    const offlineTree = () =>
+      this.router.createUrlTree(['/offline'], { queryParams: { reason: 'setup' } });
+
+    if (!this.connectivity.isOnline()) {
+      return offlineTree();
+    }
+
+    try {
+      const profile = await firstValueFrom(this.apiService.getProfile());
+      if (!profile.species || profile.species.length === 0) {
+        return this.router.createUrlTree(['/setup']);
+      }
+      this.setupComplete = true;
+      return true;
+    } catch {
+      return offlineTree();
+    }
   }
 }
