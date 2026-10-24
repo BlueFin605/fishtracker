@@ -5,6 +5,7 @@ import { MatMenuModule } from '@angular/material/menu';
 import { MatButtonModule } from '@angular/material/button';
 import { CommonModule } from '@angular/common';
 import { AuthenticationService } from '../../services/authentication.service';
+import { SessionService } from '../../services/session.service';
 import { SyncService } from '../../services/offline/sync.service';
 import { SyncState } from '../../services/offline/offline.types';
 import { filter } from 'rxjs/operators';
@@ -27,7 +28,7 @@ export class HeaderComponent {
   syncState$: Observable<SyncState>;
   pendingCount$: Observable<number>;
 
-  constructor(private router: Router, public authService: AuthenticationService, private syncService: SyncService) {
+  constructor(private router: Router, public authService: AuthenticationService, public session: SessionService, private syncService: SyncService) {
     this.syncState$ = this.syncService.syncState$;
     this.pendingCount$ = this.syncService.pendingCount$;
 

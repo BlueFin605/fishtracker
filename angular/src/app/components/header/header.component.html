@@ -1,4 +1,4 @@
-<ng-container *ngIf="authService.isAuthenticated() ; else loggedOut">
+<ng-container *ngIf="session.signedIn ; else loggedOut">
     <header>
         <nav class="nav-links">
             <!-- <a class="nav-link" [routerLink]="['/trips']">Trips</a> -->
@@ -13,7 +13,7 @@
                     <i class="fas fa-cloud-upload-alt"></i>
                     <span class="sync-count">{{ pendingCount$ | async }}</span>
                 </span>
-                <i *ngIf="syncState === 'authExpired'" class="fas fa-exclamation-triangle sync-auth-warning" title="Re-login needed to sync"></i>
+                <button *ngIf="syncState === 'authExpired'" type="button" class="sync-auth-warning" title="Sign in again to sync" (click)="authService.signIn()"><i class="fas fa-exclamation-triangle"></i></button>
             </span>
         </nav>
         <div class="avatar-menu">

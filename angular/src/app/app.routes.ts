@@ -10,6 +10,7 @@ import { SettingsComponent } from './pages/settings/settings.component';
 import { SharedMapPageComponent } from './pages/shared-map/shared-map.component';
 import { MySharesPageComponent } from './pages/my-shares/my-shares.component';
 import { AuthGuard } from './auth.guard';
+import { OnlineOnlyGuard } from './online-only.guard';
 import { SetupGuard } from './setup.guard';
 import { LoginComponent } from './pages/login/login.component';
 import { OfflineNoticeComponent } from './pages/offline-notice/offline-notice.component';
@@ -23,8 +24,8 @@ export const routes: Routes = [
     { path: 'debug', component: DebugDisplayComponent, canActivate: [AuthGuard]  },
     { path: 'profile', component: ProfileComponent, canActivate: [AuthGuard]  },
     { path: 'settings', component: SettingsComponent, canActivate: [AuthGuard]  },
-    { path: 'shared/:shareId', component: SharedMapPageComponent, canActivate: [AuthGuard] },
-    { path: 'shares', component: MySharesPageComponent, canActivate: [AuthGuard] },
+    { path: 'shared/:shareId', component: SharedMapPageComponent, canActivate: [AuthGuard, OnlineOnlyGuard] },
+    { path: 'shares', component: MySharesPageComponent, canActivate: [AuthGuard, OnlineOnlyGuard] },
     { path: 'login', component: LoginComponent },
     { path: 'offline', component: OfflineNoticeComponent },
     { path: '', redirectTo: '/trips', pathMatch: 'full' },
