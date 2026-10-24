@@ -9,14 +9,18 @@ import { ConnectivityService } from './services/connectivity.service';
 
 describe('AuthGuard', () => {
   let state: SessionState;
+  let proxy: boolean;
+  let online: boolean;
 
   beforeEach(() => {
     state = 'valid';
+    proxy = false;
+    online = true;
     TestBed.configureTestingModule({
       providers: [
         provideHttpClient(), provideHttpClientTesting(), provideRouter([]),
-        { provide: SessionService, useValue: { get state() { return state; } } },
-        { provide: ConnectivityService, useValue: { isOnline: () => true } },
+        { provide: SessionService, useValue: { get state() { return state; }, get isProxy() { return proxy; } } },
+        { provide: ConnectivityService, useValue: { isOnline: () => online } },
       ]
     });
   });
@@ -40,5 +44,18 @@ describe('AuthGuard', () => {
     const result = TestBed.inject(AuthGuard).canActivate();
     expect(result instanceof UrlTree).toBeTrue();
     expect(TestBed.inject(Router).serializeUrl(result as UrlTree)).toBe('/login');
+  });
+
+  it('allows a signed-out proxy session', () => {
+    state = 'none';
+    proxy = true;
+    expect(TestBed.inject(AuthGuard).canActivate()).toBeTrue();
+  });
+
+  it('redirects to /offline-user when signed out and offline', () => {
+    state = 'none';
+    online = false;
+    const result = TestBed.inject(AuthGuard).canActivate();
+    expect(TestBed.inject(Router).serializeUrl(result as UrlTree)).toBe('/offline-user');
   });
 });

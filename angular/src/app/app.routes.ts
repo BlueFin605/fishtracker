@@ -14,6 +14,7 @@ import { OnlineOnlyGuard } from './online-only.guard';
 import { SetupGuard } from './setup.guard';
 import { LoginComponent } from './pages/login/login.component';
 import { OfflineNoticeComponent } from './pages/offline-notice/offline-notice.component';
+import { OfflineUserComponent } from './pages/offline-user/offline-user.component';
 
 export const routes: Routes = [
     { path: 'callback', component: CallbackComponent },
@@ -28,6 +29,7 @@ export const routes: Routes = [
     { path: 'shares', component: MySharesPageComponent, canActivate: [AuthGuard, OnlineOnlyGuard] },
     { path: 'login', component: LoginComponent },
     { path: 'offline', component: OfflineNoticeComponent },
+    { path: 'offline-user', component: OfflineUserComponent },
     { path: '', redirectTo: '/trips', pathMatch: 'full' },
     { path: '**', redirectTo: '/trips' }
 ];

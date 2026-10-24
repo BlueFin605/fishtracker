@@ -39,6 +39,11 @@ export class HeaderComponent {
     });
   }
 
+  get initial(): string {
+    const name = this.session.displayName || this.session.displayEmail;
+    return name ? name.charAt(0).toUpperCase() : '?';
+  }
+
   get showStartTrip(): boolean {
     return !this.currentRoute.startsWith('/setup')
         && !this.currentRoute.startsWith('/newtrip')
@@ -72,7 +77,12 @@ export class HeaderComponent {
     // this.router.navigate(['/preferences']);
   }
   onLogout() {
-    // Handle logout logic
+    if (this.session.isProxy) {
+      // Cognito logout is unreachable offline; just leave the proxied user.
+      this.session.exitProxy();
+      this.router.navigate(['/offline-user']);
+      return;
+    }
     this.authService.signOut();
     console.log('Logout clicked');
   }

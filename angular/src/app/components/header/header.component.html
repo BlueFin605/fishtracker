@@ -17,13 +17,13 @@
             </span>
         </nav>
         <div class="avatar-menu">
-            <button mat-icon-button [matMenuTriggerFor]="menu" class="avatar-button" [title]="authService.userDisplayName || authService.userEmail">
-              <span class="avatar-initial">{{ authService.userInitial }}</span>
+            <button mat-icon-button [matMenuTriggerFor]="menu" class="avatar-button" [title]="session.displayName || session.displayEmail">
+              <span class="avatar-initial">{{ initial }}</span>
             </button>
             <mat-menu #menu="matMenu">
-              <div class="menu-user-info" *ngIf="authService.userDisplayName || authService.userEmail">
-                <span class="menu-user-name">{{ authService.userDisplayName }}</span>
-                <span class="menu-user-email" *ngIf="authService.userEmail">{{ authService.userEmail }}</span>
+              <div class="menu-user-info" *ngIf="session.displayName || session.displayEmail">
+                <span class="menu-user-name">{{ session.displayName }}</span>
+                <span class="menu-user-email" *ngIf="session.displayEmail">{{ session.displayEmail }}</span>
               </div>
               <button mat-menu-item (click)="onPreferences()">Preferences</button>
               <button mat-menu-item (click)="onSettings()">Settings</button>

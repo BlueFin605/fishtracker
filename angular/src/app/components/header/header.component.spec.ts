@@ -1,5 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { provideRouter } from '@angular/router';
+import { Router, provideRouter } from '@angular/router';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { BehaviorSubject } from 'rxjs';
 
@@ -14,22 +14,28 @@ describe('HeaderComponent', () => {
   let signedIn: boolean;
   let syncState: BehaviorSubject<SyncState>;
   let signIn: jasmine.Spy;
+  let signOut: jasmine.Spy;
+  let exitProxy: jasmine.Spy;
+  let isProxy: boolean;
 
   beforeEach(async () => {
     signedIn = true;
     signIn = jasmine.createSpy('signIn');
+    signOut = jasmine.createSpy('signOut');
+    exitProxy = jasmine.createSpy('exitProxy');
+    isProxy = false;
     syncState = new BehaviorSubject<SyncState>('idle' as SyncState);
     await TestBed.configureTestingModule({
       imports: [HeaderComponent, NoopAnimationsModule],
       providers: [
         provideRouter([]),
-        { provide: SessionService, useValue: { get signedIn() { return signedIn; } } },
+        { provide: SessionService, useValue: { get signedIn() { return signedIn; }, get isProxy() { return isProxy; }, displayName: 'Dean', displayEmail: 'd@x.com', exitProxy } },
         {
           provide: AuthenticationService,
           useValue: {
             isAuthenticated: () => false, // expired id token
             userDisplayName: 'Dean', userEmail: 'd@x.com', userInitial: 'D',
-            signIn, signOut: () => {},
+            signIn, signOut,
           },
         },
         { provide: SyncService, useValue: { syncState$: syncState, pendingCount$: new BehaviorSubject(0) } },
@@ -57,5 +63,22 @@ describe('HeaderComponent', () => {
     expect(btn.title).toBe('Sign in again to sync');
     btn.click();
     expect(signIn).toHaveBeenCalled();
+  });
+
+  it('log out signs out normally when not in proxy mode', () => {
+    fixture.detectChanges();
+    fixture.componentInstance.onLogout();
+    expect(signOut).toHaveBeenCalled();
+    expect(exitProxy).not.toHaveBeenCalled();
+  });
+
+  it('log out in proxy mode exits proxy and goes to the picker without signOut', () => {
+    isProxy = true;
+    const navigate = spyOn(TestBed.inject(Router), 'navigate').and.resolveTo(true);
+    fixture.detectChanges();
+    fixture.componentInstance.onLogout();
+    expect(exitProxy).toHaveBeenCalled();
+    expect(navigate).toHaveBeenCalledWith(['/offline-user']);
+    expect(signOut).not.toHaveBeenCalled();
   });
 });

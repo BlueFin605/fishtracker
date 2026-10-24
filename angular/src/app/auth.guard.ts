@@ -14,10 +14,12 @@ export class AuthGuard implements CanActivate {
     private router: Router) {}
 
   canActivate(): boolean | UrlTree {
-    if (this.session.state !== 'none') {
+    if (this.session.state !== 'none' || this.session.isProxy) {
       return true;
     }
-    // The offline picker rule is added by the picker ticket.
-    return this.router.createUrlTree(['/login']);
+    if (this.connectivity.isOnline()) {
+      return this.router.createUrlTree(['/login']);
+    }
+    return this.router.createUrlTree(['/offline-user']);
   }
 }
