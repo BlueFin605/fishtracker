@@ -1,7 +1,10 @@
-import { Component, inject } from '@angular/core';
+import { Component, DestroyRef, OnInit, inject, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { AuthenticationService } from '../../services/authentication.service';
 import { ConnectivityService } from '../../services/connectivity.service';
 import { SessionService } from '../../services/session.service';
+import { IndexedDbService } from '../../services/offline/indexed-db.service';
+import { LocalUsersRegistry } from '../../services/local-users-registry.service';
 
 @Component({
   standalone: true,
@@ -15,6 +18,10 @@ import { SessionService } from '../../services/session.service';
                 [title]="connectivity.isOnline() ? '' : 'Needs a connection'"
                 (click)="authService.signIn()">Sign in</button>
       </div>
+    } @else if (otherUserName() !== null) {
+      <div class="offline-banner">
+        <span>{{ otherUserName() }} has unsynced offline changes — sign in as them to sync</span>
+      </div>
     }
   `,
   styles: [`
@@ -22,8 +29,30 @@ import { SessionService } from '../../services/session.service';
       padding: 0.5rem 1rem; background: #fff3cd; color: #664d03; }
   `]
 })
-export class OfflineBannerComponent {
+export class OfflineBannerComponent implements OnInit {
   session = inject(SessionService);
   authService = inject(AuthenticationService);
   connectivity = inject(ConnectivityService);
+  private db = inject(IndexedDbService);
+  private registry = inject(LocalUsersRegistry);
+  private destroyRef = inject(DestroyRef);
+
+  /** Name of another user with unsynced offline work, or null. */
+  otherUserName = signal<string | null>(null);
+
+  ngOnInit(): void {
+    void this.refreshOtherUser();
+    this.session.state$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => void this.refreshOtherUser());
+  }
+
+  private async refreshOtherUser(): Promise<void> {
+    const last = this.session.lastProxySub;
+    if (this.session.isProxy || !last || last === this.db.currentSubjectId()) {
+      this.otherUserName.set(null);
+      return;
+    }
+    const count = await this.db.getSyncQueueCountFor(last);
+    if (this.session.lastProxySub !== last) return;
+    this.otherUserName.set(count > 0 ? (this.registry.find(last)?.name || 'Another user') : null);
+  }
 }

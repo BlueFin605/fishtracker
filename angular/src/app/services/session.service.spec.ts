@@ -201,6 +201,39 @@ describe('SessionService', () => {
       expect(sessionStorage.getItem('proxy_sub')).toBeNull();
     });
 
+    it('remembers the proxied sub when a different user signs in', () => {
+      const s = create();
+      s.enterProxy('abc');
+      localStorage.setItem('id_token', validToken()); // sub u1
+      s.recompute();
+      expect(localStorage.getItem('last_proxy_sub')).toBe('abc');
+      expect(s.lastProxySub).toBe('abc');
+    });
+
+    it('clears the remembered sub when that same user signs in', () => {
+      localStorage.setItem('last_proxy_sub', 'u1');
+      const s = create();
+      s.enterProxy('u1');
+      localStorage.setItem('id_token', validToken()); // sub u1
+      s.recompute();
+      expect(localStorage.getItem('last_proxy_sub')).toBeNull();
+    });
+
+    it('clears a remembered sub when the same user signs in later', () => {
+      localStorage.setItem('last_proxy_sub', 'u1');
+      localStorage.setItem('id_token', validToken());
+      const s = create();
+      s.recompute();
+      expect(localStorage.getItem('last_proxy_sub')).toBeNull();
+    });
+
+    it('does not remember a sub when leaving proxy without a signed-in user', () => {
+      const s = create();
+      s.enterProxy('abc');
+      s.exitProxy();
+      expect(localStorage.getItem('last_proxy_sub')).toBeNull();
+    });
+
     it('displayName/displayEmail come from the registry in proxy mode', () => {
       (auth as any).userDisplayName = 'Token Name';
       (auth as any).userEmail = 'token@x';

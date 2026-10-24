@@ -273,4 +273,24 @@ export class IndexedDbService {
     const failed = await db.countFromIndex('syncQueue', 'by-status', 'failed');
     return queued + failed;
   }
+
+  /**
+   * Size of another user's sync queue, read from their own database without
+   * touching the active one. Returns 0 on any error.
+   */
+  async getSyncQueueCountFor(sub: string): Promise<number> {
+    let db: IDBPDatabase<FishTrackerDB> | undefined;
+    try {
+      db = await this.openDatabase(`fishtracker-${sub}`);
+      return await db.count('syncQueue');
+    } catch {
+      return 0;
+    } finally {
+      try {
+        db?.close();
+      } catch {
+        // ignore
+      }
+    }
+  }
 }

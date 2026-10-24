@@ -49,3 +49,31 @@ describe('IndexedDbService subject resolution', () => {
     expect(service.currentSubjectId()).toBe('user123');
   });
 });
+
+describe('IndexedDbService getSyncQueueCountFor', () => {
+  let service: IndexedDbService;
+
+  beforeEach(() => {
+    service = TestBed.inject(IndexedDbService);
+  });
+
+  it('returns the queue size of the other user DB and closes it', async () => {
+    const fake = { count: jasmine.createSpy('count').and.resolveTo(3), close: jasmine.createSpy('close') };
+    const open = spyOn<any>(service, 'openDatabase').and.resolveTo(fake);
+    expect(await service.getSyncQueueCountFor('other')).toBe(3);
+    expect(open).toHaveBeenCalledWith('fishtracker-other');
+    expect(fake.count).toHaveBeenCalledWith('syncQueue');
+    expect(fake.close).toHaveBeenCalled();
+  });
+
+  it('returns 0 when the DB cannot be opened', async () => {
+    spyOn<any>(service, 'openDatabase').and.rejectWith(new Error('missing'));
+    expect(await service.getSyncQueueCountFor('nobody')).toBe(0);
+  });
+
+  it('returns 0 when counting fails', async () => {
+    const fake = { count: jasmine.createSpy('count').and.rejectWith(new Error('x')), close: jasmine.createSpy('close') };
+    spyOn<any>(service, 'openDatabase').and.resolveTo(fake);
+    expect(await service.getSyncQueueCountFor('other')).toBe(0);
+  });
+});
