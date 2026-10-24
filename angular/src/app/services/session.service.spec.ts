@@ -4,6 +4,8 @@ import { environment } from '../../environments/environment';
 import { AuthenticationService } from './authentication.service';
 import { ConnectivityService } from './connectivity.service';
 import { SessionService, SessionState } from './session.service';
+import { IndexedDbService } from './offline/indexed-db.service';
+import { LocalUsersRegistry } from './local-users-registry.service';
 
 function makeJwt(payload: object): string {
   const b64 = (o: object) => btoa(JSON.stringify(o)).replace(/=+$/, '');
@@ -33,6 +35,7 @@ describe('SessionService', () => {
 
   beforeEach(() => {
     localStorage.clear();
+    sessionStorage.clear();
     online$ = new BehaviorSubject<boolean>(false);
     accessToken$ = new Subject<string>();
     auth = { refreshToken: jasmine.createSpy('refreshToken').and.returnValue(of('a')), accessToken$ };
@@ -40,6 +43,7 @@ describe('SessionService', () => {
 
   afterEach(() => {
     localStorage.clear();
+    sessionStorage.clear();
     (environment as any).bypassAuth = false;
   });
 
@@ -153,6 +157,60 @@ describe('SessionService', () => {
       let last: SessionState | undefined;
       s.state$.subscribe(v => (last = v));
       expect(last).toBe('none');
+    });
+  });
+
+  describe('proxy mode', () => {
+    it('enterProxy sets the proxy subject and signedIn', () => {
+      const s = create();
+      const db = TestBed.inject(IndexedDbService);
+      expect(s.signedIn).toBeFalse();
+      s.enterProxy('abc');
+      expect(s.isProxy).toBeTrue();
+      expect(s.proxySub).toBe('abc');
+      expect(s.signedIn).toBeTrue();
+      expect(sessionStorage.getItem('proxy_sub')).toBe('abc');
+      expect(db.currentSubjectId()).toBe('abc');
+      s.exitProxy();
+      expect(s.isProxy).toBeFalse();
+      expect(sessionStorage.getItem('proxy_sub')).toBeNull();
+      expect(db.currentSubjectId()).toBe('anonymous');
+    });
+
+    it('recompute clears the proxy once tokens exist', () => {
+      const s = create();
+      s.enterProxy('abc');
+      localStorage.setItem('id_token', validToken());
+      s.recompute();
+      expect(s.isProxy).toBeFalse();
+      expect(TestBed.inject(IndexedDbService).currentSubjectId()).toBe('u1');
+    });
+
+    it('restores a stored proxy sub on construction when signed out', () => {
+      sessionStorage.setItem('proxy_sub', 'abc');
+      const s = create();
+      expect(s.isProxy).toBeTrue();
+      expect(TestBed.inject(IndexedDbService).currentSubjectId()).toBe('abc');
+    });
+
+    it('discards a stored proxy sub on construction when tokens exist', () => {
+      sessionStorage.setItem('proxy_sub', 'abc');
+      localStorage.setItem('refresh_token', 'r');
+      const s = create();
+      expect(s.isProxy).toBeFalse();
+      expect(sessionStorage.getItem('proxy_sub')).toBeNull();
+    });
+
+    it('displayName/displayEmail come from the registry in proxy mode', () => {
+      (auth as any).userDisplayName = 'Token Name';
+      (auth as any).userEmail = 'token@x';
+      const s = create();
+      expect(s.displayName).toBe('Token Name');
+      expect(s.displayEmail).toBe('token@x');
+      TestBed.inject(LocalUsersRegistry).upsert({ sub: 'abc', name: 'Abe', email: 'abe@x' });
+      s.enterProxy('abc');
+      expect(s.displayName).toBe('Abe');
+      expect(s.displayEmail).toBe('abe@x');
     });
   });
 

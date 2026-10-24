@@ -2,7 +2,6 @@ import { Injectable, NgZone } from '@angular/core';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { filter } from 'rxjs/operators';
 import { HttpClient } from '@angular/common/http';
-import { jwtDecode } from 'jwt-decode';
 import { environment } from '../../environments/environment';
 import { ProfileDetails, SettingsDetails, ApiService } from './api.service';
 import { IndexedDbService } from './offline/indexed-db.service';
@@ -200,16 +199,7 @@ export class FishTrackerSettingsService {
   }
 
   private getSubject(): string | null {
-    if (environment.bypassAuth) {
-      return 'user123';
-    }
-    try {
-      const idToken = localStorage.getItem('id_token');
-      if (!idToken) return null;
-      const decoded: { sub: string } = jwtDecode(idToken);
-      return decoded.sub;
-    } catch {
-      return null;
-    }
+    const subject = this.db.currentSubjectId();
+    return subject === 'anonymous' ? null : subject;
   }
 }

@@ -5,6 +5,10 @@ import { jwtDecode } from 'jwt-decode';
 import { environment } from '../../environments/environment';
 import { AuthenticationService } from './authentication.service';
 import { ConnectivityService } from './connectivity.service';
+import { IndexedDbService } from './offline/indexed-db.service';
+import { LocalUsersRegistry } from './local-users-registry.service';
+
+const PROXY_KEY = 'proxy_sub';
 
 export type SessionState = 'valid' | 'stale' | 'none';
 
@@ -14,7 +18,15 @@ export class SessionService {
   readonly state$: Observable<SessionState>;
   private refreshInFlight = false;
 
-  constructor(private auth: AuthenticationService, private connectivity: ConnectivityService) {
+  proxySub: string | null = null;
+
+  constructor(
+    private auth: AuthenticationService,
+    private connectivity: ConnectivityService,
+    private db: IndexedDbService,
+    private registry: LocalUsersRegistry,
+  ) {
+    this.restoreProxy();
     this.subject = new BehaviorSubject<SessionState>(this.state);
     this.state$ = this.subject.asObservable().pipe(distinctUntilChanged());
 
@@ -30,12 +42,67 @@ export class SessionService {
     return localStorage.getItem('refresh_token') ? 'stale' : 'none';
   }
 
+  get isProxy(): boolean {
+    return this.proxySub !== null;
+  }
+
   get signedIn(): boolean {
-    return this.state !== 'none';
+    return this.state !== 'none' || this.isProxy;
+  }
+
+  get displayName(): string {
+    if (this.proxySub) return this.registry.find(this.proxySub)?.name ?? '';
+    return this.auth.userDisplayName;
+  }
+
+  get displayEmail(): string {
+    if (this.proxySub) return this.registry.find(this.proxySub)?.email ?? '';
+    return this.auth.userEmail;
+  }
+
+  enterProxy(sub: string): void {
+    this.proxySub = sub;
+    try {
+      sessionStorage.setItem(PROXY_KEY, sub);
+    } catch {
+      // storage unavailable
+    }
+    this.db.setProxySubject(sub);
+  }
+
+  exitProxy(): void {
+    this.proxySub = null;
+    try {
+      sessionStorage.removeItem(PROXY_KEY);
+    } catch {
+      // storage unavailable
+    }
+    this.db.setProxySubject(null);
   }
 
   recompute(): void {
-    this.subject.next(this.state);
+    const state = this.state;
+    if (state !== 'none' && this.isProxy) this.exitProxy();
+    this.subject.next(state);
+  }
+
+  private restoreProxy(): void {
+    let stored: string | null = null;
+    try {
+      stored = sessionStorage.getItem(PROXY_KEY);
+    } catch {
+      // storage unavailable
+    }
+    if (!stored) return;
+    if (this.state === 'none') {
+      this.enterProxy(stored);
+    } else {
+      try {
+        sessionStorage.removeItem(PROXY_KEY);
+      } catch {
+        // storage unavailable
+      }
+    }
   }
 
   private idTokenValid(): boolean {

@@ -55,9 +55,10 @@ interface FishTrackerDB extends DBSchema {
 export class IndexedDbService {
   private dbPromise: Promise<IDBPDatabase<FishTrackerDB>> | null = null;
   private currentSubject: string | null = null;
+  private proxySubject: string | null = null;
 
   private getDb(): Promise<IDBPDatabase<FishTrackerDB>> {
-    const subject = this.getSubject();
+    const subject = this.currentSubjectId();
     // If user changed (logout/login), open a new database
     if (this.currentSubject !== subject) {
       this.dbPromise = null;
@@ -70,20 +71,28 @@ export class IndexedDbService {
     return this.dbPromise;
   }
 
-  private getSubject(): string {
+  /** Offline proxy mode: open this user's database when there is no id token. */
+  setProxySubject(sub: string | null): void {
+    if (this.proxySubject === sub) return;
+    this.proxySubject = sub;
+    this.dbPromise = null;
+    this.currentSubject = null;
+  }
+
+  currentSubjectId(): string {
     if (environment.bypassAuth) {
       return 'user123';
     }
     const idToken = localStorage.getItem('id_token');
-    if (!idToken) {
-      return 'anonymous';
+    if (idToken) {
+      try {
+        const decoded: { sub: string } = jwtDecode(idToken);
+        if (decoded.sub) return decoded.sub;
+      } catch {
+        // fall through to proxy subject
+      }
     }
-    try {
-      const decoded: { sub: string } = jwtDecode(idToken);
-      return decoded.sub;
-    } catch {
-      return 'anonymous';
-    }
+    return this.proxySubject ?? 'anonymous';
   }
 
   private openDatabase(dbName: string): Promise<IDBPDatabase<FishTrackerDB>> {
