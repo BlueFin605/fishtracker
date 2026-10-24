@@ -1,20 +1,23 @@
 import { Injectable } from '@angular/core';
-import { CanActivate, Router } from '@angular/router';
-import { AuthenticationService } from './services/authentication.service';
+import { CanActivate, Router, UrlTree } from '@angular/router';
+import { SessionService } from './services/session.service';
+import { ConnectivityService } from './services/connectivity.service';
 
 @Injectable({
   providedIn: 'root'
 })
 export class AuthGuard implements CanActivate {
 
-  constructor(private authService: AuthenticationService, private router: Router) {}
+  constructor(
+    private session: SessionService,
+    private connectivity: ConnectivityService,
+    private router: Router) {}
 
-  canActivate(): boolean {
-    if (this.authService.isAuthenticated()) {
+  canActivate(): boolean | UrlTree {
+    if (this.session.state !== 'none') {
       return true;
-    } else {
-      this.router.navigate(['/login']);
-      return false;
     }
+    // The offline picker rule is added by the picker ticket.
+    return this.router.createUrlTree(['/login']);
   }
 }

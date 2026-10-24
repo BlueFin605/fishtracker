@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 import { Router } from '@angular/router';
 import { AuthButtonComponent } from '../../components/auth-button/auth-button.component';
-import { AuthenticationService } from '../../services/authentication.service';
+import { SessionService } from '../../services/session.service';
 
 @Component({
   standalone: true,
@@ -12,11 +12,11 @@ import { AuthenticationService } from '../../services/authentication.service';
 })
 export class LoginComponent {
 
-  constructor(private router: Router, private authService: AuthenticationService ) {
+  constructor(private router: Router, private session: SessionService ) {
   }
 
   ngOnInit() {
-    if (this.authService.isAuthenticated()) {
+    if (this.session.signedIn) {
       this.router.navigate(['/trips']);
     }
   }

@@ -1,5 +1,4 @@
-import { NgModule } from '@angular/core';
-import { Routes, RouterModule } from '@angular/router';
+import { Routes } from '@angular/router';
 import { TripCatchComponent } from './pages/trip-catch/trip-catch.component';
 import { DebugDisplayComponent } from './pages/debug-display/debug-display.component';
 import { TripsComponent } from './pages/trips/trips.component';
@@ -13,6 +12,7 @@ import { MySharesPageComponent } from './pages/my-shares/my-shares.component';
 import { AuthGuard } from './auth.guard';
 import { SetupGuard } from './setup.guard';
 import { LoginComponent } from './pages/login/login.component';
+import { OfflineNoticeComponent } from './pages/offline-notice/offline-notice.component';
 
 export const routes: Routes = [
     { path: 'callback', component: CallbackComponent },
@@ -26,6 +26,7 @@ export const routes: Routes = [
     { path: 'shared/:shareId', component: SharedMapPageComponent, canActivate: [AuthGuard] },
     { path: 'shares', component: MySharesPageComponent, canActivate: [AuthGuard] },
     { path: 'login', component: LoginComponent },
-    { path: '', redirectTo: '/login', pathMatch: 'full' },
-    { path: '**', redirectTo: '/login' }
+    { path: 'offline', component: OfflineNoticeComponent },
+    { path: '', redirectTo: '/trips', pathMatch: 'full' },
+    { path: '**', redirectTo: '/trips' }
 ];
