@@ -1,9 +1,10 @@
 import { TestBed } from '@angular/core/testing';
-import { HttpClientTestingModule } from '@angular/common/http/testing';
+import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
 import { OfflineDataService } from './offline-data.service';
 import { IndexedDbService } from './indexed-db.service';
 import { SyncService } from './sync.service';
 import { ConnectivityService } from '../connectivity.service';
+import { SessionService } from '../session.service';
 import { ApiService, NewTrip, NewCatch, FishSize, TripRating } from '../api.service';
 import { LocalTripRecord, LocalCatchRecord } from './offline.types';
 
@@ -13,6 +14,7 @@ describe('OfflineDataService', () => {
   let syncSpy: jasmine.SpyObj<SyncService>;
   let apiSpy: jasmine.SpyObj<ApiService>;
   let online: boolean;
+  let proxy: boolean;
 
   beforeEach(() => {
     dbSpy = jasmine.createSpyObj('IndexedDbService', [
@@ -44,6 +46,7 @@ describe('OfflineDataService', () => {
     });
 
     online = true;
+    proxy = false;
     TestBed.configureTestingModule({
       imports: [HttpClientTestingModule],
       providers: [
@@ -52,9 +55,47 @@ describe('OfflineDataService', () => {
         { provide: SyncService, useValue: syncSpy },
         { provide: ApiService, useValue: apiSpy },
         { provide: ConnectivityService, useValue: { isOnline: () => online } },
+        { provide: SessionService, useValue: { get isProxy() { return proxy; } } },
       ],
     });
     service = TestBed.inject(OfflineDataService);
+  });
+
+  describe('proxy mode while online', () => {
+    beforeEach(() => { proxy = true; });
+
+    it('getTrips makes no API call with empty cache', (done) => {
+      const http = TestBed.inject(HttpTestingController);
+      dbSpy.getAllTrips.and.resolveTo([]);
+      service.getTrips().subscribe(trips => {
+        expect(trips).toEqual([]);
+        expect(apiSpy.getAllTrips).not.toHaveBeenCalled();
+        http.expectNone(() => true);
+        done();
+      });
+    });
+
+    it('getTrips makes no refresh request with cached trips', (done) => {
+      const http = TestBed.inject(HttpTestingController);
+      dbSpy.getAllTrips.and.resolveTo([{ tripId: 't1' } as any]);
+      service.getTrips().subscribe({ complete: () => {
+        http.expectNone(() => true);
+        done();
+      } });
+    });
+
+    it('getTrip and getCatches make no API call on a cache miss', (done) => {
+      dbSpy.getTrip.and.resolveTo(undefined as any);
+      dbSpy.getCatchesByTripId.and.resolveTo([]);
+      service.getCatches('t1').subscribe(c => {
+        expect(c).toEqual([]);
+        expect(apiSpy.getTripCatch).not.toHaveBeenCalled();
+        service.getTrip('t1').subscribe({ error: () => {
+          expect(apiSpy.getTrip).not.toHaveBeenCalled();
+          done();
+        } });
+      });
+    });
   });
 
   describe('createTrip', () => {

@@ -95,8 +95,8 @@ export class AuthenticationService {
 
     const refreshToken = localStorage.getItem('refresh_token');
     if (!refreshToken) {
-      this.signOut();
-      return throwError('No refresh token available');
+      // Nothing to refresh (e.g. proxy mode): fail without ending the session.
+      return throwError(() => 'No refresh token available');
     }
 
     const body = new URLSearchParams();

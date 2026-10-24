@@ -5,6 +5,7 @@ import { HttpClient } from '@angular/common/http';
 import { environment } from '../../environments/environment';
 import { ProfileDetails, SettingsDetails, ApiService } from './api.service';
 import { IndexedDbService } from './offline/indexed-db.service';
+import { SessionService } from './session.service';
 
 @Injectable({
   providedIn: 'root'
@@ -21,6 +22,7 @@ export class FishTrackerSettingsService {
     private db: IndexedDbService,
     private http: HttpClient,
     private ngZone: NgZone,
+    private session: SessionService,
   ) {}
 
   get relevantTrips(): boolean {
@@ -86,6 +88,8 @@ export class FishTrackerSettingsService {
       if (cached) {
         this.emitProfile(cached);
         this.backgroundRefreshProfile();
+      } else if (this.session.isProxy) {
+        this.emitProfile({ species: [], defaultSpecies: '' });
       } else {
         this.apiService.getProfile().subscribe({
           next: p => {
@@ -115,6 +119,8 @@ export class FishTrackerSettingsService {
       if (cached) {
         this.emitSettings(cached);
         this.backgroundRefreshSettings();
+      } else if (this.session.isProxy) {
+        this.emitSettings({ species: [] });
       } else {
         this.apiService.getSettings().subscribe({
           next: s => {
@@ -179,6 +185,7 @@ export class FishTrackerSettingsService {
   }
 
   private backgroundRefreshProfile(): void {
+    if (this.session.isProxy) return;
     this.http.get<ProfileDetails>(`${environment.apiUrl}/profile`).subscribe({
       next: p => {
         this.emitProfile(p);
@@ -189,6 +196,7 @@ export class FishTrackerSettingsService {
   }
 
   private backgroundRefreshSettings(): void {
+    if (this.session.isProxy) return;
     this.http.get<SettingsDetails>(`${environment.apiUrl}/settings`).subscribe({
       next: s => {
         this.emitSettings(s);

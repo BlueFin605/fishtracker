@@ -5,10 +5,12 @@ import { SetupGuard } from './setup.guard';
 import { ApiService } from './services/api.service';
 import { ConnectivityService } from './services/connectivity.service';
 import { FishTrackerSettingsService } from './services/fish-tracker-settings.service';
+import { SessionService } from './services/session.service';
 
 describe('SetupGuard', () => {
   let cached: any;
   let online: boolean;
+  let proxy: boolean;
   let api: { getProfile: jasmine.Spy };
 
   function make(): SetupGuard {
@@ -19,6 +21,7 @@ describe('SetupGuard', () => {
         { provide: ApiService, useValue: api },
         { provide: FishTrackerSettingsService, useValue: { getCachedProfile: () => Promise.resolve(cached) } },
         { provide: ConnectivityService, useValue: { isOnline: () => online } },
+        { provide: SessionService, useValue: { get isProxy() { return proxy; } } },
       ],
     });
     return TestBed.inject(SetupGuard);
@@ -28,7 +31,14 @@ describe('SetupGuard', () => {
     return TestBed.inject(Router).serializeUrl(r as UrlTree);
   }
 
-  beforeEach(() => { cached = null; online = true; });
+  beforeEach(() => { cached = null; online = true; proxy = false; });
+
+  it('does not call the API in proxy mode even when online', async () => {
+    proxy = true;
+    const guard = make();
+    expect(path(await guard.canActivate())).toBe('/offline?reason=setup');
+    expect(api.getProfile).not.toHaveBeenCalled();
+  });
 
   it('passes with cached species while offline without calling the API', async () => {
     cached = { species: ['Bream'], defaultSpecies: 'Bream' };

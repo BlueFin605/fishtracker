@@ -6,6 +6,7 @@ import { environment } from '../../../environments/environment';
 import { IndexedDbService } from './indexed-db.service';
 import { SyncService } from './sync.service';
 import { ConnectivityService } from '../connectivity.service';
+import { SessionService } from '../session.service';
 import {
   ApiService,
   TripDetails,
@@ -35,7 +36,13 @@ export class OfflineDataService {
     @Inject(forwardRef(() => SyncService)) private syncService: SyncService,
     private ngZone: NgZone,
     private connectivity: ConnectivityService,
+    private session: SessionService,
   ) {}
+
+  /** Proxy mode has no tokens, so it must never reach the API even when online. */
+  private isOffline(): boolean {
+    return !this.connectivity.isOnline() || this.session.isProxy;
+  }
 
   /** Called by SyncService after a deleteTrip sync succeeds */
   clearDeletedTripId(tripId: string): void {
@@ -83,7 +90,7 @@ export class OfflineDataService {
       switchMap(localTrips => {
         const local$ = of(localTrips as TripDetails[]);
 
-        if (!this.connectivity.isOnline()) {
+        if (this.isOffline()) {
           return localTrips.length > 0 ? local$ : of([] as TripDetails[]);
         }
 
@@ -129,7 +136,7 @@ export class OfflineDataService {
         if (trip) {
           return of(trip as TripDetails);
         }
-        if (!this.connectivity.isOnline()) {
+        if (this.isOffline()) {
           throw new Error(`Trip ${tripId} not available offline`);
         }
         // Fallback to API
@@ -146,7 +153,7 @@ export class OfflineDataService {
         if (catches.length > 0) {
           return of(catches as CatchDetails[]);
         }
-        if (!this.connectivity.isOnline()) {
+        if (this.isOffline()) {
           return of([] as CatchDetails[]);
         }
         // Fallback to API

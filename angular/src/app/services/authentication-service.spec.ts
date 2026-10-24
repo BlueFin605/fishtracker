@@ -55,11 +55,11 @@ describe('AuthenticationService', () => {
     expect(signOutSpy).not.toHaveBeenCalled();
   });
 
-  it('signs out when no refresh token is stored', () => {
+  it('throws without signing out when no refresh token is stored', () => {
     let errored = false;
     service.refreshToken().subscribe({ error: () => (errored = true) });
     expect(errored).toBeTrue();
-    expect(signOutSpy).toHaveBeenCalled();
+    expect(signOutSpy).not.toHaveBeenCalled();
   });
 
   it('records the user in the registry after a successful refresh', () => {

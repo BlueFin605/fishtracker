@@ -4,6 +4,7 @@ import { firstValueFrom } from 'rxjs';
 import { ApiService } from './services/api.service';
 import { ConnectivityService } from './services/connectivity.service';
 import { FishTrackerSettingsService } from './services/fish-tracker-settings.service';
+import { SessionService } from './services/session.service';
 
 @Injectable({
   providedIn: 'root'
@@ -15,6 +16,7 @@ export class SetupGuard implements CanActivate {
     private settings: FishTrackerSettingsService,
     private apiService: ApiService,
     private connectivity: ConnectivityService,
+    private session: SessionService,
     private router: Router,
   ) {}
 
@@ -35,7 +37,7 @@ export class SetupGuard implements CanActivate {
     const offlineTree = () =>
       this.router.createUrlTree(['/offline'], { queryParams: { reason: 'setup' } });
 
-    if (!this.connectivity.isOnline()) {
+    if (!this.connectivity.isOnline() || this.session.isProxy) {
       return offlineTree();
     }
 
