@@ -10,6 +10,12 @@ import { jwtDecode } from "jwt-decode";
 // import * as jwt_decode from "jwt-decode";
 // import jwt_decode from 'jwt-decode';
 
+/** True only when Cognito explicitly rejects the refresh token. */
+export function isRefreshRejected(err: unknown): boolean {
+  const e = err as { status?: number; error?: { error?: string } };
+  return e?.status === 400 && e?.error?.error === 'invalid_grant';
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -115,9 +121,13 @@ export class AuthenticationService {
         return newAccessToken;
       }),
       catchError(error => {
-        console.error('Token refresh failed, signing out:', error);
-        this.signOut();
-        return throwError(error);
+        if (isRefreshRejected(error)) {
+          console.error('Token refresh rejected, signing out:', error);
+          this.signOut();
+        } else {
+          console.warn('Token refresh failed (keeping session):', error);
+        }
+        return throwError(() => error);
       }),
       finalize(() => {
         this.refreshTokenInFlight$ = null;
@@ -150,10 +160,13 @@ export class AuthenticationService {
       return false;
     }
 
-    const decodedToken: any = jwtDecode(idToken);
-    const currentTime = Math.floor(new Date().getTime() / 1000);
-
-    return decodedToken.exp > currentTime;
+    try {
+      const decodedToken: any = jwtDecode(idToken);
+      const currentTime = Math.floor(new Date().getTime() / 1000);
+      return decodedToken.exp > currentTime;
+    } catch {
+      return false;
+    }
   }
 
   get userDisplayName(): string {
