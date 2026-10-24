@@ -72,4 +72,16 @@ describe('ConnectivityService', () => {
     expect(seen).toEqual([true]);
     discardPeriodicTasks();
   }));
+
+  it('whenProbed() resolves with the first probe result, not the navigator.onLine seed', fakeAsync(() => {
+    spyOnProperty(navigator, 'onLine').and.returnValue(true);
+    fetchSpy.and.returnValue(Promise.reject(new TypeError('Failed to fetch')));
+    const svc = create();
+    expect(svc.isOnline()).toBeTrue();
+    let result: boolean | undefined;
+    svc.whenProbed().then(r => (result = r));
+    tick();
+    expect(result).toBeFalse();
+    discardPeriodicTasks();
+  }));
 });

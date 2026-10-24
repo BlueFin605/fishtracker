@@ -14,18 +14,18 @@ describe('OnlineOnlyGuard', () => {
     TestBed.configureTestingModule({
       providers: [
         provideHttpClient(), provideHttpClientTesting(), provideRouter([]),
-        { provide: ConnectivityService, useValue: { isOnline: () => online } },
+        { provide: ConnectivityService, useValue: { isOnline: () => true, whenProbed: () => Promise.resolve(online) } },
       ]
     });
   });
 
-  it('allows navigation when online', () => {
-    expect(TestBed.inject(OnlineOnlyGuard).canActivate()).toBeTrue();
+  it('allows navigation when online', async () => {
+    expect(await TestBed.inject(OnlineOnlyGuard).canActivate()).toBeTrue();
   });
 
-  it('redirects to /offline with a needs-connection reason when offline', () => {
+  it('redirects to /offline with a needs-connection reason when the probe says offline', async () => {
     online = false;
-    const result = TestBed.inject(OnlineOnlyGuard).canActivate();
+    const result = await TestBed.inject(OnlineOnlyGuard).canActivate();
     expect(result instanceof UrlTree).toBeTrue();
     expect(TestBed.inject(Router).serializeUrl(result as UrlTree)).toBe('/offline?reason=needs-connection');
   });

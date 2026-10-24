@@ -13,11 +13,16 @@ export class AuthGuard implements CanActivate {
     private connectivity: ConnectivityService,
     private router: Router) {}
 
-  canActivate(): boolean | UrlTree {
+  canActivate(): boolean | Promise<boolean | UrlTree> {
     if (this.session.state !== 'none' || this.session.isProxy) {
       return true;
     }
-    if (this.connectivity.isOnline()) {
+    return this.routeSignedOut();
+  }
+
+  private async routeSignedOut(): Promise<UrlTree> {
+    // navigator.onLine can lie (signal, no data); wait for a real probe.
+    if (await this.connectivity.whenProbed()) {
       return this.router.createUrlTree(['/login']);
     }
     return this.router.createUrlTree(['/offline-user']);

@@ -10,6 +10,8 @@ export class ConnectivityService {
   private readonly subject = new BehaviorSubject<boolean>(navigator.onLine);
   readonly online$ = this.subject.asObservable().pipe(distinctUntilChanged());
 
+  private readonly firstProbe: Promise<boolean>;
+
   constructor(private ngZone: NgZone) {
     this.ngZone.runOutsideAngular(() => {
       window.addEventListener('online', () => void this.check());
@@ -19,7 +21,12 @@ export class ConnectivityService {
       });
       setInterval(() => void this.check(), RECHECK_INTERVAL_MS);
     });
-    void this.check();
+    this.firstProbe = this.check();
+  }
+
+  /** Resolves with the current state once the first real probe has completed. */
+  whenProbed(): Promise<boolean> {
+    return this.firstProbe.then(() => this.subject.value);
   }
 
   isOnline(): boolean {

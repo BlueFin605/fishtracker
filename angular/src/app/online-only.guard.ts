@@ -9,8 +9,8 @@ export class OnlineOnlyGuard implements CanActivate {
 
   constructor(private connectivity: ConnectivityService, private router: Router) {}
 
-  canActivate(): boolean | UrlTree {
-    if (this.connectivity.isOnline()) {
+  async canActivate(): Promise<boolean | UrlTree> {
+    if (await this.connectivity.whenProbed()) {
       return true;
     }
     return this.router.createUrlTree(['/offline'], { queryParams: { reason: 'needs-connection' } });

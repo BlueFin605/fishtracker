@@ -37,7 +37,7 @@ export class SetupGuard implements CanActivate {
     const offlineTree = () =>
       this.router.createUrlTree(['/offline'], { queryParams: { reason: 'setup' } });
 
-    if (!this.connectivity.isOnline() || this.session.isProxy) {
+    if (this.session.isProxy || !(await this.connectivity.whenProbed())) {
       return offlineTree();
     }
 

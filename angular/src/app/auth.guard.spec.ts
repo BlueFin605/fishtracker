@@ -20,7 +20,7 @@ describe('AuthGuard', () => {
       providers: [
         provideHttpClient(), provideHttpClientTesting(), provideRouter([]),
         { provide: SessionService, useValue: { get state() { return state; }, get isProxy() { return proxy; } } },
-        { provide: ConnectivityService, useValue: { isOnline: () => online } },
+        { provide: ConnectivityService, useValue: { isOnline: () => true, whenProbed: () => Promise.resolve(online) } },
       ]
     });
   });
@@ -39,9 +39,9 @@ describe('AuthGuard', () => {
     expect(TestBed.inject(AuthGuard).canActivate()).toBeTrue();
   });
 
-  it('redirects to /login when there is no session', () => {
+  it('redirects to /login when there is no session', async () => {
     state = 'none';
-    const result = TestBed.inject(AuthGuard).canActivate();
+    const result = await TestBed.inject(AuthGuard).canActivate();
     expect(result instanceof UrlTree).toBeTrue();
     expect(TestBed.inject(Router).serializeUrl(result as UrlTree)).toBe('/login');
   });
@@ -52,10 +52,10 @@ describe('AuthGuard', () => {
     expect(TestBed.inject(AuthGuard).canActivate()).toBeTrue();
   });
 
-  it('redirects to /offline-user when signed out and offline', () => {
+  it('redirects to /offline-user when the probe says offline despite navigator.onLine', async () => {
     state = 'none';
     online = false;
-    const result = TestBed.inject(AuthGuard).canActivate();
+    const result = await TestBed.inject(AuthGuard).canActivate();
     expect(TestBed.inject(Router).serializeUrl(result as UrlTree)).toBe('/offline-user');
   });
 });

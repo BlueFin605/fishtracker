@@ -20,7 +20,7 @@ describe('SetupGuard', () => {
         provideRouter([]),
         { provide: ApiService, useValue: api },
         { provide: FishTrackerSettingsService, useValue: { getCachedProfile: () => Promise.resolve(cached) } },
-        { provide: ConnectivityService, useValue: { isOnline: () => online } },
+        { provide: ConnectivityService, useValue: { isOnline: () => true, whenProbed: () => Promise.resolve(online) } },
         { provide: SessionService, useValue: { get isProxy() { return proxy; } } },
       ],
     });
