@@ -28,6 +28,18 @@
     </div>
   </div>
 
+  <div class="settings-section">
+    <h3>App</h3>
+    <div class="setting-row">
+      <div class="setting-info">
+        <span class="setting-label">Version</span>
+        <span class="setting-hint">v{{ buildVersion }} · built {{ buildDate }}</span>
+      </div>
+      <button class="clear-button" (click)="checkForUpdates()">Check for updates</button>
+    </div>
+    <p class="success-message" *ngIf="updateStatus">{{ updateStatus }}</p>
+  </div>
+
   <div class="button-group">
     <button class="back-button" (click)="goBack()">Back</button>
   </div>
