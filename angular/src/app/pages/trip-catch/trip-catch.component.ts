@@ -26,6 +26,7 @@ import { ShareDialogComponent, ShareDialogTripOption } from '../share-dialog/sha
 export class TripCatchComponent implements OnInit, OnDestroy {
   mapsUnavailable = false;
   private onlineSub?: Subscription;
+  private locationSetManually = false;
   currentPositionMapVisible = false;
   currentPositionMapReady = false;
   catchHistoryMapVisible = false;
@@ -151,7 +152,15 @@ export class TripCatchComponent implements OnInit, OnDestroy {
     });
   }
 
-  postCatch() {
+  async postCatch() {
+    if (!this.locationSetManually) {
+      try {
+        const p = await this.getCurrentLocation();
+        this.newCatch.caughtLocation = { latitude: p.lat, longitude: p.lng };
+      } catch {
+        // keep earlier fix
+      }
+    }
     this.newCatch.caughtWhen = this.dateFormatter.createLocalDate(this.caughtWhen, this.newCatch.timeZone);
 
     this.offlineData.createCatch(this.tripId, this.newCatch).subscribe({
@@ -185,7 +194,8 @@ export class TripCatchComponent implements OnInit, OnDestroy {
           },
           (error) => {
             reject(error);
-          }
+          },
+          { enableHighAccuracy: true, timeout: 10000, maximumAge: 30000 }
         );
       } else {
         reject(new Error('Geolocation is not supported by this browser.'));
@@ -198,6 +208,7 @@ export class TripCatchComponent implements OnInit, OnDestroy {
     if (event?.latLng == null)
       return;
 
+    this.locationSetManually = true;
     this.currentPositionMarkerPosition = event.latLng.toJSON();
     this.newCatch.caughtLocation = { latitude: this.currentPositionMarkerPosition.lat, longitude: this.currentPositionMarkerPosition.lng };
   }
@@ -205,6 +216,7 @@ export class TripCatchComponent implements OnInit, OnDestroy {
   onMarkerDragEnd(event: any) {
     console.log("onMarkerDragEnd");
     console.log(JSON.stringify(event));
+      this.locationSetManually = true;
       const newLat = event.latLng.lat();
       const newLng = event.latLng.lng();
       this.newCatch.caughtLocation = { latitude: newLat, longitude: newLng };
