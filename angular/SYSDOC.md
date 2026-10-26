@@ -41,8 +41,31 @@ writes queued, sync later). Pieces in `src/app/services/` unless noted:
   offline-as-user state.
 - Guards — `AuthGuard` (via `SessionService`; `none` goes to `/login` online,
   `/offline-user` offline), `SetupGuard` (trusts the cached profile, hits the
-  network only on genuine first run), `OnlineOnlyGuard` (routes that need a
-  connection show the `/offline` page).
+  network only on genuine first run; on that first successful fetch it caches
+  the profile via `FishTrackerSettingsService.primeCache`, and offline it lets
+  any cached profile through, even one with an empty species list),
+  `OnlineOnlyGuard` (routes that need a connection show the `/offline` page).
+- `pages/offline-notice` — the `/offline` page; resumes to `/trips` only on a
+  real offline-to-online transition, not when already online.
+
+## Updates and offline shell
+
+- `services/update.service.ts` — on `VERSION_READY` shows a "New version
+  available" snackbar with an Update action (activate, then reload via the
+  `RELOAD_PAGE` token). Checks on app foreground and every 4 hours; never
+  auto-reloads. Started from `main.ts`.
+- `services/persistent-storage.service.ts` — requests persistent storage at
+  startup (`main.ts`) so Android is less likely to evict IndexedDB.
+- Fonts and icons (Roboto, Material Icons, Font Awesome) are self-hosted via
+  `angular.json` styles, no CDN. The built `/media/*.woff2` files are cached
+  lazily by the `fonts` group in `ngsw-config.json`.
+- Maps degrade offline: `GoogleMapsLoaderService` rejects with
+  `Error('offline')` when offline, and map views (`shared-map`, `trip-catch`)
+  show an "Offline: map unavailable" placeholder. Trip-catch geolocation is
+  time-bounded and refreshed at save unless the position was set manually.
+- Settings has an "App" section: version, build date and "Check for updates".
+  The deploy workflow substitutes `BUILD_DATE` in `environments/environment.ts`
+  at build time.
 
 ## Running / using this area
 

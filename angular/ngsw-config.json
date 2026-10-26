@@ -25,6 +25,22 @@
       }
     },
     {
+      "name": "fonts",
+      "installMode": "prefetch",
+      "updateMode": "prefetch",
+      "resources": {
+        "files": [
+          "/media/roboto-latin-300-normal-*.woff2",
+          "/media/roboto-latin-400-normal-*.woff2",
+          "/media/roboto-latin-500-normal-*.woff2",
+          "/media/material-icons-????????.woff2",
+          "/media/fa-solid-900-*.woff2",
+          "/media/fa-regular-400-*.woff2",
+          "/media/fa-brands-400-*.woff2"
+        ]
+      }
+    },
+    {
       "name": "assets",
       "installMode": "lazy",
       "updateMode": "prefetch",

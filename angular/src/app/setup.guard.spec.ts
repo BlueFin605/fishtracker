@@ -12,14 +12,16 @@ describe('SetupGuard', () => {
   let online: boolean;
   let proxy: boolean;
   let api: { getProfile: jasmine.Spy };
+  let primeSpy: jasmine.Spy;
 
   function make(): SetupGuard {
+    primeSpy = jasmine.createSpy('primeCache');
     api = { getProfile: jasmine.createSpy('getProfile') };
     TestBed.configureTestingModule({
       providers: [
         provideRouter([]),
         { provide: ApiService, useValue: api },
-        { provide: FishTrackerSettingsService, useValue: { getCachedProfile: () => Promise.resolve(cached) } },
+        { provide: FishTrackerSettingsService, useValue: { getCachedProfile: () => Promise.resolve(cached), primeCache: primeSpy } },
         { provide: ConnectivityService, useValue: { isOnline: () => true, whenProbed: () => Promise.resolve(online) } },
         { provide: SessionService, useValue: { get isProxy() { return proxy; } } },
       ],
@@ -70,6 +72,36 @@ describe('SetupGuard', () => {
     const guard = make();
     api.getProfile.and.returnValue(throwError(() => new Error('x')));
     expect(path(await guard.canActivate())).toBe('/offline?reason=setup');
+  });
+
+  it('primes the cache when online and the profile has species', async () => {
+    const guard = make();
+    const profile = { species: ['Bream'], defaultSpecies: '' };
+    api.getProfile.and.returnValue(of(profile));
+    expect(await guard.canActivate()).toBeTrue();
+    expect(primeSpy).toHaveBeenCalledWith(profile);
+  });
+
+  it('primes the cache when online and species are empty, then goes to /setup', async () => {
+    const guard = make();
+    const profile = { species: [], defaultSpecies: '' };
+    api.getProfile.and.returnValue(of(profile));
+    expect(path(await guard.canActivate())).toBe('/setup');
+    expect(primeSpy).toHaveBeenCalledWith(profile);
+  });
+
+  it('passes offline with a cached empty-species profile', async () => {
+    cached = { species: [], defaultSpecies: '' };
+    online = false;
+    const guard = make();
+    expect(await guard.canActivate()).toBeTrue();
+  });
+
+  it('passes when the API errors but an empty cached profile exists', async () => {
+    cached = { species: [], defaultSpecies: '' };
+    const guard = make();
+    api.getProfile.and.returnValue(throwError(() => new Error('x')));
+    expect(await guard.canActivate()).toBeTrue();
   });
 
   it('remembers completed setup', async () => {

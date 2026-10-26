@@ -5,6 +5,8 @@ import { IndexedDbService } from '../../services/offline/indexed-db.service';
 import { SyncService } from '../../services/offline/sync.service';
 import { environment } from '../../../environments/environment';
 import { AuthenticationService } from '../../services/authentication.service';
+import { UpdateService } from '../../services/update.service';
+import { ConnectivityService } from '../../services/connectivity.service';
 
 @Component({
   standalone: true,
@@ -18,12 +20,16 @@ export class SettingsComponent {
   pendingCount = 0;
   cacheCleared = false;
   buildVersion = environment.buildVersion;
+  buildDate = environment.buildDate;
+  updateStatus = '';
 
   constructor(
     private db: IndexedDbService,
     private syncService: SyncService,
     private router: Router,
     public authService: AuthenticationService,
+    private updates: UpdateService,
+    private connectivity: ConnectivityService,
   ) {
     this.loadPendingCount();
   }
@@ -53,6 +59,21 @@ export class SettingsComponent {
       this.pendingCount = 0;
     } catch (e) {
       console.error('Failed to clear cache', e);
+    }
+  }
+
+  async checkForUpdates(): Promise<void> {
+    this.updateStatus = 'Checking...';
+    const found = await this.updates.checkNow();
+    if (this.updates.updateReady) {
+      this.updateStatus = 'Update ready — tap Update';
+      this.updates.showPrompt();
+    } else if (found) {
+      this.updateStatus = 'Update found — use the Update button in the banner';
+    } else if (!this.connectivity.isOnline()) {
+      this.updateStatus = "Couldn't check for updates (offline?)";
+    } else {
+      this.updateStatus = 'You are on the latest version';
     }
   }
 

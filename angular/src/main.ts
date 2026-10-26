@@ -5,8 +5,10 @@ import { routes } from './app/app.routes'; // Import the app.routes file
 import { provideHttpClient, withInterceptors, HTTP_INTERCEPTORS, withInterceptorsFromDi, withXhr } from "@angular/common/http";
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { provideServiceWorker } from '@angular/service-worker';
-import { isDevMode } from '@angular/core';
+import { isDevMode, provideAppInitializer, inject } from '@angular/core';
 import { AuthInterceptor } from './app/services/auth.interceptor';
+import { PersistentStorageService } from './app/services/persistent-storage.service';
+import { UpdateService } from './app/services/update.service';
 
 bootstrapApplication(AppComponent, {
   providers: [
@@ -17,9 +19,11 @@ bootstrapApplication(AppComponent, {
       { provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true },
     provideRouter(routes),
     provideAnimationsAsync(),
+    provideAppInitializer(() => { void inject(PersistentStorageService).request(); }),
+    provideAppInitializer(() => { inject(UpdateService).start(); }),
     provideServiceWorker('ngsw-worker.js', {
       enabled: !isDevMode(),
-      registrationStrategy: 'registerWhenStable:30000'
+      registrationStrategy: 'registerWhenStable:5000'
     })
   ]
 }).catch((err) => console.error(err));

@@ -8,6 +8,8 @@ import { SharedMapPageComponent } from './shared-map.component';
 import { GoogleMapsLoaderService } from '../../google-maps-loader.service';
 import { AuthenticationService } from '../../services/authentication.service';
 import { environment } from '../../../environments/environment';
+import { ConnectivityService } from '../../services/connectivity.service';
+import { of } from 'rxjs';
 
 describe('SharedMapPageComponent', () => {
   let fixture: ComponentFixture<SharedMapPageComponent>;
@@ -28,6 +30,10 @@ describe('SharedMapPageComponent', () => {
           useValue: { loadScript: () => Promise.resolve() },
         },
         {
+          provide: ConnectivityService,
+          useValue: { online$: of(true), isOnline: () => true },
+        },
+        {
           provide: AuthenticationService,
           useValue: { userEmail: 'me@x.com' },
         },
@@ -45,5 +51,18 @@ describe('SharedMapPageComponent', () => {
     req.flush('', { status: 410, statusText: 'Gone' });
     fixture.detectChanges();
     expect(fixture.nativeElement.textContent).toContain('no longer available');
+  });
+
+  it('shows the offline placeholder when the maps script cannot load', async () => {
+    const loader = TestBed.inject(GoogleMapsLoaderService) as any;
+    loader.loadScript = () => Promise.reject(new Error('offline'));
+    fixture.detectChanges();
+    http.expectOne(`${environment.apiUrl}/share/s1`).flush({
+      shareId: 's1', ownerDisplayName: 'Bob', createdAt: '2026-01-01T00:00:00Z', fuzzLocation: false, trips: [],
+    });
+    await fixture.whenStable();
+    fixture.detectChanges();
+    expect(fixture.componentInstance.mapsUnavailable).toBeTrue();
+    expect(fixture.nativeElement.querySelector('.map-offline')?.textContent).toContain('map unavailable');
   });
 });

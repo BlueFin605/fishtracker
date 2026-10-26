@@ -1,5 +1,7 @@
-import { AfterViewInit, Component, ElementRef, OnInit, ViewChild, ChangeDetectionStrategy } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, OnInit, ViewChild, ChangeDetectionStrategy, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Subscription } from 'rxjs';
+import { ConnectivityService } from '../../services/connectivity.service';
 import { ActivatedRoute } from '@angular/router';
 import { ShareService } from '../../services/share.service';
 import { GoogleMapsLoaderService } from '../../google-maps-loader.service';
@@ -16,20 +18,23 @@ import { ShareWatermarkComponent } from '../../components/share-watermark/share-
   changeDetection: ChangeDetectionStrategy.Eager,
   styleUrls: ['./shared-map.component.css'],
 })
-export class SharedMapPageComponent implements OnInit, AfterViewInit {
+export class SharedMapPageComponent implements OnInit, AfterViewInit, OnDestroy {
   @ViewChild('mapEl') mapEl!: ElementRef<HTMLDivElement>;
 
   share: ShareDetails | null = null;
   viewerEmail = '';
   state: 'loading' | 'ready' | 'gone' | 'error' = 'loading';
   errorMessage = '';
+  mapsUnavailable = false;
   private mapsLoaded = false;
+  private sub?: Subscription;
 
   constructor(
     private route: ActivatedRoute,
     private shareSvc: ShareService,
     private maps: GoogleMapsLoaderService,
-    private auth: AuthenticationService
+    private auth: AuthenticationService,
+    private connectivity: ConnectivityService
   ) {}
 
   ngOnInit() {
@@ -52,8 +57,27 @@ export class SharedMapPageComponent implements OnInit, AfterViewInit {
     });
   }
 
-  async ngAfterViewInit() {
-    await this.maps.loadScript();
+  ngAfterViewInit() {
+    this.sub = this.connectivity.online$.subscribe((online) => {
+      if (online && this.mapsUnavailable) {
+        this.mapsUnavailable = false;
+        void this.loadMaps();
+      }
+    });
+    void this.loadMaps();
+  }
+
+  ngOnDestroy() {
+    this.sub?.unsubscribe();
+  }
+
+  private async loadMaps() {
+    try {
+      await this.maps.loadScript();
+    } catch {
+      this.mapsUnavailable = true;
+      return;
+    }
     this.mapsLoaded = true;
     this.drawMapIfReady();
   }

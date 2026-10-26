@@ -170,6 +170,15 @@ export class FishTrackerSettingsService {
     }
   }
 
+  /** Cache a profile fetched outside this service (SetupGuard) and warm the settings cache. */
+  primeCache(profile: ProfileDetails): void {
+    this.cacheProfile(profile);
+    this.apiService.getSettings().subscribe({
+      next: s => this.cacheSettings(s),
+      error: () => { /* offline/transient: settings load lazily later */ },
+    });
+  }
+
   private cacheProfile(profile: ProfileDetails): void {
     const subject = this.getSubject();
     if (!subject) return;

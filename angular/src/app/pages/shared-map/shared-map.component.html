@@ -22,7 +22,8 @@
 
   <div class="split">
     <div class="map-wrap">
-      <div #mapEl class="map"></div>
+      <div #mapEl class="map" *ngIf="!mapsUnavailable"></div>
+      <p class="map-offline" *ngIf="mapsUnavailable">Offline: map unavailable.</p>
       <app-share-watermark
         [recipientEmail]="viewerEmail"
         [senderName]="share.ownerDisplayName">

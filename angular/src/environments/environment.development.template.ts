@@ -8,5 +8,6 @@ export const environment = {
     logoutRedirectUri: '<<Put your login age url here>>',
     apiUrl: 'https://api.fishtracker.bluefin605.com/api',
     googleMapiApi: 'GOOGLE_API_KEY',
-    buildVersion: 'dev'
+    buildVersion: 'dev',
+    buildDate: 'dev'
   };

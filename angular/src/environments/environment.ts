@@ -8,5 +8,6 @@ export const environment = {
   logoutRedirectUri: 'COGNITO_REDIRECT_LOGOUT',
   apiUrl: 'https://api.fishtracker.bluefin605.com/api',
   googleMapiApi: 'GOOGLE_API_KEY',
-  buildVersion: 'BUILD_VERSION'
+  buildVersion: 'BUILD_VERSION',
+  buildDate: 'BUILD_DATE'
 };

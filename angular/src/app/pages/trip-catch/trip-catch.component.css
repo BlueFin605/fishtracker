@@ -204,3 +204,8 @@
   font-size: 0.75rem;
   margin-left: 4px;
 }
+
+.map-offline {
+  padding: 12px;
+  color: #666;
+}
