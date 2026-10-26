@@ -8,6 +8,7 @@ import { provideServiceWorker } from '@angular/service-worker';
 import { isDevMode, provideAppInitializer, inject } from '@angular/core';
 import { AuthInterceptor } from './app/services/auth.interceptor';
 import { PersistentStorageService } from './app/services/persistent-storage.service';
+import { UpdateService } from './app/services/update.service';
 
 bootstrapApplication(AppComponent, {
   providers: [
@@ -19,6 +20,7 @@ bootstrapApplication(AppComponent, {
     provideRouter(routes),
     provideAnimationsAsync(),
     provideAppInitializer(() => { void inject(PersistentStorageService).request(); }),
+    provideAppInitializer(() => { inject(UpdateService).start(); }),
     provideServiceWorker('ngsw-worker.js', {
       enabled: !isDevMode(),
       registrationStrategy: 'registerWhenStable:30000'
