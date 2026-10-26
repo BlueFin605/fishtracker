@@ -1,5 +1,7 @@
-import { Component, inject, ChangeDetectionStrategy } from '@angular/core';
-import { ActivatedRoute, RouterLink } from '@angular/router';
+import { Component, inject, ChangeDetectionStrategy, OnInit, OnDestroy } from '@angular/core';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { Subscription, filter, take } from 'rxjs';
+import { ConnectivityService } from '../../services/connectivity.service';
 
 const MESSAGES: Record<string, string> = {
   'setup': 'Connect to the internet once to finish setting up your account.',
@@ -13,13 +15,32 @@ const MESSAGES: Record<string, string> = {
   template: `
     <div class="offline-notice">
       <p>{{ message }}</p>
+      @if (isSetup) {
+        <p>We'll continue automatically when you're back online.</p>
+      }
       <a routerLink="/trips">Back</a>
     </div>
   `,
   changeDetection: ChangeDetectionStrategy.Eager,
   styles: [`.offline-notice { padding: 2rem; text-align: center; }`]
 })
-export class OfflineNoticeComponent {
+export class OfflineNoticeComponent implements OnInit, OnDestroy {
   private route = inject(ActivatedRoute);
-  message = MESSAGES[this.route.snapshot.queryParamMap.get('reason') ?? ''] ?? MESSAGES['needs-connection'];
+  private router = inject(Router);
+  private connectivity = inject(ConnectivityService);
+  private sub?: Subscription;
+  private reason = this.route.snapshot.queryParamMap.get('reason') ?? '';
+  isSetup = this.reason === 'setup';
+  message = MESSAGES[this.reason] ?? MESSAGES['needs-connection'];
+
+  ngOnInit(): void {
+    if (!this.isSetup) return;
+    this.sub = this.connectivity.online$
+      .pipe(filter(Boolean), take(1))
+      .subscribe(() => this.router.navigate(['/trips']));
+  }
+
+  ngOnDestroy(): void {
+    this.sub?.unsubscribe();
+  }
 }
