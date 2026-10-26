@@ -12,3 +12,8 @@ aside ul   { padding-left: 18px; margin: 0; }
 @media (max-width: 800px) {
   .split { grid-template-columns: 1fr; }
 }
+
+.map-offline {
+  padding: 12px;
+  color: #666;
+}

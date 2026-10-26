@@ -46,4 +46,17 @@ describe('SharedMapPageComponent', () => {
     fixture.detectChanges();
     expect(fixture.nativeElement.textContent).toContain('no longer available');
   });
+
+  it('shows the offline placeholder when the maps script cannot load', async () => {
+    const loader = TestBed.inject(GoogleMapsLoaderService) as any;
+    loader.loadScript = () => Promise.reject(new Error('offline'));
+    fixture.detectChanges();
+    http.expectOne(`${environment.apiUrl}/share/s1`).flush({
+      shareId: 's1', ownerDisplayName: 'Bob', createdAt: '2026-01-01T00:00:00Z', fuzzLocation: false, trips: [],
+    });
+    await fixture.whenStable();
+    fixture.detectChanges();
+    expect(fixture.componentInstance.mapsUnavailable).toBeTrue();
+    expect(fixture.nativeElement.querySelector('.map-offline')?.textContent).toContain('map unavailable');
+  });
 });

@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { environment } from '../environments/environment';
+import { ConnectivityService } from './services/connectivity.service';
 
 @Injectable({
   providedIn: 'root'
@@ -13,12 +14,13 @@ export class GoogleMapsLoaderService {
   private resolver:any;
 
 
-  constructor() {
+  constructor(private connectivity: ConnectivityService) {
     // Step 1: Define mapInit globally
     (window as any)['mapInit'] = this.mapInit.bind(this);
   }
 
   loadScript(): Promise<void> {
+    if (!this.connectivity.isOnline()) return Promise.reject(new Error('offline'));
     this.promise = new Promise((resolve, reject) => {
       if (this.loaded) {
         resolve();
@@ -33,7 +35,10 @@ export class GoogleMapsLoaderService {
       script.onload = () => {
         this.loaded = true;
       };
-      script.onerror = (error) => reject(error);
+      script.onerror = (error) => {
+        script.remove();
+        reject(error);
+      };
       document.head.appendChild(script);
     });
 

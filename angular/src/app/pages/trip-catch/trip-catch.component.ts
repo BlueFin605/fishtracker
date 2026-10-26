@@ -1,8 +1,10 @@
-import { Component, OnInit, ChangeDetectorRef, NgZone, ChangeDetectionStrategy } from '@angular/core';
+import { Component, OnInit, OnDestroy, ChangeDetectorRef, NgZone, ChangeDetectionStrategy } from '@angular/core';
 import { ApiService, CatchDetails, TripDetails, NewCatch, EndTripDetails, TripRating, FishSize } from '../../services/api.service';
 import { OfflineDataService } from '../../services/offline/offline-data.service';
 import { SyncStatus, LocalTripRecord, LocalCatchRecord } from '../../services/offline/offline.types';
 import { CommonModule } from '@angular/common';
+import { Subscription } from 'rxjs';
+import { ConnectivityService } from '../../services/connectivity.service';
 import { ActivatedRoute, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms'; // Add this line
 import { GoogleMapsModule } from '@angular/google-maps'; // Add this line\
@@ -21,7 +23,9 @@ import { ShareDialogComponent, ShareDialogTripOption } from '../share-dialog/sha
   changeDetection: ChangeDetectionStrategy.Eager,
   imports: [CommonModule, FormsModule, GoogleMapsModule, DateFormatModule, ShareDialogComponent]
 })
-export class TripCatchComponent implements OnInit {
+export class TripCatchComponent implements OnInit, OnDestroy {
+  mapsUnavailable = false;
+  private onlineSub?: Subscription;
   currentPositionMapVisible = false;
   currentPositionMapReady = false;
   catchHistoryMapVisible = false;
@@ -70,11 +74,15 @@ export class TripCatchComponent implements OnInit {
               private preferencesService: PreferencesService,
               private router: Router,
               private cdr: ChangeDetectorRef,
-              private ngZone: NgZone) {
+              private ngZone: NgZone,
+              private connectivity: ConnectivityService) {
     this.tripCatch = [];
   }
 
   ngOnInit() {
+    this.onlineSub = this.connectivity.online$.subscribe((online) => {
+      if (online) this.mapsUnavailable = false;
+    });
     // this.timeZones = moment.tz.names();
     this.newCatch.timeZone = this.preferencesService.getTimeZone();
     this.tripId = this.route.snapshot.paramMap.get('tripid')!;
@@ -91,6 +99,10 @@ export class TripCatchComponent implements OnInit {
     console.log(JSON.stringify(this.currentPositionMarkerPosition));
     console.log(`sizeOptions: ${this.sizeOptions}`);
     console.log(`ratingOptions: ${this.ratingOptions}`);
+  }
+
+  ngOnDestroy() {
+    this.onlineSub?.unsubscribe();
   }
 
   get showAdvancedMode(): boolean {
@@ -218,6 +230,7 @@ export class TripCatchComponent implements OnInit {
         });
       }).catch(error => {
         console.error('Error loading Google Maps:', error);
+        this.ngZone.run(() => { this.mapsUnavailable = true; this.cdr.detectChanges(); });
       });
     }
   }
@@ -242,6 +255,7 @@ export class TripCatchComponent implements OnInit {
         });
       }).catch(error => {
         console.error('Error loading Google Maps:', error);
+        this.ngZone.run(() => { this.mapsUnavailable = true; this.cdr.detectChanges(); });
       });
     }
   }
