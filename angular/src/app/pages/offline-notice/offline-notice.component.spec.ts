@@ -8,13 +8,15 @@ import { ConnectivityService } from '../../services/connectivity.service';
 
 describe('OfflineNoticeComponent', () => {
   let online$: Subject<boolean>;
+  let currentlyOnline: boolean;
 
   beforeEach(() => {
     online$ = new Subject<boolean>();
+    currentlyOnline = false;
     TestBed.configureTestingModule({
       providers: [
         provideRouter([{ path: 'offline', component: OfflineNoticeComponent }]),
-        { provide: ConnectivityService, useValue: { online$: online$.asObservable() } }
+        { provide: ConnectivityService, useValue: { online$: online$.asObservable(), isOnline: () => currentlyOnline } }
       ]
     });
   });
@@ -50,6 +52,16 @@ describe('OfflineNoticeComponent', () => {
     expect(await textFor('/offline?reason=setup')).toContain("We'll continue automatically when you're back online.");
   });
 
+  it('when already online, hides the auto-continue line and offers Try again to /trips', async () => {
+    currentlyOnline = true;
+    const harness = await RouterTestingHarness.create();
+    await harness.navigateByUrl('/offline?reason=setup');
+    const el = harness.routeNativeElement as HTMLElement;
+    expect(el.textContent).not.toContain('continue automatically');
+    const retry = Array.from(el.querySelectorAll('a')).find(a => a.textContent?.includes('Try again'));
+    expect(retry?.getAttribute('href')).toBe('/trips');
+  });
+
   it('hides the auto-continue line for needs-connection', async () => {
     expect(await textFor('/offline?reason=needs-connection')).not.toContain('continue automatically');
   });
@@ -68,7 +80,7 @@ describe('OfflineNoticeComponent', () => {
 
   it('does not navigate when already online on load or on repeated true (setup)', async () => {
     const replay$ = new BehaviorSubject<boolean>(true);
-    TestBed.overrideProvider(ConnectivityService, { useValue: { online$: replay$.asObservable() } });
+    TestBed.overrideProvider(ConnectivityService, { useValue: { online$: replay$.asObservable(), isOnline: () => true } });
     const router = TestBed.inject(Router);
     const nav = spyOn(router, 'navigate').and.resolveTo(true);
     const harness = await RouterTestingHarness.create();

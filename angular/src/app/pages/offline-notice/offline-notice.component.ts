@@ -15,8 +15,12 @@ const MESSAGES: Record<string, string> = {
   template: `
     <div class="offline-notice">
       <p>{{ message }}</p>
-      @if (isSetup) {
-        <p>We'll continue automatically when you're back online.</p>
+      @if (isOffline) {
+        @if (isSetup) {
+          <p>We'll continue automatically when you're back online.</p>
+        }
+      } @else {
+        <a routerLink="/trips" class="retry">Try again</a>
       }
       <a routerLink="/trips">Back</a>
     </div>
@@ -31,6 +35,7 @@ export class OfflineNoticeComponent implements OnInit, OnDestroy {
   private sub?: Subscription;
   private reason = this.route.snapshot.queryParamMap.get('reason') ?? '';
   isSetup = this.reason === 'setup';
+  isOffline = !this.connectivity.isOnline();
   message = MESSAGES[this.reason] ?? MESSAGES['needs-connection'];
 
   ngOnInit(): void {
