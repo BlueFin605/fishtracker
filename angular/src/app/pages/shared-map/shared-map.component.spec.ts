@@ -8,6 +8,8 @@ import { SharedMapPageComponent } from './shared-map.component';
 import { GoogleMapsLoaderService } from '../../google-maps-loader.service';
 import { AuthenticationService } from '../../services/authentication.service';
 import { environment } from '../../../environments/environment';
+import { ConnectivityService } from '../../services/connectivity.service';
+import { of } from 'rxjs';
 
 describe('SharedMapPageComponent', () => {
   let fixture: ComponentFixture<SharedMapPageComponent>;
@@ -26,6 +28,10 @@ describe('SharedMapPageComponent', () => {
         {
           provide: GoogleMapsLoaderService,
           useValue: { loadScript: () => Promise.resolve() },
+        },
+        {
+          provide: ConnectivityService,
+          useValue: { online$: of(true), isOnline: () => true },
         },
         {
           provide: AuthenticationService,
