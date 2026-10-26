@@ -37,19 +37,19 @@ export class SetupGuard implements CanActivate {
     const offlineTree = () =>
       this.router.createUrlTree(['/offline'], { queryParams: { reason: 'setup' } });
 
-    if (this.session.isProxy || !(await this.connectivity.whenProbed())) {
-      return offlineTree();
-    }
+    const online = !this.session.isProxy && (await this.connectivity.whenProbed());
+    if (!online) return cached ? true : offlineTree();
 
     try {
       const profile = await firstValueFrom(this.apiService.getProfile());
+      this.settings.primeCache(profile);
       if (!profile.species || profile.species.length === 0) {
         return this.router.createUrlTree(['/setup']);
       }
       this.setupComplete = true;
       return true;
     } catch {
-      return offlineTree();
+      return cached ? true : offlineTree();
     }
   }
 }
