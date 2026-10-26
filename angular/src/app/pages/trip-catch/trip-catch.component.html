@@ -80,8 +80,8 @@
                     {{newCatch.caughtLocation?.longitude}} (Select from map):</label>
                 <button (click)="toggleCurrentPositionMapVisibility($event)">Show Map</button>
 
-                <p class="map-offline" *ngIf="mapsUnavailable">Offline: map unavailable. Your position is still recorded with each catch.</p>
-                <div *ngIf="currentPositionMapVisible && !mapsUnavailable" style="height:400px;width:750px;">
+                <p class="map-offline" *ngIf="currentMapUnavailable">Offline: map unavailable. Your position is still recorded with each catch.</p>
+                <div *ngIf="currentPositionMapVisible && !currentMapUnavailable" style="height:400px;width:750px;">
                     <google-map *ngIf="currentPositionMapReady" height="400px" width="750px" [center]="center" [zoom]="zoom"
                         (mapClick)="onMapClick($event)">
                         <map-marker [position]="currentPositionMarkerPosition" [options]="currentPositionMarkerOptions"
@@ -99,8 +99,8 @@
     <section> <!-- Catch History -->
         <h2>Catch History</h2>
         <button (click)="togglecatchHistoryVisibility($event)">Show catches on Map</button> <!-- Show on Maps button -->
-        <p class="map-offline" *ngIf="mapsUnavailable">Offline: map unavailable. Your position is still recorded with each catch.</p>
-        <div *ngIf="catchHistoryMapVisible && !mapsUnavailable" style="height:400px;width:750px;">
+        <p class="map-offline" *ngIf="historyMapUnavailable">Offline: map unavailable. Your position is still recorded with each catch.</p>
+        <div *ngIf="catchHistoryMapVisible && !historyMapUnavailable" style="height:400px;width:750px;">
             <google-map *ngIf="catchHistoryMapReady" height="400px" width="750px" [center]="center" [zoom]="zoom">
                 <map-marker *ngFor="let position of catchHistoryMapMarkerPosition" [position]="position"
                     [options]="catchHistoryMapMarkerOptions" />

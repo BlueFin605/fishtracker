@@ -13,6 +13,7 @@ import { DateConversionService } from '../../services/date-conversion.service';
 // import * as moment from 'moment-timezone';
 import { DateFormatModule } from '../../components/date-format/date-format.module';
 import { PreferencesService } from '../../services/preferences.service';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { ShareDialogComponent, ShareDialogTripOption } from '../share-dialog/share-dialog.component';
 
 @Component({
@@ -24,7 +25,9 @@ import { ShareDialogComponent, ShareDialogTripOption } from '../share-dialog/sha
   imports: [CommonModule, FormsModule, GoogleMapsModule, DateFormatModule, ShareDialogComponent]
 })
 export class TripCatchComponent implements OnInit, OnDestroy {
-  mapsUnavailable = false;
+  currentMapUnavailable = false;
+  historyMapUnavailable = false;
+  private savingCatch = false;
   private onlineSub?: Subscription;
   private locationSetManually = false;
   currentPositionMapVisible = false;
@@ -76,13 +79,14 @@ export class TripCatchComponent implements OnInit, OnDestroy {
               private router: Router,
               private cdr: ChangeDetectorRef,
               private ngZone: NgZone,
-              private connectivity: ConnectivityService) {
+              private connectivity: ConnectivityService,
+              private snackBar: MatSnackBar) {
     this.tripCatch = [];
   }
 
   ngOnInit() {
     this.onlineSub = this.connectivity.online$.subscribe((online) => {
-      if (online) this.mapsUnavailable = false;
+      if (online) { this.currentMapUnavailable = false; this.historyMapUnavailable = false; }
     });
     // this.timeZones = moment.tz.names();
     this.newCatch.timeZone = this.preferencesService.getTimeZone();
@@ -153,6 +157,16 @@ export class TripCatchComponent implements OnInit, OnDestroy {
   }
 
   async postCatch() {
+    if (this.savingCatch) return;
+    this.savingCatch = true;
+    try {
+      await this.doPostCatch();
+    } finally {
+      this.savingCatch = false;
+    }
+  }
+
+  private async doPostCatch() {
     if (!this.locationSetManually) {
       try {
         const p = await this.getCurrentLocation();
@@ -167,17 +181,23 @@ export class TripCatchComponent implements OnInit, OnDestroy {
       next: (response) => {
         console.log('Catch saved successfully', response);
         this.tripCatch.push(response);
-        const markerPosition: google.maps.LatLngLiteral = {
-          lat: response.caughtLocation.latitude,
-          lng: response.caughtLocation.longitude
-        };
-        this.catchHistoryMapMarkerPosition.push(markerPosition);
+        this.addHistoryMarker(response);
+        this.locationSetManually = false;
         this.cdr.detectChanges();
       },
       error: (error) => {
         console.error('Error saving catch', error);
       }
     });
+  }
+
+  private addHistoryMarker(response: CatchDetails): void {
+    if (response?.caughtLocation) {
+      this.catchHistoryMapMarkerPosition.push({
+        lat: response.caughtLocation.latitude,
+        lng: response.caughtLocation.longitude
+      });
+    }
   }
 
   getCurrentLocation(): Promise<google.maps.LatLngLiteral> {
@@ -231,6 +251,7 @@ export class TripCatchComponent implements OnInit, OnDestroy {
       this.googleMapsLoader.loadScript().then(() => {
         this.ngZone.run(() => {
           // Show container first, then init map after DOM renders
+          this.currentMapUnavailable = false;
           this.currentPositionMapVisible = true;
           this.cdr.detectChanges();
           requestAnimationFrame(() => {
@@ -242,7 +263,7 @@ export class TripCatchComponent implements OnInit, OnDestroy {
         });
       }).catch(error => {
         console.error('Error loading Google Maps:', error);
-        this.ngZone.run(() => { this.mapsUnavailable = true; this.cdr.detectChanges(); });
+        this.ngZone.run(() => { this.currentMapUnavailable = true; this.cdr.detectChanges(); });
       });
     }
   }
@@ -256,6 +277,7 @@ export class TripCatchComponent implements OnInit, OnDestroy {
       this.googleMapsLoader.loadScript().then(() => {
         this.ngZone.run(() => {
           // Show container first, then init map after DOM renders
+          this.historyMapUnavailable = false;
           this.catchHistoryMapVisible = true;
           this.cdr.detectChanges();
           requestAnimationFrame(() => {
@@ -267,7 +289,7 @@ export class TripCatchComponent implements OnInit, OnDestroy {
         });
       }).catch(error => {
         console.error('Error loading Google Maps:', error);
-        this.ngZone.run(() => { this.mapsUnavailable = true; this.cdr.detectChanges(); });
+        this.ngZone.run(() => { this.historyMapUnavailable = true; this.cdr.detectChanges(); });
       });
     }
   }
@@ -280,39 +302,47 @@ export class TripCatchComponent implements OnInit, OnDestroy {
     this.showEndTripModal = false;
   }
 
-  onFishSizeSelected(size: FishSize) {
+  async onFishSizeSelected(size: FishSize): Promise<void> {
     const species = this.activeSpecies || this.tripDetails.defaultSpecies;
-    this.getCurrentLocation().then((position) => {
-      const mycatch: NewCatch = {
-       timeZone: this.newCatch.timeZone,
-       caughtWhen: this.dateFormatter.createLocalDate(new Date(), this.newCatch.timeZone),
-       speciesId: species,
-       caughtSize: size,
-       caughtLocation: { latitude: position.lat, longitude: position.lng },
-       caughtLength: 0
-     }
-
-     this.offlineData.createCatch(this.tripId, mycatch).subscribe({
-       next: (response) => {
-         console.log('Catch saved successfully', response);
-         this.tripCatch.push(response);
-         const markerPosition: google.maps.LatLngLiteral = {
-           lat: response.caughtLocation.latitude,
-           lng: response.caughtLocation.longitude
-         };
-         this.catchHistoryMapMarkerPosition.push(markerPosition);
-         this.activeSpecies = this.tripDetails.defaultSpecies;
-         this.cdr.detectChanges();
-       },
-       error: (error) => {
-         console.error('Error saving catch', error);
-         this.activeSpecies = this.tripDetails.defaultSpecies;
-       }
-     });
-    }).catch((error) => {
+    let location: NewCatch['caughtLocation'] | undefined;
+    try {
+      const position = await this.getCurrentLocation();
+      location = { latitude: position.lat, longitude: position.lng };
+    } catch (error) {
       console.error('Error getting current location', error);
-    });
+      // Never lose the catch: fall back to the last known position, or none.
+      const last = this.currentPositionMarkerPosition;
+      if (last && last.lat !== undefined && last.lng !== undefined) {
+        location = { latitude: last.lat, longitude: last.lng };
+      } else {
+        location = this.newCatch.caughtLocation;
+      }
+      this.snackBar.open(
+        location ? "Couldn't get a GPS fix - used your last known position." : "Couldn't get a GPS fix - catch saved without a position.",
+        undefined, { duration: 4000 });
+    }
+    const mycatch: NewCatch = {
+      timeZone: this.newCatch.timeZone,
+      caughtWhen: this.dateFormatter.createLocalDate(new Date(), this.newCatch.timeZone),
+      speciesId: species,
+      caughtSize: size,
+      caughtLocation: location as NewCatch['caughtLocation'],
+      caughtLength: 0
+    };
 
+    this.offlineData.createCatch(this.tripId, mycatch).subscribe({
+      next: (response) => {
+        console.log('Catch saved successfully', response);
+        this.tripCatch.push(response);
+        this.addHistoryMarker(response);
+        this.activeSpecies = this.tripDetails.defaultSpecies;
+        this.cdr.detectChanges();
+      },
+      error: (error) => {
+        console.error('Error saving catch', error);
+        this.activeSpecies = this.tripDetails.defaultSpecies;
+      }
+    });
   }
 
   endTrip() {
