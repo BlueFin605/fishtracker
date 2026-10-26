@@ -1,6 +1,6 @@
 import { Component, inject, ChangeDetectionStrategy, OnInit, OnDestroy } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
-import { Subscription, filter, take } from 'rxjs';
+import { Subscription, filter, pairwise, take } from 'rxjs';
 import { ConnectivityService } from '../../services/connectivity.service';
 
 const MESSAGES: Record<string, string> = {
@@ -35,8 +35,10 @@ export class OfflineNoticeComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     if (!this.isSetup) return;
+    // online$ replays its current value; only react to a real offline -> online
+    // transition, otherwise an already-online user would loop through the guard.
     this.sub = this.connectivity.online$
-      .pipe(filter(Boolean), take(1))
+      .pipe(pairwise(), filter(([prev, cur]) => !prev && cur), take(1))
       .subscribe(() => this.router.navigate(['/trips']));
   }
 

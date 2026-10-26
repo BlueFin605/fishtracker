@@ -1,7 +1,7 @@
 import { TestBed } from '@angular/core/testing';
 import { Router, provideRouter } from '@angular/router';
 import { RouterTestingHarness } from '@angular/router/testing';
-import { Subject } from 'rxjs';
+import { BehaviorSubject, Subject } from 'rxjs';
 
 import { OfflineNoticeComponent } from './offline-notice.component';
 import { ConnectivityService } from '../../services/connectivity.service';
@@ -63,6 +63,21 @@ describe('OfflineNoticeComponent', () => {
     online$.next(true);
     online$.next(false);
     online$.next(true);
+    expect(nav).toHaveBeenCalledOnceWith(['/trips']);
+  });
+
+  it('does not navigate when already online on load or on repeated true (setup)', async () => {
+    const replay$ = new BehaviorSubject<boolean>(true);
+    TestBed.overrideProvider(ConnectivityService, { useValue: { online$: replay$.asObservable() } });
+    const router = TestBed.inject(Router);
+    const nav = spyOn(router, 'navigate').and.resolveTo(true);
+    const harness = await RouterTestingHarness.create();
+    await harness.navigateByUrl('/offline?reason=setup');
+    expect(nav).not.toHaveBeenCalled();
+    replay$.next(true);
+    expect(nav).not.toHaveBeenCalled();
+    replay$.next(false);
+    replay$.next(true);
     expect(nav).toHaveBeenCalledOnceWith(['/trips']);
   });
 
