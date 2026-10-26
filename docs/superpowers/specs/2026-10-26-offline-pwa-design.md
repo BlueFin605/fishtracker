@@ -42,32 +42,38 @@ What is missing:
 
 ### 1. First-run offline reliability
 
-- Cache the profile and settings as soon as they are fetched, independent of
-  which screen is open: write them from `SetupGuard.check()` after a
-  successful `getProfile()` and from the post-sign-in path, via
-  `FishTrackerSettingsService`.
+- Cache the profile as soon as it is fetched, independent of which screen is
+  open: `SetupGuard.check()` calls `FishTrackerSettingsService.primeCache()`
+  after a successful `getProfile()`. (As built, this is the only call site;
+  there is no separate post-sign-in write.)
 - "Signed in and profile fetched" is sufficient to work offline. A profile with
-  an empty species list is cached too; offline it means "no species yet" (shown
-  as a prompt to add species once online), not a blocker. `SetupGuard` offline
-  gate becomes "no cached profile at all", not "no cached species".
-- When offline with nothing cached the `/offline` page says what to do and
-  retries when connectivity returns, rather than leaving the user stranded.
+  an empty species list is cached too and lets the guard through offline. The
+  `SetupGuard` offline gate is "no cached profile at all", not "no cached
+  species". Deviation: the planned "prompt to add species once online" for an
+  empty-species offline profile was deferred; the existing species selector
+  handles an empty list.
+- When offline with nothing cached the `/offline` page says what to do. It
+  navigates to `/trips` only after a real offline-to-online transition (not
+  when already online on load), rather than leaving the user stranded.
 
 ### 2. Offline in the field
 
 - Trip/catch logging, the write queue and sync are existing behaviour
   (`services/offline/`); verify them end to end on a fresh install.
 - Capture GPS with each catch; position is recorded even when the map cannot
-  render.
-- Map components show an "Offline: map unavailable" placeholder when
-  `ConnectivityService` reports offline or the Google Maps script fails to
-  load, and never block on the loader (`google-maps-loader.service.ts`).
-- Audit the app shell for CDN dependencies (Font Awesome, Google Fonts). Bundle
-  them or ensure `ngsw-config.json` caches them (the `assets` group already
-  lists these origins with lazy install; confirm they are cached after one
-  online run).
-- Call `navigator.storage.persist()` at startup so Android is less likely to
-  evict IndexedDB (the sync queue) from an installed PWA.
+  render. Trip-catch geolocation is time-bounded and refreshed at save unless
+  the position was set manually.
+- `GoogleMapsLoaderService` rejects with `Error('offline')` when
+  `ConnectivityService` reports offline; map views (`shared-map`, `trip-catch`)
+  show an "Offline: map unavailable" placeholder and never block on the loader.
+- CDN dependencies were bundled: Font Awesome, Roboto and Material Icons are
+  self-hosted via `angular.json` styles. Their font files are emitted under
+  `/media/` and need a lazy `fonts` asset group (`/media/*.woff2`) in
+  `ngsw-config.json` to be available offline; the CDN `assets` group remains
+  as a fallback.
+- `PersistentStorageService` calls `navigator.storage.persist()` at startup
+  (`provideAppInitializer` in `main.ts`) so Android is less likely to evict
+  IndexedDB (the sync queue) from an installed PWA.
 
 ### 3. Updates (prompt)
 
@@ -78,8 +84,11 @@ What is missing:
   (`SwUpdate.checkForUpdate()`), so a long-lived app notices new builds.
 - Never auto-reload: unsaved catch entry must not be lost. The snackbar stays
   until acted on.
-- Settings shows app version and build date (injected at build time) and a
-  "Check for updates" button.
+- Settings has an "App" section showing version and build date and a "Check
+  for updates" button. The build date is substituted for the `BUILD_DATE`
+  placeholder in `environments/environment.ts` by the Home deploy workflow.
+- `RELOAD_PAGE` is an injection token wrapping `document.location.reload()` so
+  tests can stub the reload.
 - Deployment is unchanged: a new build changes hashed files and `ngsw.json`,
   which the service worker detects.
 
@@ -88,12 +97,15 @@ What is missing:
 - Unit: `SetupGuard` and settings caching (profile cached on fetch, empty
   species accepted offline), `UpdateService` (ready → snackbar → activate),
   map offline placeholder.
-- E2E: fresh install path — sign in online, go offline, reload, log a catch,
-  go online, assert it synced.
+- Integration: a Karma spec (`src/app/offline-first-run.integration.spec.ts`)
+  exercises the fresh-install path with the real `SetupGuard`,
+  `FishTrackerSettingsService` and IndexedDB, mocking only network services.
+  (This replaced a planned e2e test.)
 - Manual, post-deploy, on the phone: install, open once online, airplane mode,
   log a catch, reconnect and confirm sync; then deploy a trivial change and
   confirm the update prompt appears.
-- Run `ng lint` before closing tickets.
+- There is no lint script in this package; the production build plus the unit
+  and integration tests are the gate.
 
 ## Out of scope
 
