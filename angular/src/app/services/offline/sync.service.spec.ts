@@ -1,7 +1,9 @@
 import { TestBed, fakeAsync, tick } from '@angular/core/testing';
 import { NgZone } from '@angular/core';
 import { HttpClientTestingModule } from '@angular/common/http/testing';
-import { of, throwError } from 'rxjs';
+import { BehaviorSubject, of, throwError } from 'rxjs';
+import { ConnectivityService } from '../connectivity.service';
+import { SessionService, SessionState } from '../session.service';
 import { SyncService } from './sync.service';
 import { IndexedDbService } from './indexed-db.service';
 import { ApiService, TripDetails, CatchDetails, TripRating } from '../api.service';
@@ -11,6 +13,10 @@ describe('SyncService', () => {
   let service: SyncService;
   let dbSpy: jasmine.SpyObj<IndexedDbService>;
   let apiSpy: jasmine.SpyObj<ApiService>;
+  let online: boolean;
+  let online$: BehaviorSubject<boolean>;
+  let sessionState: SessionState;
+  let sessionState$: BehaviorSubject<SessionState>;
 
   const makeQueueEntry = (overrides: Partial<SyncQueueEntry>): SyncQueueEntry => ({
     id: 1,
@@ -40,7 +46,7 @@ describe('SyncService', () => {
     dbSpy = jasmine.createSpyObj('IndexedDbService', [
       'getSyncQueueCount', 'getAllSyncQueueEntries', 'getSyncQueueEntries',
       'updateSyncQueueEntry', 'deleteSyncQueueEntry',
-      'putTrip', 'getTrip', 'putCatch',
+      'putTrip', 'getTrip', 'putCatch', 'getSyncQueueCountFor',
     ]);
     apiSpy = jasmine.createSpyObj('ApiService', [
       'postTrip', 'postCatch', 'patchTrip', 'endTrip', 'deleteTrip',
@@ -54,12 +60,24 @@ describe('SyncService', () => {
     dbSpy.putTrip.and.resolveTo();
     dbSpy.putCatch.and.resolveTo();
 
+    online = true;
+    online$ = new BehaviorSubject<boolean>(true);
+    sessionState = 'valid';
+    sessionState$ = new BehaviorSubject<SessionState>('valid');
+    const fakeConnectivity = { isOnline: () => online, online$: online$.asObservable() };
+    const fakeSession = {
+      get state() { return sessionState; },
+      state$: sessionState$.asObservable(),
+    };
+
     TestBed.configureTestingModule({
       imports: [HttpClientTestingModule],
       providers: [
         SyncService,
         { provide: IndexedDbService, useValue: dbSpy },
         { provide: ApiService, useValue: apiSpy },
+        { provide: ConnectivityService, useValue: fakeConnectivity },
+        { provide: SessionService, useValue: fakeSession },
       ],
     });
     service = TestBed.inject(SyncService);
@@ -177,6 +195,79 @@ describe('SyncService', () => {
       await new Promise(resolve => setTimeout(resolve, 200));
 
       expect(states).toContain('authExpired');
+    });
+  });
+
+  describe('database scope', () => {
+    it("a sync pass only reads the signed-in user's database, never another user's", async () => {
+      const entry = makeQueueEntry({ operation: 'createTrip', entityId: 'trip123' });
+      dbSpy.getSyncQueueCount.and.resolveTo(1);
+      dbSpy.getAllSyncQueueEntries.and.resolveTo([entry]);
+      apiSpy.postTrip.and.returnValue(of(makeServerTrip('trip123')));
+
+      service.notifyNewEntry();
+      await new Promise(resolve => setTimeout(resolve, 100));
+
+      expect(apiSpy.postTrip).toHaveBeenCalled();
+      expect(dbSpy.getSyncQueueCountFor).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('connectivity and session gating', () => {
+    const queueOne = () => {
+      dbSpy.getSyncQueueCount.and.resolveTo(1);
+      dbSpy.getAllSyncQueueEntries.and.resolveTo([makeQueueEntry({})]);
+      apiSpy.postTrip.and.returnValue(of(makeServerTrip('trip123')));
+    };
+    const wait = () => new Promise(resolve => setTimeout(resolve, 100));
+
+    it('makes no API call when ConnectivityService reports offline', async () => {
+      queueOne();
+      online = false;
+      service.notifyNewEntry();
+      await wait();
+      expect(apiSpy.postTrip).not.toHaveBeenCalled();
+    });
+
+    it('makes no API call when session state is none', async () => {
+      queueOne();
+      sessionState = 'none';
+      service.notifyNewEntry();
+      await wait();
+      expect(apiSpy.postTrip).not.toHaveBeenCalled();
+    });
+
+    it('syncs when connectivity becomes online', async () => {
+      queueOne();
+      online = false;
+      online$.next(false);
+      await wait();
+      expect(apiSpy.postTrip).not.toHaveBeenCalled();
+      online = true;
+      online$.next(true);
+      await wait();
+      expect(apiSpy.postTrip).toHaveBeenCalled();
+    });
+
+    it('clears an authExpired block when session becomes valid', async () => {
+      queueOne();
+      apiSpy.postTrip.and.returnValue(throwError(() => ({ status: 401 })));
+      sessionState = 'stale';
+      sessionState$.next('stale');
+      service.notifyNewEntry();
+      await wait();
+      expect(apiSpy.postTrip).toHaveBeenCalledTimes(1);
+
+      // Blocked: another attempt makes no call
+      service.notifyNewEntry();
+      await wait();
+      expect(apiSpy.postTrip).toHaveBeenCalledTimes(1);
+
+      apiSpy.postTrip.and.returnValue(of(makeServerTrip('trip123')));
+      sessionState = 'valid';
+      sessionState$.next('valid');
+      await wait();
+      expect(apiSpy.postTrip).toHaveBeenCalledTimes(2);
     });
   });
 

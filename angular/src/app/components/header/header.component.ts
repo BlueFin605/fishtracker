@@ -1,10 +1,11 @@
-import { Component, Inject } from '@angular/core';
+import { Component, Inject, ChangeDetectionStrategy } from '@angular/core';
 import { RouterLink, Router, NavigationEnd } from '@angular/router';
 import { MatIconModule } from '@angular/material/icon';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatButtonModule } from '@angular/material/button';
 import { CommonModule } from '@angular/common';
 import { AuthenticationService } from '../../services/authentication.service';
+import { SessionService } from '../../services/session.service';
 import { SyncService } from '../../services/offline/sync.service';
 import { SyncState } from '../../services/offline/offline.types';
 import { filter } from 'rxjs/operators';
@@ -20,6 +21,7 @@ import { Observable } from 'rxjs';
     MatButtonModule
   ],
   templateUrl: './header.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './header.component.css'
 })
 export class HeaderComponent {
@@ -27,7 +29,7 @@ export class HeaderComponent {
   syncState$: Observable<SyncState>;
   pendingCount$: Observable<number>;
 
-  constructor(private router: Router, public authService: AuthenticationService, private syncService: SyncService) {
+  constructor(private router: Router, public authService: AuthenticationService, public session: SessionService, private syncService: SyncService) {
     this.syncState$ = this.syncService.syncState$;
     this.pendingCount$ = this.syncService.pendingCount$;
 
@@ -36,6 +38,11 @@ export class HeaderComponent {
     ).subscribe((event: any) => {
       this.currentRoute = event.urlAfterRedirects || event.url;
     });
+  }
+
+  get initial(): string {
+    const name = this.session.displayName || this.session.displayEmail;
+    return name ? name.charAt(0).toUpperCase() : '?';
   }
 
   get showStartTrip(): boolean {
@@ -71,7 +78,12 @@ export class HeaderComponent {
     // this.router.navigate(['/preferences']);
   }
   onLogout() {
-    // Handle logout logic
+    if (this.session.isProxy) {
+      // Cognito logout is unreachable offline; just leave the proxied user.
+      this.session.exitProxy();
+      this.router.navigate(['/offline-user'], { queryParams: { exited: 1 } });
+      return;
+    }
     this.authService.signOut();
     console.log('Logout clicked');
   }

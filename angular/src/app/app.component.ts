@@ -1,10 +1,11 @@
-import { Component, ChangeDetectorRef, NgZone, OnInit } from '@angular/core';
+import { Component, ChangeDetectorRef, NgZone, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { Router, NavigationStart, NavigationEnd, NavigationCancel, NavigationError } from '@angular/router';
 import { CommonModule } from '@angular/common'; // Import CommonModule
 import { Observable } from 'rxjs';
 import { GoogleMapsLoaderService } from './google-maps-loader.service';
 import { HeaderComponent } from './components/header/header.component';
+import { OfflineBannerComponent } from './components/offline-banner/offline-banner.component';
 import { LoadingService } from './services/loading.service';
 import { LoadingSpinnerComponent } from './loading-spinner/loading-spinner.component';
 import { AuthenticationService } from './services/authentication.service';
@@ -16,9 +17,11 @@ import { AuthenticationService } from './services/authentication.service';
     CommonModule,
     RouterOutlet,
     HeaderComponent,
+    OfflineBannerComponent,
     LoadingSpinnerComponent
   ],
   templateUrl: './app.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './app.component.css'
 })
 export class AppComponent implements OnInit {

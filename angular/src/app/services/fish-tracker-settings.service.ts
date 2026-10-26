@@ -2,10 +2,10 @@ import { Injectable, NgZone } from '@angular/core';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { filter } from 'rxjs/operators';
 import { HttpClient } from '@angular/common/http';
-import { jwtDecode } from 'jwt-decode';
 import { environment } from '../../environments/environment';
 import { ProfileDetails, SettingsDetails, ApiService } from './api.service';
 import { IndexedDbService } from './offline/indexed-db.service';
+import { SessionService } from './session.service';
 
 @Injectable({
   providedIn: 'root'
@@ -22,6 +22,7 @@ export class FishTrackerSettingsService {
     private db: IndexedDbService,
     private http: HttpClient,
     private ngZone: NgZone,
+    private session: SessionService,
   ) {}
 
   get relevantTrips(): boolean {
@@ -87,6 +88,8 @@ export class FishTrackerSettingsService {
       if (cached) {
         this.emitProfile(cached);
         this.backgroundRefreshProfile();
+      } else if (this.session.isProxy) {
+        this.emitProfile({ species: [], defaultSpecies: '' });
       } else {
         this.apiService.getProfile().subscribe({
           next: p => {
@@ -116,6 +119,8 @@ export class FishTrackerSettingsService {
       if (cached) {
         this.emitSettings(cached);
         this.backgroundRefreshSettings();
+      } else if (this.session.isProxy) {
+        this.emitSettings({ species: [] });
       } else {
         this.apiService.getSettings().subscribe({
           next: s => {
@@ -141,6 +146,10 @@ export class FishTrackerSettingsService {
   }
 
   // --- Private caching methods ---
+
+  getCachedProfile(): Promise<ProfileDetails | null> {
+    return this.loadProfileFromCache();
+  }
 
   private async loadProfileFromCache(): Promise<ProfileDetails | null> {
     try {
@@ -176,6 +185,7 @@ export class FishTrackerSettingsService {
   }
 
   private backgroundRefreshProfile(): void {
+    if (this.session.isProxy) return;
     this.http.get<ProfileDetails>(`${environment.apiUrl}/profile`).subscribe({
       next: p => {
         this.emitProfile(p);
@@ -186,6 +196,7 @@ export class FishTrackerSettingsService {
   }
 
   private backgroundRefreshSettings(): void {
+    if (this.session.isProxy) return;
     this.http.get<SettingsDetails>(`${environment.apiUrl}/settings`).subscribe({
       next: s => {
         this.emitSettings(s);
@@ -196,16 +207,7 @@ export class FishTrackerSettingsService {
   }
 
   private getSubject(): string | null {
-    if (environment.bypassAuth) {
-      return 'user123';
-    }
-    try {
-      const idToken = localStorage.getItem('id_token');
-      if (!idToken) return null;
-      const decoded: { sub: string } = jwtDecode(idToken);
-      return decoded.sub;
-    } catch {
-      return null;
-    }
+    const subject = this.db.currentSubjectId();
+    return subject === 'anonymous' ? null : subject;
   }
 }

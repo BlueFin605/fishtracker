@@ -1,4 +1,4 @@
-import { Component, ChangeDetectorRef } from '@angular/core';
+import { Component, ChangeDetectorRef, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { TripDetails } from '../../services/api.service';
 import { Router } from '@angular/router';
@@ -13,6 +13,7 @@ import { ShareDialogComponent, ShareDialogTripOption } from '../share-dialog/sha
   standalone: true,
   imports: [CommonModule, DateFormatModule, ShareDialogComponent],
   templateUrl: './trips.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './trips.component.css'
 })
 export class TripsComponent {

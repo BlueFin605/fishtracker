@@ -2,10 +2,11 @@ import { Injectable, Inject, forwardRef, NgZone } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, from, of, switchMap, catchError, concat } from 'rxjs';
 import { toZonedTime } from 'date-fns-tz';
-import { jwtDecode } from 'jwt-decode';
 import { environment } from '../../../environments/environment';
 import { IndexedDbService } from './indexed-db.service';
 import { SyncService } from './sync.service';
+import { ConnectivityService } from '../connectivity.service';
+import { SessionService } from '../session.service';
 import {
   ApiService,
   TripDetails,
@@ -34,7 +35,14 @@ export class OfflineDataService {
     private http: HttpClient,
     @Inject(forwardRef(() => SyncService)) private syncService: SyncService,
     private ngZone: NgZone,
+    private connectivity: ConnectivityService,
+    private session: SessionService,
   ) {}
+
+  /** Proxy mode has no tokens, so it must never reach the API even when online. */
+  private isOffline(): boolean {
+    return !this.connectivity.isOnline() || this.session.isProxy;
+  }
 
   /** Called by SyncService after a deleteTrip sync succeeds */
   clearDeletedTripId(tripId: string): void {
@@ -82,7 +90,7 @@ export class OfflineDataService {
       switchMap(localTrips => {
         const local$ = of(localTrips as TripDetails[]);
 
-        if (!navigator.onLine) {
+        if (this.isOffline()) {
           return localTrips.length > 0 ? local$ : of([] as TripDetails[]);
         }
 
@@ -128,7 +136,7 @@ export class OfflineDataService {
         if (trip) {
           return of(trip as TripDetails);
         }
-        if (!navigator.onLine) {
+        if (this.isOffline()) {
           throw new Error(`Trip ${tripId} not available offline`);
         }
         // Fallback to API
@@ -145,7 +153,7 @@ export class OfflineDataService {
         if (catches.length > 0) {
           return of(catches as CatchDetails[]);
         }
-        if (!navigator.onLine) {
+        if (this.isOffline()) {
           return of([] as CatchDetails[]);
         }
         // Fallback to API
@@ -338,14 +346,6 @@ export class OfflineDataService {
   }
 
   private getSubject(): string {
-    if (environment.bypassAuth) {
-      return 'user123';
-    }
-    const idToken = localStorage.getItem('id_token');
-    if (!idToken) {
-      throw new Error('No id_token available — user not authenticated');
-    }
-    const decoded: { sub: string } = jwtDecode(idToken);
-    return decoded.sub;
+    return this.db.currentSubjectId();
   }
 }

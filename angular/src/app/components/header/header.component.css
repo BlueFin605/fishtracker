@@ -99,6 +99,9 @@ header {
 
 .sync-auth-warning {
   color: #ffb74d;
+  background: none;
+  border: 0;
+  cursor: pointer;
 }
 
 .avatar-initial {

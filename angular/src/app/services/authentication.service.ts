@@ -6,9 +6,16 @@ import { BehaviorSubject, Observable, throwError } from 'rxjs';
 import { map, catchError, share, finalize } from 'rxjs/operators';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { PkceService } from './pkce.service';
+import { LocalUsersRegistry } from './local-users-registry.service';
 import { jwtDecode } from "jwt-decode";
 // import * as jwt_decode from "jwt-decode";
 // import jwt_decode from 'jwt-decode';
+
+/** True only when Cognito explicitly rejects the refresh token. */
+export function isRefreshRejected(err: unknown): boolean {
+  const e = err as { status?: number; error?: { error?: string } };
+  return e?.status === 400 && e?.error?.error === 'invalid_grant';
+}
 
 @Injectable({
   providedIn: 'root'
@@ -23,7 +30,7 @@ export class AuthenticationService {
   private userInfoUrl = `${environment.domain}/oauth2/userInfo`;
   private logoutUrl = `${environment.domain}/logout?client_id=${environment.clientId}&logout_uri=${encodeURIComponent(environment.logoutRedirectUri)}`;
 
-  constructor(private router: Router, private http: HttpClient, private pkceService: PkceService) {}
+  constructor(private router: Router, private http: HttpClient, private pkceService: PkceService, private localUsers: LocalUsersRegistry) {}
 
   async signIn() {
     const codeVerifier = this.pkceService.generateCodeVerifier();
@@ -68,6 +75,7 @@ export class AuthenticationService {
         localStorage.setItem('refresh_token', refreshToken);
   
         this.accessTokenSubject.next(accessToken);
+        this.localUsers.recordFromIdToken(idToken);
   
         return response;
       }),
@@ -87,8 +95,8 @@ export class AuthenticationService {
 
     const refreshToken = localStorage.getItem('refresh_token');
     if (!refreshToken) {
-      this.signOut();
-      return throwError('No refresh token available');
+      // Nothing to refresh (e.g. proxy mode): fail without ending the session.
+      return throwError(() => 'No refresh token available');
     }
 
     const body = new URLSearchParams();
@@ -111,13 +119,18 @@ export class AuthenticationService {
         localStorage.setItem('refresh_token', newRefreshToken);
 
         this.accessTokenSubject.next(newAccessToken);
+        this.localUsers.recordFromIdToken(newIdToken);
 
         return newAccessToken;
       }),
       catchError(error => {
-        console.error('Token refresh failed, signing out:', error);
-        this.signOut();
-        return throwError(error);
+        if (isRefreshRejected(error)) {
+          console.error('Token refresh rejected, signing out:', error);
+          this.signOut();
+        } else {
+          console.warn('Token refresh failed (keeping session):', error);
+        }
+        return throwError(() => error);
       }),
       finalize(() => {
         this.refreshTokenInFlight$ = null;
@@ -150,10 +163,13 @@ export class AuthenticationService {
       return false;
     }
 
-    const decodedToken: any = jwtDecode(idToken);
-    const currentTime = Math.floor(new Date().getTime() / 1000);
-
-    return decodedToken.exp > currentTime;
+    try {
+      const decodedToken: any = jwtDecode(idToken);
+      const currentTime = Math.floor(new Date().getTime() / 1000);
+      return decodedToken.exp > currentTime;
+    } catch {
+      return false;
+    }
   }
 
   get userDisplayName(): string {
@@ -182,11 +198,6 @@ export class AuthenticationService {
     } catch {
       return '';
     }
-  }
-
-  get userInitial(): string {
-    const name = this.userDisplayName || this.userEmail;
-    return name ? name.charAt(0).toUpperCase() : '?';
   }
 
   get id_token(): string | null {

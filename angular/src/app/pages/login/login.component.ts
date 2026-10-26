@@ -1,22 +1,24 @@
-import { Component } from '@angular/core';
+import { Component, ChangeDetectionStrategy } from '@angular/core';
 import { Router } from '@angular/router';
 import { AuthButtonComponent } from '../../components/auth-button/auth-button.component';
-import { AuthenticationService } from '../../services/authentication.service';
+import { SessionService } from '../../services/session.service';
+import { ConnectivityService } from '../../services/connectivity.service';
 
 @Component({
   standalone: true,
   selector: 'app-login',
   templateUrl: './login.component.html',
   styleUrls: ['./login.component.css'],
+  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [AuthButtonComponent]
 })
 export class LoginComponent {
 
-  constructor(private router: Router, private authService: AuthenticationService ) {
+  constructor(private router: Router, private session: SessionService, public connectivity: ConnectivityService) {
   }
 
   ngOnInit() {
-    if (this.authService.isAuthenticated()) {
+    if (this.session.signedIn) {
       this.router.navigate(['/trips']);
     }
   }

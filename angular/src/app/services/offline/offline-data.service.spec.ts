@@ -1,8 +1,10 @@
 import { TestBed } from '@angular/core/testing';
-import { HttpClientTestingModule } from '@angular/common/http/testing';
+import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
 import { OfflineDataService } from './offline-data.service';
 import { IndexedDbService } from './indexed-db.service';
 import { SyncService } from './sync.service';
+import { ConnectivityService } from '../connectivity.service';
+import { SessionService } from '../session.service';
 import { ApiService, NewTrip, NewCatch, FishSize, TripRating } from '../api.service';
 import { LocalTripRecord, LocalCatchRecord } from './offline.types';
 
@@ -11,12 +13,14 @@ describe('OfflineDataService', () => {
   let dbSpy: jasmine.SpyObj<IndexedDbService>;
   let syncSpy: jasmine.SpyObj<SyncService>;
   let apiSpy: jasmine.SpyObj<ApiService>;
+  let online: boolean;
+  let proxy: boolean;
 
   beforeEach(() => {
     dbSpy = jasmine.createSpyObj('IndexedDbService', [
       'putTrip', 'getTrip', 'getAllTrips', 'deleteTrip',
       'putCatch', 'getCatch', 'getCatchesByTripId', 'deleteCatchesByTripId',
-      'addToSyncQueue', 'deleteSyncQueueEntriesByEntityId',
+      'addToSyncQueue', 'deleteSyncQueueEntriesByEntityId', 'currentSubjectId',
     ]);
     syncSpy = jasmine.createSpyObj('SyncService', ['notifyNewEntry']);
     apiSpy = jasmine.createSpyObj('ApiService', ['getAllTrips', 'getTrip', 'getTripCatch']);
@@ -28,6 +32,7 @@ describe('OfflineDataService', () => {
     dbSpy.deleteCatchesByTripId.and.resolveTo();
     dbSpy.deleteSyncQueueEntriesByEntityId.and.resolveTo();
     dbSpy.deleteTrip.and.resolveTo();
+    dbSpy.currentSubjectId.and.returnValue('test-user-123');
 
     // Mock localStorage for getSubject
     spyOn(localStorage, 'getItem').and.callFake((key: string) => {
@@ -40,6 +45,8 @@ describe('OfflineDataService', () => {
       return null;
     });
 
+    online = true;
+    proxy = false;
     TestBed.configureTestingModule({
       imports: [HttpClientTestingModule],
       providers: [
@@ -47,12 +54,60 @@ describe('OfflineDataService', () => {
         { provide: IndexedDbService, useValue: dbSpy },
         { provide: SyncService, useValue: syncSpy },
         { provide: ApiService, useValue: apiSpy },
+        { provide: ConnectivityService, useValue: { isOnline: () => online } },
+        { provide: SessionService, useValue: { get isProxy() { return proxy; } } },
       ],
     });
     service = TestBed.inject(OfflineDataService);
   });
 
+  describe('proxy mode while online', () => {
+    beforeEach(() => { proxy = true; });
+
+    it('getTrips makes no API call with empty cache', (done) => {
+      const http = TestBed.inject(HttpTestingController);
+      dbSpy.getAllTrips.and.resolveTo([]);
+      service.getTrips().subscribe(trips => {
+        expect(trips).toEqual([]);
+        expect(apiSpy.getAllTrips).not.toHaveBeenCalled();
+        http.expectNone(() => true);
+        done();
+      });
+    });
+
+    it('getTrips makes no refresh request with cached trips', (done) => {
+      const http = TestBed.inject(HttpTestingController);
+      dbSpy.getAllTrips.and.resolveTo([{ tripId: 't1' } as any]);
+      service.getTrips().subscribe({ complete: () => {
+        http.expectNone(() => true);
+        done();
+      } });
+    });
+
+    it('getTrip and getCatches make no API call on a cache miss', (done) => {
+      dbSpy.getTrip.and.resolveTo(undefined as any);
+      dbSpy.getCatchesByTripId.and.resolveTo([]);
+      service.getCatches('t1').subscribe(c => {
+        expect(c).toEqual([]);
+        expect(apiSpy.getTripCatch).not.toHaveBeenCalled();
+        service.getTrip('t1').subscribe({ error: () => {
+          expect(apiSpy.getTrip).not.toHaveBeenCalled();
+          done();
+        } });
+      });
+    });
+  });
+
   describe('createTrip', () => {
+    it('writes under the proxy subject when there are no tokens', (done) => {
+      (localStorage.getItem as jasmine.Spy).and.returnValue(null);
+      dbSpy.currentSubjectId.and.returnValue('proxy-sub');
+      service.createTrip({ timeZone: 'Pacific/Auckland', notes: '', tags: [], species: [], defaultSpecies: '' } as NewTrip).subscribe(trip => {
+        expect(trip.subject).toBe('proxy-sub');
+        done();
+      });
+    });
+
     it('should write trip to IndexedDB with pending status', (done) => {
       const newTrip: NewTrip = {
         timeZone: 'Pacific/Auckland',
@@ -254,6 +309,49 @@ describe('OfflineDataService', () => {
       service.getTrips().subscribe(result => {
         expect(result.length).toBe(2);
         expect(dbSpy.getAllTrips).toHaveBeenCalled();
+        done();
+      });
+    });
+  });
+
+  describe('when ConnectivityService reports offline', () => {
+    beforeEach(() => {
+      online = false;
+    });
+
+    it('getTrips returns cached trips without calling the API', (done) => {
+      dbSpy.getAllTrips.and.resolveTo([{ tripId: 't1', syncStatus: 'synced' } as LocalTripRecord]);
+      service.getTrips().subscribe(trips => {
+        expect(trips.length).toBe(1);
+        expect(apiSpy.getAllTrips).not.toHaveBeenCalled();
+        done();
+      });
+    });
+
+    it('getTrips returns empty without calling the API when nothing cached', (done) => {
+      dbSpy.getAllTrips.and.resolveTo([]);
+      service.getTrips().subscribe(trips => {
+        expect(trips).toEqual([]);
+        expect(apiSpy.getAllTrips).not.toHaveBeenCalled();
+        done();
+      });
+    });
+
+    it('getTrip errors without calling the API when not cached', (done) => {
+      dbSpy.getTrip.and.resolveTo(undefined);
+      service.getTrip('missing').subscribe({
+        error: () => {
+          expect(apiSpy.getTrip).not.toHaveBeenCalled();
+          done();
+        },
+      });
+    });
+
+    it('getCatches returns empty without calling the API when not cached', (done) => {
+      dbSpy.getCatchesByTripId.and.resolveTo([]);
+      service.getCatches('t1').subscribe(catches => {
+        expect(catches).toEqual([]);
+        expect(apiSpy.getTripCatch).not.toHaveBeenCalled();
         done();
       });
     });

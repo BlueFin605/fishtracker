@@ -55,9 +55,10 @@ interface FishTrackerDB extends DBSchema {
 export class IndexedDbService {
   private dbPromise: Promise<IDBPDatabase<FishTrackerDB>> | null = null;
   private currentSubject: string | null = null;
+  private proxySubject: string | null = null;
 
   private getDb(): Promise<IDBPDatabase<FishTrackerDB>> {
-    const subject = this.getSubject();
+    const subject = this.currentSubjectId();
     // If user changed (logout/login), open a new database
     if (this.currentSubject !== subject) {
       this.dbPromise = null;
@@ -70,20 +71,28 @@ export class IndexedDbService {
     return this.dbPromise;
   }
 
-  private getSubject(): string {
+  /** Offline proxy mode: open this user's database when there is no id token. */
+  setProxySubject(sub: string | null): void {
+    if (this.proxySubject === sub) return;
+    this.proxySubject = sub;
+    this.dbPromise = null;
+    this.currentSubject = null;
+  }
+
+  currentSubjectId(): string {
     if (environment.bypassAuth) {
       return 'user123';
     }
     const idToken = localStorage.getItem('id_token');
-    if (!idToken) {
-      return 'anonymous';
+    if (idToken) {
+      try {
+        const decoded: { sub: string } = jwtDecode(idToken);
+        if (decoded.sub) return decoded.sub;
+      } catch {
+        // fall through to proxy subject
+      }
     }
-    try {
-      const decoded: { sub: string } = jwtDecode(idToken);
-      return decoded.sub;
-    } catch {
-      return 'anonymous';
-    }
+    return this.proxySubject ?? 'anonymous';
   }
 
   private openDatabase(dbName: string): Promise<IDBPDatabase<FishTrackerDB>> {
@@ -263,5 +272,43 @@ export class IndexedDbService {
     const queued = await db.countFromIndex('syncQueue', 'by-status', 'queued');
     const failed = await db.countFromIndex('syncQueue', 'by-status', 'failed');
     return queued + failed;
+  }
+
+  /**
+   * Opens an existing per-user database without ever creating one: the
+   * upgrade callback aborts when the database is new (oldVersion 0).
+   */
+  private openExistingDatabase(dbName: string): Promise<IDBPDatabase<FishTrackerDB>> {
+    return openDB<FishTrackerDB>(dbName, DB_VERSION, {
+      upgrade(_db, oldVersion, _newVersion, tx) {
+        if (oldVersion === 0) tx.abort();
+      },
+    });
+  }
+
+  /**
+   * Size of another user's sync queue, read from their own database without
+   * touching the active one. Never creates a database for an unseen sub.
+   * Returns 0 on any error.
+   */
+  async getSyncQueueCountFor(sub: string): Promise<number> {
+    const dbName = `fishtracker-${sub}`;
+    let db: IDBPDatabase<FishTrackerDB> | undefined;
+    try {
+      if (typeof indexedDB.databases === 'function') {
+        const known = await indexedDB.databases();
+        if (!known.some(d => d.name === dbName)) return 0;
+      }
+      db = await this.openExistingDatabase(dbName);
+      return await db.count('syncQueue');
+    } catch {
+      return 0;
+    } finally {
+      try {
+        db?.close();
+      } catch {
+        // ignore
+      }
+    }
   }
 }

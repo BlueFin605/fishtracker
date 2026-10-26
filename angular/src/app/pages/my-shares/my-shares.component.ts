@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { ShareService } from '../../services/share.service';
@@ -9,6 +9,7 @@ import { ShareSummary } from '../../services/share.types';
   standalone: true,
   imports: [CommonModule, RouterLink],
   templateUrl: './my-shares.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrls: ['./my-shares.component.css'],
 })
 export class MySharesPageComponent implements OnInit {

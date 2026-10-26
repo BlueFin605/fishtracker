@@ -1,5 +1,4 @@
-import { NgModule } from '@angular/core';
-import { Routes, RouterModule } from '@angular/router';
+import { Routes } from '@angular/router';
 import { TripCatchComponent } from './pages/trip-catch/trip-catch.component';
 import { DebugDisplayComponent } from './pages/debug-display/debug-display.component';
 import { TripsComponent } from './pages/trips/trips.component';
@@ -11,8 +10,12 @@ import { SettingsComponent } from './pages/settings/settings.component';
 import { SharedMapPageComponent } from './pages/shared-map/shared-map.component';
 import { MySharesPageComponent } from './pages/my-shares/my-shares.component';
 import { AuthGuard } from './auth.guard';
+import { OnlineOnlyGuard } from './online-only.guard';
+import { OfflineUserGuard } from './offline-user.guard';
 import { SetupGuard } from './setup.guard';
 import { LoginComponent } from './pages/login/login.component';
+import { OfflineNoticeComponent } from './pages/offline-notice/offline-notice.component';
+import { OfflineUserComponent } from './pages/offline-user/offline-user.component';
 
 export const routes: Routes = [
     { path: 'callback', component: CallbackComponent },
@@ -21,11 +24,13 @@ export const routes: Routes = [
     { path: 'trips', component: TripsComponent, canActivate: [AuthGuard, SetupGuard]  },
     { path: 'newtrip', component: NewTripComponent, canActivate: [AuthGuard, SetupGuard]  },
     { path: 'debug', component: DebugDisplayComponent, canActivate: [AuthGuard]  },
-    { path: 'profile', component: ProfileComponent, canActivate: [AuthGuard]  },
+    { path: 'profile', component: ProfileComponent, canActivate: [AuthGuard, OnlineOnlyGuard]  },
     { path: 'settings', component: SettingsComponent, canActivate: [AuthGuard]  },
-    { path: 'shared/:shareId', component: SharedMapPageComponent, canActivate: [AuthGuard] },
-    { path: 'shares', component: MySharesPageComponent, canActivate: [AuthGuard] },
+    { path: 'shared/:shareId', component: SharedMapPageComponent, canActivate: [AuthGuard, OnlineOnlyGuard] },
+    { path: 'shares', component: MySharesPageComponent, canActivate: [AuthGuard, OnlineOnlyGuard] },
     { path: 'login', component: LoginComponent },
-    { path: '', redirectTo: '/login', pathMatch: 'full' },
-    { path: '**', redirectTo: '/login' }
+    { path: 'offline', component: OfflineNoticeComponent },
+    { path: 'offline-user', component: OfflineUserComponent, canActivate: [OfflineUserGuard] },
+    { path: '', redirectTo: '/trips', pathMatch: 'full' },
+    { path: '**', redirectTo: '/trips' }
 ];
