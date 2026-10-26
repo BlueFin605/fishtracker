@@ -23,7 +23,7 @@ bootstrapApplication(AppComponent, {
     provideAppInitializer(() => { inject(UpdateService).start(); }),
     provideServiceWorker('ngsw-worker.js', {
       enabled: !isDevMode(),
-      registrationStrategy: 'registerWhenStable:30000'
+      registrationStrategy: 'registerWhenStable:5000'
     })
   ]
 }).catch((err) => console.error(err));

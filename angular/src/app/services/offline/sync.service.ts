@@ -76,18 +76,23 @@ export class SyncService implements OnDestroy {
 
     // Periodic foreground check (30s) — fallback for iOS
     // Only attempts sync if there are pending items (no unnecessary API calls)
-    this.periodicTimer = setInterval(async () => {
-      if (document.visibilityState === 'visible') {
-        try {
-          const count = await this.db.getSyncQueueCount();
-          if (count > 0) {
-            this.attemptSync();
+    // Run outside the zone: a recurring in-zone timer would keep the app permanently
+    // "unstable" and delay service worker registration. attemptSync re-enters the zone
+    // (ngZone.run) where it emits state.
+    this.ngZone.runOutsideAngular(() => {
+      this.periodicTimer = setInterval(async () => {
+        if (document.visibilityState === 'visible') {
+          try {
+            const count = await this.db.getSyncQueueCount();
+            if (count > 0) {
+              this.attemptSync();
+            }
+          } catch {
+            // Ignore — IndexedDB read only, no network
           }
-        } catch {
-          // Ignore — IndexedDB read only, no network
         }
-      }
-    }, 30000);
+      }, 30000);
+    });
   }
 
   private async attemptSync(): Promise<void> {

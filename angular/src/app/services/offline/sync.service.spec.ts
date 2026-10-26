@@ -292,4 +292,23 @@ describe('SyncService', () => {
       }, 100);
     });
   });
+
+  describe('periodic timer', () => {
+    it('is scheduled outside the Angular zone so it does not block app stability', () => {
+      const ngZone = TestBed.inject(NgZone);
+      const inZone: boolean[] = [];
+      const realSetInterval = window.setInterval.bind(window);
+      spyOn(window, 'setInterval').and.callFake(((...args: any[]) => {
+        inZone.push(NgZone.isInAngularZone());
+        return (realSetInterval as any)(...args);
+      }) as any);
+      let created!: SyncService;
+      ngZone.run(() => {
+        created = new SyncService(dbSpy, apiSpy, ngZone,
+          TestBed.inject(ConnectivityService), TestBed.inject(SessionService));
+      });
+      created.ngOnDestroy();
+      expect(inZone).toEqual([false]);
+    });
+  });
 });

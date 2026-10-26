@@ -1,7 +1,8 @@
+import { NgZone } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { SwUpdate } from '@angular/service-worker';
-import { of, Subject } from 'rxjs';
+import { NEVER, Observable, of, Subject } from 'rxjs';
 import { RELOAD_PAGE, UpdateService } from './update.service';
 
 describe('UpdateService', () => {
@@ -10,6 +11,9 @@ describe('UpdateService', () => {
   let snackBar: { open: jasmine.Spy };
   let reload: jasmine.Spy;
   let visibilityHandlers: Array<() => void>;
+  let intervalInZone: boolean[];
+  let onAction$: Observable<void>;
+  const flush = () => new Promise<void>(r => setTimeout(r));
 
   function setup(isEnabled = true): UpdateService {
     versionUpdates = new Subject<any>();
@@ -19,8 +23,9 @@ describe('UpdateService', () => {
       checkForUpdate: jasmine.createSpy('checkForUpdate').and.resolveTo(false),
       activateUpdate: jasmine.createSpy('activateUpdate').and.resolveTo(true),
     };
-    snackBar = { open: jasmine.createSpy('open').and.returnValue({ onAction: () => of(void 0) }) };
+    snackBar = { open: jasmine.createSpy('open').and.callFake(() => ({ onAction: () => onAction$ })) };
     reload = jasmine.createSpy('reload');
+    onAction$ = of(void 0);
     TestBed.configureTestingModule({
       providers: [
         { provide: SwUpdate, useValue: sw },
@@ -40,12 +45,16 @@ describe('UpdateService', () => {
       if (type === 'visibilitychange') visibilityHandlers.push(handler);
       else realAdd(type, handler, opts);
     }) as any);
-    spyOn(window, 'setInterval').and.returnValue(0 as any);
+    intervalInZone = [];
+    spyOn(window, 'setInterval').and.callFake((() => {
+      intervalInZone.push(NgZone.isInAngularZone());
+      return 0;
+    }) as any);
   });
 
   it('(a) opens one persistent snackbar when VERSION_READY is emitted', () => {
-    // action never fires here: use a never-resolving onAction to check the open args only
     const service = setup();
+    onAction$ = NEVER;
     service.start();
     versionUpdates.next({ type: 'VERSION_READY' });
     expect(snackBar.open).toHaveBeenCalledTimes(1);
@@ -59,8 +68,7 @@ describe('UpdateService', () => {
     const service = setup();
     service.start();
     versionUpdates.next({ type: 'VERSION_READY' });
-    await Promise.resolve();
-    await Promise.resolve();
+    await flush();
     expect(sw.activateUpdate).toHaveBeenCalled();
     expect(reload).toHaveBeenCalled();
   });
@@ -98,5 +106,31 @@ describe('UpdateService', () => {
     expect(await service.checkNow()).toBeTrue();
     sw.checkForUpdate.and.resolveTo(false);
     expect(await service.checkNow()).toBeFalse();
+  });
+
+  it('(g) schedules the periodic check outside the Angular zone', () => {
+    const service = setup();
+    TestBed.inject(NgZone).run(() => service.start());
+    expect(intervalInZone).toEqual([false]);
+  });
+
+  it('(h) remembers a ready update: checkNow returns true without asking the SW', async () => {
+    const service = setup();
+    onAction$ = NEVER;
+    service.start();
+    expect(service.updateReady).toBeFalse();
+    versionUpdates.next({ type: 'VERSION_READY' });
+    expect(service.updateReady).toBeTrue();
+    expect(await service.checkNow()).toBeTrue();
+    expect(sw.checkForUpdate).not.toHaveBeenCalled();
+  });
+
+  it('(i) showPrompt re-opens the snackbar', () => {
+    const service = setup();
+    onAction$ = NEVER;
+    service.start();
+    versionUpdates.next({ type: 'VERSION_READY' });
+    service.showPrompt();
+    expect(snackBar.open).toHaveBeenCalledTimes(2);
   });
 });
