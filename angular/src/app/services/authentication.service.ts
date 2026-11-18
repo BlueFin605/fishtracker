@@ -25,7 +25,7 @@ export class AuthenticationService {
   public accessToken$: Observable<string> = this.accessTokenSubject.asObservable();
   private refreshTokenInFlight$: Observable<string> | null = null;
 
-  private loginUrl = `${environment.domain}/oauth2/authorize?client_id=${environment.clientId}&response_type=code&scope=aws.cognito.signin.user.admin+email+openid+profile&redirect_uri=${encodeURIComponent(environment.redirectUri)}`;
+  private loginUrl = `${environment.domain}/oauth2/authorize?client_id=${environment.clientId}&response_type=code&scope=email+openid+profile&redirect_uri=${encodeURIComponent(environment.redirectUri)}`;
   private tokenUrl = `${environment.domain}/oauth2/token`;
   private userInfoUrl = `${environment.domain}/oauth2/userInfo`;
   private logoutUrl = `${environment.domain}/logout?client_id=${environment.clientId}&logout_uri=${encodeURIComponent(environment.logoutRedirectUri)}`;

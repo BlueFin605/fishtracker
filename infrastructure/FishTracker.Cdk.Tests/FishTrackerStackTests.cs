@@ -62,6 +62,22 @@ public class FishTrackerStackTests
         }));
     }
 
+    [Theory]
+    [InlineData(false, true)]
+    [InlineData(true, false)]
+    public void ClientScopes_ListAdminScopeOnlyInDefaultMode(bool external, bool expectAdmin)
+    {
+        var t = external ? Synth("ap-southeast-2_TEST", "auth.example.com") : Synth();
+        var clients = t.FindResources("AWS::Cognito::UserPoolClient");
+        Assert.Equal(2, clients.Count);
+        foreach (var c in clients.Values)
+        {
+            var json = System.Text.Json.JsonSerializer.Serialize(c);
+            Assert.Contains("openid", json);
+            Assert.Equal(expectAdmin, json.Contains("aws.cognito.signin.user.admin"));
+        }
+    }
+
     [Fact]
     public void OnlyOneIdentityParam_Throws()
     {

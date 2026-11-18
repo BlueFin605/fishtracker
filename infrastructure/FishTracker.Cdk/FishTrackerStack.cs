@@ -279,13 +279,13 @@ You'll need to sign in to view. {{#if expiresAt}}Expires {{expiresAt}}. {{/if}}{
         });
         }
 
-        var oauthScopes = new[]
-        {
-            OAuthScope.COGNITO_ADMIN,
-            OAuthScope.EMAIL,
-            OAuthScope.OPENID,
-            OAuthScope.PROFILE
-        };
+        // COGNITO_ADMIN (aws.cognito.signin.user.admin) lets an access token call DeleteUser / UpdateUserAttributes /
+        // ChangePassword on the account. On a shared pool that is pool-wide, so external mode omits it. Nothing in the SPA
+        // or backend needs it (the backend uses AdminGetUser via IAM; /oauth2/userInfo needs only openid).
+        // Default mode keeps it: self-hosters own their pool.
+        var oauthScopes = external
+            ? new[] { OAuthScope.EMAIL, OAuthScope.OPENID, OAuthScope.PROFILE }
+            : new[] { OAuthScope.COGNITO_ADMIN, OAuthScope.EMAIL, OAuthScope.OPENID, OAuthScope.PROFILE };
 
         var callbackUrls = new[] { "http://localhost:4200/callback", $"https://{websiteDomain}/callback" };
         var logoutUrls = new[] { "http://localhost:4200/login", $"https://{websiteDomain}/login" };
