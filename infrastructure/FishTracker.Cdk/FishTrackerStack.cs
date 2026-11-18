@@ -131,6 +131,16 @@ public class FishTrackerStack : Stack
             ProjectionType = ProjectionType.ALL
         });
 
+        // Identity alias: maps a shared-pool sub to the legacy sub that owns pre-migration data (empty unless migrated).
+        var identityAliasTable = new Table(this, "IdentityAliasTable", new TableProps
+        {
+            TableName = $"FishTracker-IdentityAlias-{env}",
+            BillingMode = BillingMode.PAY_PER_REQUEST,
+            PartitionKey = new Attribute { Name = "Subject", Type = AttributeType.STRING },
+            PointInTimeRecoverySpecification = new PointInTimeRecoverySpecification { PointInTimeRecoveryEnabled = true },
+            RemovalPolicy = RemovalPolicy.RETAIN
+        });
+
         var shareThumbnailsBucket = new Bucket(this, "ShareThumbnailsBucket", new BucketProps
         {
             BucketName = $"fishtracker-share-thumbnails-{env.ToLower()}",
@@ -448,6 +458,7 @@ You'll need to sign in to view. {{#if expiresAt}}Expires {{expiresAt}}. {{/if}}{
         lambdaEnvironment["SHARE_VIEW_URL_BASE"] = $"https://{websiteDomain}/shared";
         lambdaEnvironment["FISHTRACKER_ENV"] = env;
         lambdaEnvironment["USER_POOL_ID"] = userPool.UserPoolId;
+        lambdaEnvironment["IDENTITY_ALIAS_TABLE"] = identityAliasTable.TableName;
 
         var nodejsLambda = new Function(this, "NodejsLambda", new FunctionProps
         {

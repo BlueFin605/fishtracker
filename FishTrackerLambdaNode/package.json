@@ -7,7 +7,8 @@
     "compile": "tsc",
     "bundle": "esbuild dist/index.js --bundle --minify --sourcemap --platform=node --target=es2020 --outfile=bundle/index.js --keep-names --format=cjs",
     "build": "npm run compile && npm run bundle",
-    "start": "ts-node src/index.ts"
+    "start": "ts-node src/index.ts",
+    "test": "vitest run"
   },
   "devDependencies": {
     "@types/aws-lambda": "^8.10.161",
@@ -19,7 +20,8 @@
     "@types/suncalc": "^1.9.2",
     "esbuild": "^0.28.2",
     "ts-node": "^10.9.2",
-    "typescript": "^7.0.2"
+    "typescript": "^7.0.2",
+    "vitest": "^5.1.1"
   },
   "dependencies": {
     "@aws-lambda-powertools/logger": "^2.33.0",

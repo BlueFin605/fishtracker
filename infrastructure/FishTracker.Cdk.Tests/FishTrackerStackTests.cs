@@ -68,4 +68,29 @@ public class FishTrackerStackTests
         Assert.Throws<InvalidOperationException>(() => Synth(poolId: "ap-southeast-2_TEST"));
         Assert.Throws<InvalidOperationException>(() => Synth(domain: "auth.example.com"));
     }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void IdentityAliasTable_ExistsInBothModes_AndIsWiredToLambda(bool external)
+    {
+        var t = external ? Synth("ap-southeast-2_TEST", "auth.example.com") : Synth();
+        t.HasResource("AWS::DynamoDB::Table", Match.ObjectLike(new Dictionary<string, object>
+        {
+            { "Properties", Match.ObjectLike(new Dictionary<string, object>
+                {
+                    { "TableName", "FishTracker-IdentityAlias-Test" },
+                    { "BillingMode", "PAY_PER_REQUEST" },
+                    { "KeySchema", new object[] { new Dictionary<string, object> { { "AttributeName", "Subject" }, { "KeyType", "HASH" } } } },
+                    { "PointInTimeRecoverySpecification", new Dictionary<string, object> { { "PointInTimeRecoveryEnabled", true } } }
+                }) },
+            { "DeletionPolicy", "Retain" }
+        }));
+        t.HasResourceProperties("AWS::Lambda::Function", Match.ObjectLike(new Dictionary<string, object>
+        {
+            { "FunctionName", "FishTracker-Lambda-NodeJs-Test" },
+            { "Environment", Match.ObjectLike(new Dictionary<string, object>
+                { { "Variables", Match.ObjectLike(new Dictionary<string, object> { { "IDENTITY_ALIAS_TABLE", Match.AnyValue() } }) } }) }
+        }));
+    }
 }
