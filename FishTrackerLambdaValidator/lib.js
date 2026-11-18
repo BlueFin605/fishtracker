@@ -43,6 +43,13 @@ module.exports.authenticate = (params) => {
             const signingKey = key.publicKey || key.rsaPublicKey;
             return jwt.verify(token, signingKey, jwtOptions);
         })
+        .then((verified) => {
+            // Shared user pool: only ID tokens are accepted (audience pins the client).
+            if (verified.token_use !== 'id') {
+                throw new Error('invalid token: token_use must be "id"');
+            }
+            return verified;
+        })
         .then((decoded)=> ({
             principalId: decoded.sub,
             policyDocument: common.getPolicyDocument('Allow', params.methodArn),
