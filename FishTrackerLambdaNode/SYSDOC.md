@@ -15,13 +15,30 @@ S3, SES v2, Cognito Identity Provider, SSM Parameter Store), `tsyringe` for DI,
 - `src/index.ts` — Lambda entry point (also runs as a local Express server
   when `IS_LAMBDA` is unset — see "Running" below).
 - `src/Services/` — business logic (trips, catches, sharing, profile,
-  settings, bite times, thumbnails, static map rendering, Cognito users).
+  settings, bite times, thumbnails, static map rendering, Cognito users,
+  identity alias lookup).
 - `src/Db.Services/` — one DynamoDB-backed service per table (Trip, Catch,
   Profile, Settings, Share) plus the shared DynamoDB/AWS client wrappers.
 - `src/Helpers/` — date conversion, ID generation, location fuzzing (for
   shared/public views), secrets caching.
 - `src/Http/`, `src/Functional/` — request/response and result-wrapping
   plumbing.
+
+## Subject resolution
+
+Routes that read or write per-user data resolve the caller's subject through
+`IdentityAliasService` (`getOwnerSubject` in `src/routes.ts`). The authorizer's
+`principalId` (the token `sub`) is looked up in the `IDENTITY_ALIAS_TABLE`. On a
+hit, the stored `LegacySubject` is the data key. Otherwise the `sub` is used as
+is. The table itself is described in `infrastructure/SYSDOC.md`.
+
+- The share routes' Cognito lookups (display name and email, via
+  `CognitoUserService`) use the raw `sub`. `AdminGetUser` runs against
+  `USER_POOL_ID`, where that `sub` identifies the user.
+- With `IDENTITY_ALIAS_TABLE` unset (for example under `npm start`), the `sub`
+  is used as is.
+- Lookups are cached per Lambda container, so an alias added later takes effect
+  on the next cold start.
 
 ## Running / using this area
 
