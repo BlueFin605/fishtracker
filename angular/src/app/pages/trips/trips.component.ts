@@ -39,7 +39,7 @@ export class TripsComponent {
   }
 
   getAllTrips(): void {
-    this.offlineData.getTrips().subscribe({
+    this.offlineData.getTrips(this.relevantTrips).subscribe({
       next: (data) => {
         this.trips = data as (TripDetails & { syncStatus?: SyncStatus })[];
         this.cdr.detectChanges();

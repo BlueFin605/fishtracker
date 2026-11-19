@@ -1,5 +1,6 @@
 import { TestBed } from '@angular/core/testing';
 import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
+import { of } from 'rxjs';
 import { OfflineDataService } from './offline-data.service';
 import { IndexedDbService } from './indexed-db.service';
 import { SyncService } from './sync.service';
@@ -309,6 +310,67 @@ describe('OfflineDataService', () => {
       service.getTrips().subscribe(result => {
         expect(result.length).toBe(2);
         expect(dbSpy.getAllTrips).toHaveBeenCalled();
+        done();
+      });
+    });
+  });
+
+  describe('getTrips relevance', () => {
+    const rec = (tripId: string, syncStatus: string = 'synced') => ({ tripId, syncStatus } as LocalTripRecord);
+
+    beforeEach(() => {
+      spyOn(service as any, 'now').and.returnValue(new Date(2026, 10, 19, 12, 0, 0)); // 19 Nov: window Oct..Jan
+    });
+
+    it('relevant=false requests view=all and returns the whole cache', (done) => {
+      const http = TestBed.inject(HttpTestingController);
+      dbSpy.getAllTrips.and.resolveTo([rec('0601:100000-26'), rec('1105:100000-26')]);
+      const emissions: number[] = [];
+      service.getTrips(false).subscribe({
+        next: trips => emissions.push(trips.length),
+        complete: () => { expect(emissions[0]).toBe(2); done(); },
+      });
+      setTimeout(() => http.expectOne(r => r.url.endsWith('/trip?view=all')).flush([]), 20);
+    });
+
+    it('relevant=false with empty cache asks ApiService for view=all', (done) => {
+      dbSpy.getAllTrips.and.resolveTo([]);
+      apiSpy.getAllTrips.and.returnValue(of([]));
+      service.getTrips(false).subscribe({
+        complete: () => { expect(apiSpy.getAllTrips).toHaveBeenCalledWith(false); done(); },
+      });
+    });
+
+    it('relevant=true requests view=relevant and filters the cache across the year wrap', (done) => {
+      const http = TestBed.inject(HttpTestingController);
+      dbSpy.getAllTrips.and.resolveTo([
+        rec('0601:100000-26'), // Jun - out
+        rec('0930:100000-26'), // Sep - out
+        rec('1015:100000-26'), // Oct - in
+        rec('1119:100000-26'), // Nov - in
+        rec('0105:100000-27'), // Jan - in (wrap)
+        rec('0210:100000-27'), // Feb - out
+      ]);
+      const emissions: string[][] = [];
+      service.getTrips(true).subscribe({
+        next: trips => emissions.push(trips.map(t => t.tripId)),
+        complete: () => {
+          expect(emissions[0]).toEqual(['1015:100000-26', '1119:100000-26', '0105:100000-27']);
+          done();
+        },
+      });
+      setTimeout(() => http.expectOne(r => r.url.endsWith('/trip?view=relevant')).flush([]), 20);
+    });
+
+    it('relevant=true always keeps pending and modified trips', (done) => {
+      online = false;
+      dbSpy.getAllTrips.and.resolveTo([
+        rec('0601:100000-26', 'pending'),
+        rec('0602:100000-26', 'modified'),
+        rec('0603:100000-26', 'synced'),
+      ]);
+      service.getTrips(true).subscribe(trips => {
+        expect(trips.map(t => t.tripId)).toEqual(['0601:100000-26', '0602:100000-26']);
         done();
       });
     });

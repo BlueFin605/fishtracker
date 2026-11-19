@@ -55,7 +55,7 @@ export class NewTripComponent implements OnInit {
       this.cdr.detectChanges();
 
       // Try to derive species from locally cached trips
-      this.offlineData.getTrips().subscribe({
+      this.offlineData.getTrips(true).subscribe({
         next: (trips: TripDetails[]) => {
           if (trips.length > 0) {
             this.applySpeciesFromTrips(trips.slice(-5));
