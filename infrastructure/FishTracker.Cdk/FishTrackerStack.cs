@@ -27,6 +27,10 @@ public class FishTrackerStackProps : StackProps
     public string? SesFromAddress { get; set; }
     /// <summary>Optional display name for SES-sent emails.</summary>
     public string? SesFromName { get; set; }
+    /// <summary>Shared external Cognito user pool id (CDK context only). Set together with IdentityDomain, or both empty.</summary>
+    public string? IdentityUserPoolId { get; set; }
+    /// <summary>Hosted-UI domain of the shared external pool (CDK context only).</summary>
+    public string? IdentityDomain { get; set; }
 }
 
 public class FishTrackerStack : Stack
@@ -42,6 +46,12 @@ public class FishTrackerStack : Stack
         var websiteDomain = $"{subdomainPrefix}.{props.DomainName}";
         var apiDomain = $"api.{subdomainPrefix}.{props.DomainName}";
         var authDomain = $"auth.{subdomainPrefix}.{props.DomainName}";
+
+        var hasExtPool = !string.IsNullOrWhiteSpace(props.IdentityUserPoolId);
+        var hasExtDomain = !string.IsNullOrWhiteSpace(props.IdentityDomain);
+        if (hasExtPool != hasExtDomain)
+            throw new System.InvalidOperationException("context \"identityUserPoolId\" and \"identityDomain\" must be provided together (or both omitted)");
+        var external = hasExtPool;
 
         // Certificate ARN from SSM Parameter Store
         var certificateArn = StringParameter.ValueForStringParameter(this, "/fishtracker/certificate-arn");
@@ -119,6 +129,16 @@ public class FishTrackerStack : Stack
             PartitionKey = new Attribute { Name = "RecipientEmail", Type = AttributeType.STRING },
             SortKey = new Attribute { Name = "ShareId", Type = AttributeType.STRING },
             ProjectionType = ProjectionType.ALL
+        });
+
+        // Identity alias: maps a shared-pool sub to the legacy sub that owns pre-migration data (empty unless migrated).
+        var identityAliasTable = new Table(this, "IdentityAliasTable", new TableProps
+        {
+            TableName = $"FishTracker-IdentityAlias-{env}",
+            BillingMode = BillingMode.PAY_PER_REQUEST,
+            PartitionKey = new Attribute { Name = "Subject", Type = AttributeType.STRING },
+            PointInTimeRecoverySpecification = new PointInTimeRecoverySpecification { PointInTimeRecoveryEnabled = true },
+            RemovalPolicy = RemovalPolicy.RETAIN
         });
 
         var shareThumbnailsBucket = new Bucket(this, "ShareThumbnailsBucket", new BucketProps
@@ -209,7 +229,15 @@ You'll need to sign in to view. {{#if expiresAt}}Expires {{expiresAt}}. {{/if}}{
         // Cognito
         // =====================================================================
 
-        var userPool = new UserPool(this, "UserPool", new UserPoolProps
+        IUserPool userPool;
+        UserPoolIdentityProviderGoogle? googleProvider = null;
+        if (external)
+        {
+            userPool = UserPool.FromUserPoolId(this, "UserPool", props.IdentityUserPoolId!.Trim());
+        }
+        else
+        {
+        var ownPool = new UserPool(this, "UserPool", new UserPoolProps
         {
             UserPoolName = $"fishtracker-userpool-{env.ToLower()}",
             SelfSignUpEnabled = true,
@@ -231,9 +259,11 @@ You'll need to sign in to view. {{#if expiresAt}}Expires {{expiresAt}}. {{/if}}{
             RemovalPolicy = RemovalPolicy.RETAIN
         });
 
-        var googleProvider = new UserPoolIdentityProviderGoogle(this, "GoogleProvider", new UserPoolIdentityProviderGoogleProps
+        userPool = ownPool;
+
+        googleProvider = new UserPoolIdentityProviderGoogle(this, "GoogleProvider", new UserPoolIdentityProviderGoogleProps
         {
-            UserPool = userPool,
+            UserPool = ownPool,
             ClientId = "PLACEHOLDER_SYNCED_POST_DEPLOY",
             ClientSecretValue = SecretValue.UnsafePlainText("PLACEHOLDER_SYNCED_POST_DEPLOY"),
             Scopes = new[] { "openid", "profile", "email" },
@@ -247,14 +277,15 @@ You'll need to sign in to view. {{#if expiresAt}}Expires {{expiresAt}}. {{/if}}{
                 }
             }
         });
+        }
 
-        var oauthScopes = new[]
-        {
-            OAuthScope.COGNITO_ADMIN,
-            OAuthScope.EMAIL,
-            OAuthScope.OPENID,
-            OAuthScope.PROFILE
-        };
+        // COGNITO_ADMIN (aws.cognito.signin.user.admin) lets an access token call DeleteUser / UpdateUserAttributes /
+        // ChangePassword on the account. On a shared pool that is pool-wide, so external mode omits it. Nothing in the SPA
+        // or backend needs it (the backend uses AdminGetUser via IAM; /oauth2/userInfo needs only openid).
+        // Default mode keeps it: self-hosters own their pool.
+        var oauthScopes = external
+            ? new[] { OAuthScope.EMAIL, OAuthScope.OPENID, OAuthScope.PROFILE }
+            : new[] { OAuthScope.COGNITO_ADMIN, OAuthScope.EMAIL, OAuthScope.OPENID, OAuthScope.PROFILE };
 
         var callbackUrls = new[] { "http://localhost:4200/callback", $"https://{websiteDomain}/callback" };
         var logoutUrls = new[] { "http://localhost:4200/login", $"https://{websiteDomain}/login" };
@@ -262,10 +293,10 @@ You'll need to sign in to view. {{#if expiresAt}}Expires {{expiresAt}}. {{/if}}{
         var identityProviders = new[]
         {
             UserPoolClientIdentityProvider.COGNITO,
-            UserPoolClientIdentityProvider.GOOGLE
+            external ? UserPoolClientIdentityProvider.Custom("Google") : UserPoolClientIdentityProvider.GOOGLE
         };
 
-        var implicitClient = userPool.AddClient("ImplicitClient", new UserPoolClientOptions
+        var implicitClient = AddClient(this, userPool, external, "ImplicitClient", new UserPoolClientOptions
         {
             UserPoolClientName = $"fishtracker-client-{env.ToLower()}",
             GenerateSecret = false,
@@ -281,9 +312,9 @@ You'll need to sign in to view. {{#if expiresAt}}Expires {{expiresAt}}. {{/if}}{
                 LogoutUrls = logoutUrls
             }
         });
-        implicitClient.Node.AddDependency(googleProvider);
+        if (googleProvider != null) implicitClient.Node.AddDependency(googleProvider);
 
-        var authCodeClient = userPool.AddClient("AuthCodeClient", new UserPoolClientOptions
+        var authCodeClient = AddClient(this, userPool, external, "AuthCodeClient", new UserPoolClientOptions
         {
             UserPoolClientName = $"fishtracker-client-auth-code-{env.ToLower()}",
             GenerateSecret = false,
@@ -299,23 +330,26 @@ You'll need to sign in to view. {{#if expiresAt}}Expires {{expiresAt}}. {{/if}}{
                 LogoutUrls = logoutUrls
             }
         });
-        authCodeClient.Node.AddDependency(googleProvider);
+        if (googleProvider != null) authCodeClient.Node.AddDependency(googleProvider);
 
-        var domain = userPool.AddDomain("CustomDomain", new UserPoolDomainOptions
+        if (!external)
         {
-            CustomDomain = new CustomDomainOptions
+            var domain = userPool.AddDomain("CustomDomain", new UserPoolDomainOptions
             {
-                DomainName = authDomain,
-                Certificate = certificate
-            }
-        });
+                CustomDomain = new CustomDomainOptions
+                {
+                    DomainName = authDomain,
+                    Certificate = certificate
+                }
+            });
 
-        new ARecord(this, "AuthDnsRecord", new ARecordProps
-        {
-            Zone = hostedZone,
-            RecordName = authDomain,
-            Target = RecordTarget.FromAlias(new UserPoolDomainTarget(domain))
-        });
+            new ARecord(this, "AuthDnsRecord", new ARecordProps
+            {
+                Zone = hostedZone,
+                RecordName = authDomain,
+                Target = RecordTarget.FromAlias(new UserPoolDomainTarget(domain))
+            });
+        }
 
         // =====================================================================
         // IAM Roles
@@ -424,6 +458,7 @@ You'll need to sign in to view. {{#if expiresAt}}Expires {{expiresAt}}. {{/if}}{
         lambdaEnvironment["SHARE_VIEW_URL_BASE"] = $"https://{websiteDomain}/shared";
         lambdaEnvironment["FISHTRACKER_ENV"] = env;
         lambdaEnvironment["USER_POOL_ID"] = userPool.UserPoolId;
+        lambdaEnvironment["IDENTITY_ALIAS_TABLE"] = identityAliasTable.TableName;
 
         var nodejsLambda = new Function(this, "NodejsLambda", new FunctionProps
         {
@@ -700,10 +735,33 @@ You'll need to sign in to view. {{#if expiresAt}}Expires {{expiresAt}}. {{/if}}{
             Description = "Cognito User Pool ID"
         });
 
+        _ = new CfnOutput(this, "AuthDomain", new CfnOutputProps
+        {
+            Value = external ? props.IdentityDomain!.Trim() : authDomain,
+            Description = "Cognito hosted-UI domain"
+        });
+
         _ = new CfnOutput(this, "CognitoClientId", new CfnOutputProps
         {
             Value = authCodeClient.UserPoolClientId,
             Description = "Cognito Auth Code Client ID (for Angular frontend)"
+        });
+    }
+
+    // Imported pools have no AddClient, so build the client explicitly; the default pool keeps AddClient (template unchanged).
+    private static UserPoolClient AddClient(Construct scope, IUserPool pool, bool external, string id, IUserPoolClientOptions o)
+    {
+        if (!external) return pool.AddClient(id, o);
+        return new UserPoolClient(scope, id, new UserPoolClientProps
+        {
+            UserPool = pool,
+            UserPoolClientName = o.UserPoolClientName,
+            GenerateSecret = o.GenerateSecret,
+            AccessTokenValidity = o.AccessTokenValidity,
+            IdTokenValidity = o.IdTokenValidity,
+            RefreshTokenValidity = o.RefreshTokenValidity,
+            SupportedIdentityProviders = o.SupportedIdentityProviders,
+            OAuth = o.OAuth
         });
     }
 

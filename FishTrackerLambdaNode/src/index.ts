@@ -19,6 +19,7 @@ import { LocationFuzzer } from './Helpers/LocationFuzzer';
 import { SecretsCache } from './Helpers/SecretsCache';
 import { DynamoDbHelper } from './Db.Services/AWSWrapper';
 import injectApiGatewayEventHeader from './injectApiGatewayEventHeader';
+import { IdentityAliasService } from './Services/IdentityAliasService';
 import { Routes } from './routes';
 
 var server: Server | undefined = undefined;
@@ -34,6 +35,7 @@ container.registerSingleton(StaticMapRenderer);
 container.registerSingleton(ThumbnailStorage);
 container.registerSingleton(ShareEmailer);
 container.registerSingleton(CognitoUserService);
+container.registerSingleton(IdentityAliasService);
 container.registerSingleton(ShareDbService);
 container.registerSingleton(ShareService);
 container.registerSingleton(DynamoDbHelper);

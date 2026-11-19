@@ -19,6 +19,24 @@ To try the whole stack locally without an AWS account, see
 [`aspire/README.md`](aspire/README.md) — it runs the API and SPA together
 against a local AWS emulator.
 
+## Using an existing Cognito user pool (optional)
+
+By default the infrastructure stack creates its own Cognito user pool with
+Google sign-in. To reuse a pool that already exists, pass both values as CDK
+context when you deploy, for example from `infrastructure/`:
+
+```
+cdk deploy -c identityUserPoolId=<pool-id> -c identityDomain=<hosted-ui-domain>
+```
+
+Pass both or neither. The pool must:
+
+- be in the same AWS account and region as the stack;
+- have a Google identity provider named `Google` (the stack does not create it);
+- have a hosted UI domain, which is the value passed as `identityDomain`.
+
+The stack then creates only its two app clients in that pool.
+
 ## Prerequisites
 
 - Node.js 22+

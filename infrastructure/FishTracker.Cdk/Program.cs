@@ -28,6 +28,12 @@ var sesFromAddress = TryGetConfigString(config, "sesFromAddress")
 var sesFromName = TryGetConfigString(config, "sesFromName")
     ?? app.Node.TryGetContext("sesFromName")?.ToString();
 
+// Shared external identity: CDK context only (never config.json). Both or neither.
+var identityUserPoolId = app.Node.TryGetContext("identityUserPoolId")?.ToString();
+var identityDomain = app.Node.TryGetContext("identityDomain")?.ToString();
+if (string.IsNullOrWhiteSpace(identityUserPoolId) != string.IsNullOrWhiteSpace(identityDomain))
+    throw new Exception("context \"identityUserPoolId\" and \"identityDomain\" must be provided together (or both omitted)");
+
 var env = new Amazon.CDK.Environment
 {
     Account = System.Environment.GetEnvironmentVariable("CDK_DEFAULT_ACCOUNT"),
@@ -40,7 +46,9 @@ new FishTrackerStack(app, $"FishTracker-{environment}", new FishTrackerStackProp
     Environment = environment,
     DomainName = domainName,
     SesFromAddress = sesFromAddress,
-    SesFromName = sesFromName
+    SesFromName = sesFromName,
+    IdentityUserPoolId = identityUserPoolId,
+    IdentityDomain = identityDomain
 });
 
 Tags.Of(app).Add("Project", "FishTracker");
