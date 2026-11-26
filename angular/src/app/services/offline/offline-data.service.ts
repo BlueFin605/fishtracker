@@ -1,6 +1,6 @@
 import { Injectable, Inject, forwardRef, NgZone } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, from, of, switchMap, catchError, concat } from 'rxjs';
+import { Observable, from, of, switchMap, catchError, concat, map } from 'rxjs';
 import { toZonedTime } from 'date-fns-tz';
 import { environment } from '../../../environments/environment';
 import { IndexedDbService } from './indexed-db.service';
@@ -85,10 +85,11 @@ export class OfflineDataService {
 
   // --- Read Operations ---
 
-  getTrips(): Observable<TripDetails[]> {
+  getTrips(relevant: boolean = true): Observable<TripDetails[]> {
+    const view = (trips: TripDetails[]) => this.applyRelevance(trips, relevant);
     return this.fromZoned(this.db.getAllTrips()).pipe(
       switchMap(localTrips => {
-        const local$ = of(localTrips as TripDetails[]);
+        const local$ = of(view(localTrips as TripDetails[]));
 
         if (this.isOffline()) {
           return localTrips.length > 0 ? local$ : of([] as TripDetails[]);
@@ -96,23 +97,57 @@ export class OfflineDataService {
 
         if (localTrips.length === 0) {
           // No local data — fetch from API as primary source
-          return this.apiService.getAllTrips(true).pipe(
+          return this.apiService.getAllTrips(relevant).pipe(
             switchMap(serverTrips => from(this.cacheTrips(serverTrips))),
+            map(view),
             catchError(() => of([] as TripDetails[])),
           );
         }
 
         // Emit local data first, then emit again with refreshed data from API
-        const refresh$ = this.fetchAndMergeTrips();
+        const refresh$ = this.fetchAndMergeTrips(relevant).pipe(map(view));
         return concat(local$, refresh$);
       }),
     );
   }
 
+  /**
+   * The IndexedDB cache is the union of everything fetched, so when only relevant trips
+   * are wanted, apply the backend's seasonal rule (TripDbService.readRelevantTripsFromDynamoDb):
+   * the trip's month (tripId starts MMDD) must lie between the month of now-1 month and the
+   * month of now+2 months, wrapping the year boundary. Pending/modified trips are always kept.
+   */
+  /** Overridable clock for tests */
+  protected now(): Date {
+    return new Date();
+  }
+
+  private applyRelevance(trips: TripDetails[], relevant: boolean): TripDetails[] {
+    if (!relevant) {
+      return trips;
+    }
+    const nowMonth = this.now().getMonth();
+    const monthOf = (offset: number) => (((nowMonth + offset) % 12) + 12) % 12 + 1;
+    const start = monthOf(-1);
+    const end = monthOf(2);
+    return trips.filter(trip => {
+      const status = (trip as LocalTripRecord).syncStatus;
+      if (status === 'pending' || status === 'modified') {
+        return true;
+      }
+      const month = parseInt((trip.tripId ?? '').substring(0, 2), 10);
+      if (isNaN(month)) {
+        return true;
+      }
+      return start <= end ? month >= start && month <= end : month >= start || month <= end;
+    });
+  }
+
   /** Fetch trips from API (no spinner), merge with local pending data, update cache, and return */
-  private fetchAndMergeTrips(): Observable<TripDetails[]> {
+  private fetchAndMergeTrips(relevant: boolean): Observable<TripDetails[]> {
     return new Observable<TripDetails[]>(subscriber => {
-      this.http.get<TripDetails[]>(`${environment.apiUrl}/trip?view=relevant`).subscribe({
+      const view = relevant ? 'relevant' : 'all';
+      this.http.get<TripDetails[]>(`${environment.apiUrl}/trip?view=${view}`).subscribe({
         next: async serverTrips => {
           await this.cacheTrips(serverTrips);
           // Re-read all trips from IndexedDB (includes both server and local pending)
